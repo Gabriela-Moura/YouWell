@@ -20,7 +20,7 @@ class HomeScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(200),
               child: Image.asset(
                 'assets/images/logo_branco.png',
-                width: 150,
+                width: 100,
                 fit: BoxFit.fitHeight,
               ),
             ),

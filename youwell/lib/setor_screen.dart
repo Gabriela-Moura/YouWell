@@ -23,6 +23,7 @@ class SetorScreen extends StatelessWidget {
               ),
 
               child: Text(
+
                 nomeSetor,
 
                 style: const TextStyle(

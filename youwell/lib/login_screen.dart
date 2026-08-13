@@ -20,7 +20,7 @@ class LoginScreen extends StatelessWidget {
 
   Future<void> fazerLogin(BuildContext context) async {
     final response = await http.post(
-      Uri.parse("http://10.140.170.184/entrar_tcc/login.php"),
+      Uri.parse("http://10.140.169.29/entrar_tcc/login.php"),
 
       body: {
         "nome": logincontrollerForm.text,

@@ -104,7 +104,95 @@ class _AdminScreenState extends State<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+
+      // MENU HAMBÚRGUER
+      drawer: Drawer(
+        child: ListView(
+          children: [
+
+            ListTile(
+              leading: const Icon(Icons.thermostat),
+
+              title: const Text("Temperatura"),
+
+              onTap: () {},
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.water_drop),
+
+              title: const Text("Umidade"),
+
+              onTap: () {},
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.air),
+
+              title: const Text("Qualidade do ar"),
+
+              onTap: () {},
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.volume_up),
+
+              title: const Text("Ruído"),
+
+              onTap: () {},
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.people),
+
+              title: const Text("Funcionários"),
+
+              onTap: () {},
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.access_alarm),
+
+              title: const Text("Alertas"),
+
+              onTap: () {},
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf),
+
+              title: const Text("Histórico Geral (PDF)"),
+
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
+
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 10, 85, 64),
+
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 20),
+
+            child: Row(
+              children: [
+                Text("Olá ADMIN", 
+                style: TextStyle(
+                  color: Color.fromARGB(255, 249, 250, 250),
+                  fontSize: 20
+                )),
+
+                SizedBox(width: 10),
+
+                CircleAvatar(child: Icon(Icons.person)),
+              ],
+            ),
+          ),
+        ],
+      ),
 
       body: SafeArea(
         child: Padding(
@@ -117,27 +205,19 @@ class _AdminScreenState extends State<AdminScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
                 children: [
-                  ElevatedButton(
-                    onPressed: criarSetor,
-
-                    child: const Text("Criar novo setor"),
-                  ),
-
-                  Row(
-                    children: const [
-                      Text(
-                        "Olá ADMIN",
-
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  SizedBox(
+                    width: 370,
+                    child: ElevatedButton(
+                      onPressed: criarSetor,
+                      child: const Text("Criar novo setor"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 10, 85, 64),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-
-                      SizedBox(width: 10),
-
-                      CircleAvatar(radius: 22, child: Icon(Icons.person)),
-                    ],
+                    ),
+                  ),
                   ),
                 ],
               ),
