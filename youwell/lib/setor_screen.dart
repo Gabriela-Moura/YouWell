@@ -33,19 +33,10 @@ class SetorScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             ListTile(
               leading: const Icon(Icons.thermostat),
 
               title: const Text("Temperatura"),
-
-              onTap: () {},
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.water_drop),
-
-              title: const Text("Umidade"),
 
               onTap: () {},
             ),
@@ -62,14 +53,6 @@ class SetorScreen extends StatelessWidget {
               leading: const Icon(Icons.volume_up),
 
               title: const Text("Ruído"),
-
-              onTap: () {},
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.people),
-
-              title: const Text("Funcionários"),
 
               onTap: () {},
             ),
@@ -121,20 +104,28 @@ class SetorScreen extends StatelessWidget {
         child: Column(
           children: [
             // CARDS
-            Row(
-              children: [
-                infoCard("Temperatura", "25°C"),
-                infoCard("Umidade", "70%"),
-              ],
+            SizedBox(
+              height: 90,
+              width: 300,
+              child:Row(
+                children: [
+                  infoCard("Temperatura", "25°C"),
+                  infoCard("Umidade", "70%"),
+                ],
+              ),
             ),
 
             SizedBox(height: 10),
 
-            Row(
-              children: [
-                infoCard("Qualidade do ar", "70%"),
-                infoCard("Ruído", "30dB"),
-              ],
+            SizedBox(
+              height: 90,
+              width: 300,
+              child: Row(
+                children: [
+                  infoCard("Qualidade do ar", "70%"),
+                  infoCard("Ruído", "30dB"),
+                ],
+              ),
             ),
 
             const SizedBox(height: 20),
@@ -164,12 +155,12 @@ class SetorScreen extends StatelessWidget {
                       // TEMPERATURA
                       LineChartBarData(
                         spots: [
-                          FlSpot(0, 22),
-                          FlSpot(1, 23),
-                          FlSpot(2, 24),
-                          FlSpot(3, 25),
-                          FlSpot(4, 24),
-                          FlSpot(5, 23),
+                          FlSpot(0, 1),
+                          FlSpot(1, 2),
+                          FlSpot(2, 3),
+                          FlSpot(3, 4),
+                          FlSpot(4, 5),
+                          FlSpot(5, 6),
                         ],
 
                         isCurved: true,
@@ -269,7 +260,7 @@ class SetorScreen extends StatelessWidget {
             Text(
               titulo,
 
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              style: const TextStyle(fontSize: 15),
             ),
 
             const SizedBox(height: 15),
@@ -277,7 +268,7 @@ class SetorScreen extends StatelessWidget {
             Text(
               valor,
 
-              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ],
         ),

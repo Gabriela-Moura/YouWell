@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/main_original.dart';
 import '../sobre_nos.dart';
-import '../login_screen.dart';
+import '../admin.dart';
+import '../gerente.dart';
+// import '../login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -55,11 +57,24 @@ class HomeScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                      MaterialPageRoute(builder: (context) => AdminScreen()),
                     );
                   },
 
-                  child: const Text("Entrar"),
+                  child: const Text("Entrar A"),
+                ),
+
+                SizedBox(width: 5),
+
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => GerenteScreen()),
+                    );
+                  },
+
+                  child: const Text("Entrar G"),
                 ),
 
                 SizedBox(width: 5),

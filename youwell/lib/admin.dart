@@ -38,69 +38,6 @@ class _AdminScreenState extends State<AdminScreen> {
     {"id": 6, "nome": "Setor F"},
   ];
 
-  // CRIAR SETOR
-  void criarSetor() {
-    setState(() {
-      setores.add({"id": setores.length + 1, "nome": "Novo Setor"});
-    });
-  }
-
-  // DELETAR SETOR
-  void deletarSetor(int index) {
-    setState(() {
-      //removeAt() é um método usado para remover um item de uma lista usando a posição (índice).
-      //0 = Gabi
-      //1 = Maria
-      //2 = João
-      setores.removeAt(index);
-    });
-  }
-
-  // EDITAR SETOR
-  void editarSetor(int index) {
-    // Cria um controlador para o TextField.
-    // O parâmetro text já inicia o campo
-    // com o nome atual do setor, permitindo
-    // editar o valor existente.
-    TextEditingController controller = TextEditingController(
-      text: setores[index]["nome"],
-    );
-
-    showDialog(
-      context: context,
-
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Editar setor"),
-
-          content: TextField(controller: controller),
-
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-
-              child: const Text("Cancelar"),
-            ),
-
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  setores[index]["nome"] = controller.text;
-                });
-
-                Navigator.pop(context);
-              },
-
-              child: const Text("Salvar"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,14 +57,6 @@ class _AdminScreenState extends State<AdminScreen> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.water_drop),
-
-              title: const Text("Umidade"),
-
-              onTap: () {},
-            ),
-
-            ListTile(
               leading: const Icon(Icons.air),
 
               title: const Text("Qualidade do ar"),
@@ -139,14 +68,6 @@ class _AdminScreenState extends State<AdminScreen> {
               leading: const Icon(Icons.volume_up),
 
               title: const Text("Ruído"),
-
-              onTap: () {},
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.people),
-
-              title: const Text("Funcionários"),
 
               onTap: () {},
             ),
@@ -200,30 +121,6 @@ class _AdminScreenState extends State<AdminScreen> {
 
           child: Column(
             children: [
-              // TOPO
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                children: [
-                  SizedBox(
-                    width: 370,
-                    child: ElevatedButton(
-                      onPressed: criarSetor,
-                      child: const Text("Criar novo setor"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 10, 85, 64),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 30),
-
               // LISTA DE SETORES
               Expanded(
                 child: ListView.builder(
@@ -266,34 +163,6 @@ class _AdminScreenState extends State<AdminScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    editarSetor(index);
-                                  },
-
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.blue,
-                                  ),
-                                ),
-
-                                IconButton(
-                                  onPressed: () {
-                                    deletarSetor(index);
-                                  },
-
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                       ),
@@ -305,29 +174,29 @@ class _AdminScreenState extends State<AdminScreen> {
               const SizedBox(height: 20),
 
               // BOTÕES INFERIORES
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {},
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: ElevatedButton(
+              //         onPressed: () {},
 
-                      child: const Text("Alertas ativos"),
-                    ),
-                  ),
+              //         child: const Text("Alertas ativos"),
+              //       ),
+              //     ),
 
-                  const SizedBox(width: 20),
+              //     const SizedBox(width: 20),
 
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {},
+              //     Expanded(
+              //       child: ElevatedButton(
+              //         onPressed: () {},
 
-                      child: const Text("Gerar relatório (PDF)"),
-                    ),
-                  ),
+              //         child: const Text("Gerar relatório (PDF)"),
+              //       ),
+              //     ),
 
-                  SizedBox(height: 50),
-                ],
-              ),
+              //     SizedBox(height: 50),
+              //   ],
+              // ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
