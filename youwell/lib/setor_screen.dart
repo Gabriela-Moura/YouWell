@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/main.dart';
+import 'package:youwell/temperatura_screen.dart';
+import 'package:youwell/screens/home_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class SetorScreen extends StatelessWidget {
@@ -23,7 +25,6 @@ class SetorScreen extends StatelessWidget {
               ),
 
               child: Text(
-
                 nomeSetor,
 
                 style: const TextStyle(
@@ -38,7 +39,14 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text("Temperatura"),
 
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TemperaturaScreen(),
+                  ),
+                );
+              },
             ),
 
             ListTile(
@@ -46,7 +54,12 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text("Qualidade do ar"),
 
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomeScreen())
+                );
+              },
             ),
 
             ListTile(
@@ -107,7 +120,7 @@ class SetorScreen extends StatelessWidget {
             SizedBox(
               height: 90,
               width: 300,
-              child:Row(
+              child: Row(
                 children: [
                   infoCard("Temperatura", "25°C"),
                   infoCard("Umidade", "70%"),
@@ -132,96 +145,140 @@ class SetorScreen extends StatelessWidget {
 
             // GRÁFICO
             Expanded(
-              child: Container(
-                width: double.infinity,
+              child: LineChart(
+                LineChartData(
+                  minY: 0,
+                  maxY: 100,
+                  minX: 0,
+                  maxX: 20,
 
-                decoration: BoxDecoration(
-                  color: Colors.grey[400],
-
-                  borderRadius: BorderRadius.circular(10),
-                ),
-
-                padding: const EdgeInsets.all(20),
-
-                child: LineChart(
-                  LineChartData(
-                    gridData: FlGridData(show: true),
-
-                    borderData: FlBorderData(show: true),
-
-                    titlesData: FlTitlesData(show: true),
-
-                    lineBarsData: [
-                      // TEMPERATURA
-                      LineChartBarData(
-                        spots: [
-                          FlSpot(0, 1),
-                          FlSpot(1, 2),
-                          FlSpot(2, 3),
-                          FlSpot(3, 4),
-                          FlSpot(4, 5),
-                          FlSpot(5, 6),
-                        ],
-
-                        isCurved: true,
-
-                        barWidth: 4,
-                      ),
-
-                      // UMIDADE
-                      LineChartBarData(
-                        spots: [
-                          FlSpot(0, 60),
-                          FlSpot(1, 62),
-                          FlSpot(2, 58),
-                          FlSpot(3, 70),
-                          FlSpot(4, 68),
-                          FlSpot(5, 65),
-                        ],
-
-                        isCurved: true,
-
-                        barWidth: 4,
-                      ),
-                    ],
+                  // Grade
+                  gridData: FlGridData(
+                    show: true,
+                    horizontalInterval: 25,
+                    verticalInterval: 4,
                   ),
+
+                  // Borda
+                  borderData: FlBorderData(show: true),
+
+                  // Eixos
+                  titlesData: FlTitlesData(
+                    topTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+
+                    rightTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+
+                    // Eixo Y
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 25,
+                        reservedSize: 35,
+                      ),
+                    ),
+
+                    // Eixo X
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 2,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            '${value.toInt()}:00',
+                            style: const TextStyle(fontSize: 9),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                  lineBarsData: [
+                    // TEMPERATURA
+                    LineChartBarData(
+                      spots: [
+                        FlSpot(0, 25),
+                        FlSpot(4, 24),
+                        FlSpot(8, 26),
+                        FlSpot(12, 28),
+                        FlSpot(16, 27),
+                        FlSpot(20, 25),
+                      ],
+                      isCurved: true,
+                      color: Color.fromARGB(255, 255, 0, 0),
+                      barWidth: 2,
+                      dotData: FlDotData(show: false),
+                    ),
+
+                    // RUÍDO
+                    LineChartBarData(
+                      spots: [
+                        FlSpot(0, 45),
+                        FlSpot(4, 40),
+                        FlSpot(8, 65),
+                        FlSpot(12, 70),
+                        FlSpot(16, 60),
+                        FlSpot(20, 50),
+                      ],
+                      isCurved: true,
+                      color: Color.fromARGB(255, 255, 230, 0),
+                      barWidth: 2,
+                      dotData: FlDotData(show: false),
+                    ),
+
+                    // QUALIDADE DO AR
+                    LineChartBarData(
+                      spots: [
+                        FlSpot(0, 80),
+                        FlSpot(4, 82),
+                        FlSpot(8, 75),
+                        FlSpot(12, 78),
+                        FlSpot(16, 80),
+                        FlSpot(20, 82),
+                      ],
+                      isCurved: true,
+                      color: Color.fromARGB(255, 0, 60, 255),
+                      barWidth: 2,
+                      dotData: FlDotData(show: false),
+                    ),
+                  ],
                 ),
               ),
             ),
 
             SizedBox(height: 20),
 
-            // BOTÕES
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
+            NavigationBar(
+              onDestinationSelected: (index) {
+                if (index == 1) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminScreen()),
+                  );
+                }
 
-                    child: const Padding(
-                      padding: EdgeInsets.all(20),
-
-                      child: Text("Alertas ativos"),
-                    ),
-                  ),
+                if(index == 2) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomeScreen())
+                  );
+                }
+              },
+              destinations: const [
+                NavigationDestination(icon: Icon(Icons.home), label: 'Início'),
+                NavigationDestination(
+                  icon: Icon(Icons.notifications),
+                  label: 'Alertas',
                 ),
-
-                const SizedBox(width: 20),
-
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
-
-                    child: const Padding(
-                      padding: EdgeInsets.all(5),
-
-                      child: Text("Gerar relatório (PDF)"),
-                    ),
-                  ),
+                NavigationDestination(
+                  icon: Icon(Icons.bar_chart),
+                  label: 'Relatório',
                 ),
               ],
             ),
-            SizedBox(height: 10),
 
             ElevatedButton(
               onPressed: () {
@@ -257,11 +314,7 @@ class SetorScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
-            Text(
-              titulo,
-
-              style: const TextStyle(fontSize: 15),
-            ),
+            Text(titulo, style: const TextStyle(fontSize: 15)),
 
             const SizedBox(height: 15),
 
