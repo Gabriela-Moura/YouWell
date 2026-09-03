@@ -59,7 +59,7 @@ class _AdminScreenState extends State<AdminScreen> {
             ListTile(
               leading: const Icon(Icons.air),
 
-              title: const Text("Qualidade do ar"),
+              title: const Text("Umidade"),
 
               onTap: () {},
             ),

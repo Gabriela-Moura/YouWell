@@ -52,7 +52,7 @@ class SetorScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.air),
 
-              title: const Text("Qualidade do ar"),
+              title: const Text("Umidade"),
 
               onTap: () {
                 Navigator.push(
