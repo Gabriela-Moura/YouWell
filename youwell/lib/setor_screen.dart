@@ -92,7 +92,7 @@ class SetorScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 10, 85, 64),
 
-        title: Text(nomeSetor),
+        title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
 
         actions: const [
           Padding(
@@ -100,7 +100,7 @@ class SetorScreen extends StatelessWidget {
 
             child: Row(
               children: [
-                Text("Olá ADMIN", style: TextStyle(fontSize: 20)),
+                Text("Olá ADMIN", style: TextStyle(fontSize: 20, color:Colors.white)),
 
                 SizedBox(width: 10),
 
