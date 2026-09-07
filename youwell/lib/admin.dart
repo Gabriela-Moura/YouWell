@@ -43,56 +43,11 @@ class _AdminScreenState extends State<AdminScreen> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
 
-      // MENU HAMBÚRGUER
-      drawer: Drawer(
-        child: ListView(
-          children: [
-
-            ListTile(
-              leading: const Icon(Icons.thermostat),
-
-              title: const Text("Temperatura"),
-
-              onTap: () {},
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.air),
-
-              title: const Text("Umidade"),
-
-              onTap: () {},
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.volume_up),
-
-              title: const Text("Ruído"),
-
-              onTap: () {},
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.access_alarm),
-
-              title: const Text("Alertas"),
-
-              onTap: () {},
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.picture_as_pdf),
-
-              title: const Text("Histórico Geral (PDF)"),
-
-              onTap: () {},
-            ),
-          ],
-        ),
-      ),
-
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 10, 85, 64),
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
 
         actions: const [
           Padding(
@@ -100,11 +55,13 @@ class _AdminScreenState extends State<AdminScreen> {
 
             child: Row(
               children: [
-                Text("Olá ADMIN", 
-                style: TextStyle(
-                  color: Color.fromARGB(255, 249, 250, 250),
-                  fontSize: 20
-                )),
+                Text(
+                  "Olá ADMIN",
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 249, 250, 250),
+                    fontSize: 20,
+                  ),
+                ),
 
                 SizedBox(width: 10),
 
@@ -169,43 +126,6 @@ class _AdminScreenState extends State<AdminScreen> {
                     );
                   },
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // BOTÕES INFERIORES
-              // Row(
-              //   children: [
-              //     Expanded(
-              //       child: ElevatedButton(
-              //         onPressed: () {},
-
-              //         child: const Text("Alertas ativos"),
-              //       ),
-              //     ),
-
-              //     const SizedBox(width: 20),
-
-              //     Expanded(
-              //       child: ElevatedButton(
-              //         onPressed: () {},
-
-              //         child: const Text("Gerar relatório (PDF)"),
-              //       ),
-              //     ),
-
-              //     SizedBox(height: 50),
-              //   ],
-              // ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MyApp()),
-                  );
-                },
-
-                child: const Text("Voltar"),
               ),
             ],
           ),

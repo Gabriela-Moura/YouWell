@@ -1,26 +1,30 @@
 List<Map<String, dynamic>> dadosSensores = [
   {
-    "horario": "08:00",
+    "data": "24/01",
+    "hora": "08:00",
     "temperatura": 24.5,
-    "umidade": 65,
-    "luminosidade": 720
+    "ruido": 60,
+    "ar": 60,
   },
   {
-    "horario": "09:00",
+    "data": "24/01",
+    "hora": "09:00",
     "temperatura": 25.2,
-    "umidade": 63,
-    "luminosidade": 850
+    "ruido": 61,
+    "ar": 61,
   },
   {
-    "horario": "10:00",
+    "data": "24/01",
+    "hora": "10:00",
     "temperatura": 26.1,
-    "umidade": 60,
-    "luminosidade": 980
+    "ruido": 62,
+    "ar": 62,
   },
   {
-    "horario": "11:00",
+    "data": "24/01",
+    "hora": "11:00",
     "temperatura": 27.0,
-    "umidade": 58,
-    "luminosidade": 1100
+    "ruido": 63,
+    "ar": 60,
   },
 ];
