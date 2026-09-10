@@ -14,7 +14,12 @@ import 'package:youwell/setor_screen.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class TemperaturaScreen extends StatelessWidget {
-  const TemperaturaScreen({super.key});
+  final String nomeSetor;
+
+  const TemperaturaScreen({
+    super.key,
+    required this.nomeSetor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +36,7 @@ class TemperaturaScreen extends StatelessWidget {
               ),
 
               child: Text(
-                'oi',
+                nomeSetor,
 
                 style: const TextStyle(
                   color: Colors.white,
@@ -80,7 +85,7 @@ class TemperaturaScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const TemperaturaScreen(),
+                    builder: (context) => TemperaturaScreen(nomeSetor:nomeSetor),
                   ),
                 );
               },
@@ -94,7 +99,7 @@ class TemperaturaScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ArScreen()),
+                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor)),
                 );
               },
             ),
@@ -107,7 +112,7 @@ class TemperaturaScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RuidoScreen()),
+                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor)),
                 );
               },
             ),
@@ -144,7 +149,7 @@ class TemperaturaScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 10, 85, 64),
 
-        title: Text('oi', style: TextStyle(color: Colors.white)),
+        title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
 
         actions: const [
           Padding(

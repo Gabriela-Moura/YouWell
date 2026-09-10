@@ -12,7 +12,8 @@ import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
 
 class RuidoScreen extends StatelessWidget {
-  const RuidoScreen({super.key});
+  final String nomeSetor;
+  const RuidoScreen({super.key, required this.nomeSetor});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,7 @@ class RuidoScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const TemperaturaScreen(),
+                    builder: (context) => TemperaturaScreen(nomeSetor: nomeSetor),
                   ),
                 );
               },
@@ -61,7 +62,7 @@ class RuidoScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ArScreen()),
+                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor)),
                 );
               },
             ),
@@ -74,7 +75,7 @@ class RuidoScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RuidoScreen()),
+                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor)),
                 );
               },
             ),

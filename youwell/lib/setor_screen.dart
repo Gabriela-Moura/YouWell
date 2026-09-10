@@ -67,7 +67,7 @@ class SetorScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const TemperaturaScreen(),
+                    builder: (context) => TemperaturaScreen(nomeSetor: nomeSetor),
                   ),
                 );
               },
@@ -78,13 +78,13 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Qualidade do Ar",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 38, 23, 23)),
               ),
 
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ArScreen()),
+                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor)),
                 );
               },
             ),
@@ -100,7 +100,7 @@ class SetorScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RuidoScreen()),
+                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor)),
                 );
               },
             ),
@@ -316,10 +316,11 @@ class SetorScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              SizedBox(height: 20),
-
-              NavigationBar(
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: NavigationBar(
                 onDestinationSelected: (index) {
                   if (index == 1) {
                     Navigator.push(
@@ -350,11 +351,7 @@ class SetorScreen extends StatelessWidget {
                   ),
                 ],
               ),
-
-            ],
-          ),
-        ),
-      ),
+      
     );
   }
 
