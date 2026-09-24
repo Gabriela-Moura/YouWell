@@ -30,7 +30,7 @@ class RuidoScreen extends StatelessWidget {
               ),
 
               child: Text(
-                'oi',
+                nomeSetor,
 
                 style: const TextStyle(
                   color: Colors.white,
@@ -112,7 +112,7 @@ class RuidoScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 10, 85, 64),
 
-        title: Text('oi', style: TextStyle(color: Colors.white)),
+        title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
 
         actions: const [
           Padding(

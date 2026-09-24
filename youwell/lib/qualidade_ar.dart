@@ -31,7 +31,7 @@ class ArScreen extends StatelessWidget {
               ),
 
               child: Text(
-                'oi',
+                nomeSetor,
 
                 style: const TextStyle(
                   color: Colors.white,
@@ -113,7 +113,7 @@ class ArScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 10, 85, 64),
 
-        title: Text('oi', style: TextStyle(color: Colors.white)),
+        title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
 
         actions: const [
           Padding(
@@ -155,8 +155,8 @@ class ArScreen extends StatelessWidget {
 
                 child: LineChart(
                   LineChartData(
-                    minY: 20,
-                    maxY: 32,
+                    minY: 40,
+                    maxY: 80,
 
                     titlesData: FlTitlesData(
                       bottomTitles: AxisTitles(
@@ -168,7 +168,7 @@ class ArScreen extends StatelessWidget {
                             int indice = value.toInt();
 
                             if (indice >= 0 && indice < dadosSensores.length) {
-                              return Text(dadosSensores[indice]["horario"]);
+                              return Text(dadosSensores[indice]["hora"]);
                             }
 
                             return const Text("");
@@ -180,7 +180,7 @@ class ArScreen extends StatelessWidget {
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 45,
-                          interval: 2,
+                          interval: 5,
                         ),
                       ),
 
