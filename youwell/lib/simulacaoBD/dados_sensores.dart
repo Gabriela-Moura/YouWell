@@ -13,18 +13,6 @@ List<Map<String, dynamic>> setores = [
     "id": 3,
     "nome": "Setor C",
   },
-  {
-    "id": 4,
-    "nome": "Setor D",
-  },
-  {
-    "id": 5,
-    "nome": "Setor E",
-  },
-  {
-    "id": 6,
-    "nome": "Setor F",
-  },
 ];
 
 

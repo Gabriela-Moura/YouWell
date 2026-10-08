@@ -11,33 +11,6 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
-  // LISTA LOCAL (FAKE)
-  // List<Map<String, dynamic>> setores
-  // Cria uma lista de objetos (Map) para armazenar
-  // os setores do sistema. Cada setor possui
-  // informações como id e nome.
-  //
-  //O tipo da chave é string
-  /// Exemplo:
-  /// {
-  ///   "id": 1,
-  ///   "nome": "Setor A"
-  /// }
-
-  List<Map<String, dynamic>> setores = [
-    {"id": 1, "nome": "Setor A"},
-
-    {"id": 2, "nome": "Setor B"},
-
-    {"id": 3, "nome": "Setor C"},
-
-    {"id": 4, "nome": "Setor D"},
-
-    {"id": 5, "nome": "Setor E"},
-
-    {"id": 6, "nome": "Setor F"},
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,6 +18,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 10, 85, 64),
+
         iconTheme: const IconThemeData(
           color: Colors.white,
         ),
@@ -65,7 +39,9 @@ class _AdminScreenState extends State<AdminScreen> {
 
                 SizedBox(width: 10),
 
-                CircleAvatar(child: Icon(Icons.person)),
+                CircleAvatar(
+                  child: Icon(Icons.person),
+                ),
               ],
             ),
           ),
@@ -78,7 +54,6 @@ class _AdminScreenState extends State<AdminScreen> {
 
           child: Column(
             children: [
-              // LISTA DE SETORES
               Expanded(
                 child: ListView.builder(
                   itemCount: setores.length,
@@ -90,11 +65,13 @@ class _AdminScreenState extends State<AdminScreen> {
                           context,
 
                           MaterialPageRoute(
-                            builder: (context) =>
-                                SetorScreen(nomeSetor: setores[index]["nome"]),
+                            builder: (context) => SetorScreen(
+                              nomeSetor: setores[index]["nome"],
+                            ),
                           ),
                         );
                       },
+
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 20),
 
@@ -108,19 +85,15 @@ class _AdminScreenState extends State<AdminScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
 
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Center(
+                          child: Text(
+                            setores[index]["nome"],
 
-                          children: [
-                            Text(
-                              setores[index]["nome"],
-
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     );

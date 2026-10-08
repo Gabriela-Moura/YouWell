@@ -52,7 +52,6 @@ class _GerenteScreenState extends State<GerenteScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
-
           child: Column(
             children: [
               Expanded(

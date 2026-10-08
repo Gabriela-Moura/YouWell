@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:youwell/main.dart';
-import 'package:youwell/setor_screen.dart';
+import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class UsuarioTi extends StatefulWidget {
   const UsuarioTi({super.key});
@@ -10,34 +9,65 @@ class UsuarioTi extends StatefulWidget {
 }
 
 class _UsuarioTiState extends State<UsuarioTi> {
+  final nomeController = TextEditingController();
+
+  void criarSetor() {
+    String nome = nomeController.text.trim();
+
+    if (nome.isEmpty) {
+      return;
+    }
+
+    int novoId = setores.isEmpty
+        ? 1
+        : setores.map((setor) => setor["id"] as int).reduce((a, b) => a > b ? a : b) + 1;
+
+    setState(() {
+      setores.add({
+        "id": novoId,
+        "nome": nome,
+      });
+    });
+
+    nomeController.clear();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Setor criado com sucesso!"),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 10, 85, 64),
+        title: const Text("Criar Setor"),
+      ),
 
-        iconTheme: const IconThemeData(color: Colors.white),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
 
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
+        child: Column(
+          children: [
 
-            child: Row(
-              children: [
-                const Text(
-                  "TI",
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                ),
-
-                const SizedBox(width: 10),
-
-                const CircleAvatar(child: Icon(Icons.person)),
-              ],
+            TextField(
+              controller: nomeController,
+              decoration: const InputDecoration(
+                labelText: "Nome do setor",
+                border: OutlineInputBorder(),
+              ),
             ),
-          ),
-        ],
+
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: criarSetor,
+              child: const Text("Criar Setor"),
+            ),
+
+          ],
+        ),
       ),
     );
   }
