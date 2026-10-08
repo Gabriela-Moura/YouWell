@@ -3,6 +3,9 @@ import 'package:youwell/main_original.dart';
 import '../sobre_nos.dart';
 import '../admin.dart';
 import '../gerente.dart';
+import '../usuario_ti.dart';
+import 'package:youwell/simulacaoBD/dados_sensores.dart';
+
 // import '../login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -68,9 +71,16 @@ class HomeScreen extends StatelessWidget {
 
                 ElevatedButton(
                   onPressed: () {
+                    
+                    String setorGerente = dadosGerentes[0]["setor"];
+
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => GerenteScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => GerenteScreen(
+                          setorGerente: setorGerente,
+                        ),
+                      ),
                     );
                   },
 
@@ -78,17 +88,32 @@ class HomeScreen extends StatelessWidget {
                 ),
 
                 SizedBox(width: 5),
-
+                
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SobreNos()),
+                      MaterialPageRoute(
+                        builder: (context) => UsuarioTi(),
+                      ),
                     );
                   },
 
-                  child: const Text("Saiba mais"),
+                  child: const Text("Entrar TI"),
                 ),
+
+                SizedBox(width: 5),
+
+                // ElevatedButton(
+                //   onPressed: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(builder: (context) => SobreNos()),
+                //     );
+                //   },
+
+                //   child: const Text("Saiba mais"),
+                // ),
               ],
             ),
           ],

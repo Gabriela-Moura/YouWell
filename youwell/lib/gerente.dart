@@ -1,43 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:youwell/main.dart';
+import 'package:youwell/setor_screen.dart';
 
 class GerenteScreen extends StatefulWidget {
-  const GerenteScreen({super.key});
+  final String setorGerente;
+
+  const GerenteScreen({ super.key, required this.setorGerente,});
 
   @override
   State<GerenteScreen> createState() => _GerenteScreenState();
 }
 
 class _GerenteScreenState extends State<GerenteScreen> {
- 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Colors.white,
 
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 10, 85, 64),
+
         iconTheme: const IconThemeData(
           color: Colors.white,
         ),
 
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 20),
+            padding: const EdgeInsets.only(right: 20),
 
             child: Row(
               children: [
-                Text(
-                  "Olá ADMIN",
+                const Text(
+                  "Olá GERENTE",
                   style: TextStyle(
-                    color: Color.fromARGB(255, 249, 250, 250),
+                    color: Colors.white,
                     fontSize: 20,
                   ),
                 ),
 
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
 
-                CircleAvatar(child: Icon(Icons.person)),
+                const CircleAvatar(
+                  child: Icon(Icons.person),
+                ),
               ],
             ),
           ),
@@ -50,53 +55,44 @@ class _GerenteScreenState extends State<GerenteScreen> {
 
           child: Column(
             children: [
-              // LISTA DE SETORES
               Expanded(
-                child: ListView.builder(
-                  itemCount: setores.length,
-
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
+                child: ListView(
+                  children: [
+                    GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
-
                           MaterialPageRoute(
-                            builder: (context) =>
-                                SetorScreen(nomeSetor: setores[index]["nome"]),
+                            builder: (context) => SetorScreen(
+                              nomeSetor: widget.setorGerente,
+                            ),
                           ),
                         );
                       },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 20),
 
+                      child: Container(
                         height: 120,
 
                         padding: const EdgeInsets.all(15),
 
                         decoration: BoxDecoration(
                           color: Colors.grey[400],
-
                           borderRadius: BorderRadius.circular(10),
                         ),
 
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Center(
+                          child: Text(
+                            widget.setorGerente,
 
-                          children: [
-                            Text(
-                              setores[index]["nome"],
-
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
               ),
             ],

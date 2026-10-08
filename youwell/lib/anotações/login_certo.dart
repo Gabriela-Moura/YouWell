@@ -39,12 +39,12 @@ class LoginScreen extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const AdminScreen()),
         );
       } else if (dados["papel"] == "gerente") {
-        String setor = dados["setor"];
+        String setorGerente = dados["setor"];
 
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => GerenteScreen(setor: setor),
+            builder: (context) => GerenteScreen(setorGerente: setorGerente),
           ),
         );
       } else {

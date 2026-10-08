@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/main.dart';
 import 'package:youwell/setor_screen.dart';
-// import 'package:youwell/setor.dart';
+import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
