@@ -15,10 +15,12 @@ import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class TemperaturaScreen extends StatelessWidget {
   final String nomeSetor;
+  final String nomeUsuario;
 
   const TemperaturaScreen({
     super.key,
     required this.nomeSetor,
+    required this.nomeUsuario,
   });
 
   @override
@@ -52,12 +54,7 @@ class TemperaturaScreen extends StatelessWidget {
               title: const Text("Início"),
 
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AdminScreen(),
-                  ),
-                );
+                Navigator.pop(context);
               },
             ),
 
@@ -67,12 +64,7 @@ class TemperaturaScreen extends StatelessWidget {
               title: const Text("Geral"),
 
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AdminScreen(),
-                  ),
-                );
+                Navigator.pop(context);
               },
             ),
 
@@ -85,7 +77,7 @@ class TemperaturaScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TemperaturaScreen(nomeSetor:nomeSetor),
+                    builder: (context) => TemperaturaScreen(nomeSetor:nomeSetor, nomeUsuario: nomeUsuario,),
                   ),
                 );
               },
@@ -99,7 +91,7 @@ class TemperaturaScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor)),
+                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN",)),
                 );
               },
             ),
@@ -112,7 +104,7 @@ class TemperaturaScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor)),
+                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN",)),
                 );
               },
             ),
@@ -207,8 +199,8 @@ class TemperaturaScreen extends StatelessWidget {
                           getTitlesWidget: (value, meta) {
                             int indice = value.toInt();
 
-                            if (indice >= 0 && indice < dadosSensores.length) {
-                              return Text(dadosSensores[indice]["hora"]);
+                            if (indice >= 0 && indice < sensores.length) {
+                              return Text(sensores[indice]["hora"]);
                             }
 
                             return const Text("");
@@ -235,7 +227,7 @@ class TemperaturaScreen extends StatelessWidget {
 
                     lineBarsData: [
                       LineChartBarData(
-                        spots: dadosSensores.asMap().entries.map((item) {
+                        spots: sensores.asMap().entries.map((item) {
                           int indice = item.key;
 
                           double temperatura = item.value["temperatura"]
@@ -315,7 +307,7 @@ class TemperaturaScreen extends StatelessWidget {
                         ),
 
                         // DADOS
-                        ...dadosSensores.map((dado) {
+                        ...sensores.map((dado) {
                           return TableRow(
                             children: [
                               Padding(

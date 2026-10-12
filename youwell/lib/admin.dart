@@ -4,7 +4,9 @@ import 'package:youwell/setor_screen.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class AdminScreen extends StatefulWidget {
-  const AdminScreen({super.key});
+  final String nomeAdmin;
+
+  const AdminScreen({super.key, required this.nomeAdmin});
 
   @override
   State<AdminScreen> createState() => _AdminScreenState();
@@ -21,25 +23,21 @@ class _AdminScreenState extends State<AdminScreen> {
 
         iconTheme: const IconThemeData(
           color: Colors.white,
-        ),
-
-        actions: const [
+        ),        
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 20),
-
+            padding: const EdgeInsets.only(right: 20),
             child: Row(
               children: [
                 Text(
-                  "Olá ADMIN",
-                  style: TextStyle(
-                    color: Color.fromARGB(255, 249, 250, 250),
+                  "Olá ${widget.nomeAdmin}",
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 20,
                   ),
                 ),
-
-                SizedBox(width: 10),
-
-                CircleAvatar(
+                const SizedBox(width: 10),
+                const CircleAvatar(
                   child: Icon(Icons.person),
                 ),
               ],
@@ -67,6 +65,7 @@ class _AdminScreenState extends State<AdminScreen> {
                           MaterialPageRoute(
                             builder: (context) => SetorScreen(
                               nomeSetor: setores[index]["nome"],
+                              nomeUsuario: widget.nomeAdmin,
                             ),
                           ),
                         );

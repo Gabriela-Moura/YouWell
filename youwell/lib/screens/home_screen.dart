@@ -4,9 +4,8 @@ import '../sobre_nos.dart';
 import '../admin.dart';
 import '../gerente.dart';
 import '../usuario_ti.dart';
+import '../login_screen.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
-
-// import '../login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -60,60 +59,12 @@ class HomeScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AdminScreen()),
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
                     );
                   },
 
-                  child: const Text("Entrar A"),
+                  child: const Text("Login"),
                 ),
-
-                SizedBox(width: 5),
-
-                ElevatedButton(
-                  onPressed: () {
-                    
-                    String setorGerente = dadosGerentes[0]["setor"];
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GerenteScreen(
-                          setorGerente: setorGerente,
-                        ),
-                      ),
-                    );
-                  },
-
-                  child: const Text("Entrar G"),
-                ),
-
-                SizedBox(width: 5),
-                
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => UsuarioTi(),
-                      ),
-                    );
-                  },
-
-                  child: const Text("Entrar TI"),
-                ),
-
-                SizedBox(width: 5),
-
-                // ElevatedButton(
-                //   onPressed: () {
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(builder: (context) => SobreNos()),
-                //     );
-                //   },
-
-                //   child: const Text("Saiba mais"),
-                // ),
               ],
             ),
           ],

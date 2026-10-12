@@ -13,7 +13,13 @@ import 'package:youwell/historico.dart';
 
 class RuidoScreen extends StatelessWidget {
   final String nomeSetor;
-  const RuidoScreen({super.key, required this.nomeSetor});
+  final String nomeUsuario;
+
+  const RuidoScreen({
+    super.key,
+    required this.nomeSetor,
+    required this.nomeUsuario,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +54,8 @@ class RuidoScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TemperaturaScreen(nomeSetor: nomeSetor),
+                    builder: (context) =>
+                        TemperaturaScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario),
                   ),
                 );
               },
@@ -62,8 +69,13 @@ class RuidoScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor)),
-                );
+                  MaterialPageRoute(
+                    builder: (context) => ArScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
+                  ),
+                ); //ArScreen
               },
             ),
 
@@ -75,7 +87,9 @@ class RuidoScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor)),
+                  MaterialPageRoute(
+                    builder: (context) => RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario),
+                  ),
                 );
               },
             ),
@@ -114,20 +128,22 @@ class RuidoScreen extends StatelessWidget {
 
         title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
 
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 20),
-
+            padding: const EdgeInsets.only(right: 20),
             child: Row(
               children: [
                 Text(
-                  "Olá ADMIN",
-                  style: TextStyle(fontSize: 20, color: Colors.white),
+                  "Olá $nomeUsuario",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
                 ),
-
-                SizedBox(width: 10),
-
-                CircleAvatar(child: Icon(Icons.person)),
+                const SizedBox(width: 10),
+                const CircleAvatar(
+                  child: Icon(Icons.person),
+                ),
               ],
             ),
           ),
@@ -166,8 +182,8 @@ class RuidoScreen extends StatelessWidget {
                           getTitlesWidget: (value, meta) {
                             int indice = value.toInt();
 
-                            if (indice >= 0 && indice < dadosSensores.length) {
-                              return Text(dadosSensores[indice]["hora"]);
+                            if (indice >= 0 && indice < sensores.length) {
+                              return Text(sensores[indice]["hora"]);
                             }
 
                             return const Text("");
@@ -194,10 +210,10 @@ class RuidoScreen extends StatelessWidget {
 
                     lineBarsData: [
                       LineChartBarData(
-                        spots: dadosSensores.asMap().entries.map((item) {
+                        spots: sensores.asMap().entries.map((item) {
                           int indice = item.key;
 
-                          double ruido = item.value["ruido"] .toDouble();
+                          double ruido = item.value["ruido"].toDouble();
 
                           return FlSpot(indice.toDouble(), ruido);
                         }).toList(),
@@ -262,7 +278,7 @@ class RuidoScreen extends StatelessWidget {
                       ),
 
                       // DADOS
-                      ...dadosSensores.map((dado) {
+                      ...sensores.map((dado) {
                         return TableRow(
                           children: [
                             Padding(
@@ -291,12 +307,8 @@ class RuidoScreen extends StatelessWidget {
 
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AdminScreen()),
-                  );
+                  Navigator.pop(context);
                 },
-
                 child: const Text("Voltar"),
               ),
             ],

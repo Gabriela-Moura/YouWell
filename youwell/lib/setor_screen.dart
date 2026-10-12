@@ -11,8 +11,9 @@ import 'package:youwell/historico.dart';
 
 class SetorScreen extends StatelessWidget {
   final String nomeSetor;
+  final String nomeUsuario;
 
-  const SetorScreen({super.key, required this.nomeSetor});
+  const SetorScreen({super.key, required this.nomeSetor, required this.nomeUsuario});
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +48,7 @@ class SetorScreen extends StatelessWidget {
               ),
 
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AdminScreen(),
-                  ),
-                );
+                Navigator.pop(context);
               },
             ),
             ListTile(
@@ -67,7 +63,7 @@ class SetorScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TemperaturaScreen(nomeSetor: nomeSetor),
+                    builder: (context) => TemperaturaScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario),
                   ),
                 );
               },
@@ -84,7 +80,7 @@ class SetorScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor)),
+                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario)),
                 );
               },
             ),
@@ -100,7 +96,7 @@ class SetorScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor)),
+                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario)),
                 );
               },
             ),
@@ -147,20 +143,22 @@ class SetorScreen extends StatelessWidget {
         ),
 
         title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 20),
-
+            padding: const EdgeInsets.only(right: 20),
             child: Row(
               children: [
                 Text(
-                  "Olá ADMIN",
-                  style: TextStyle(fontSize: 20, color: Colors.white),
+                  "Olá $nomeUsuario",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
                 ),
-
-                SizedBox(width: 10),
-
-                CircleAvatar(child: Icon(Icons.person)),
+                const SizedBox(width: 10),
+                const CircleAvatar(
+                  child: Icon(Icons.person),
+                ),
               ],
             ),
           ),

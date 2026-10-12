@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/main.dart';
 import 'package:youwell/setor_screen.dart';
+import 'package:youwell/login_screen.dart';
+import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class GerenteScreen extends StatefulWidget {
   final String setorGerente;
+  final String nomeGerente;
 
-  const GerenteScreen({ super.key, required this.setorGerente,});
+  const GerenteScreen({ super.key, required this.setorGerente, required this.nomeGerente});
 
   @override
   State<GerenteScreen> createState() => _GerenteScreenState();
@@ -30,13 +33,13 @@ class _GerenteScreenState extends State<GerenteScreen> {
 
             child: Row(
               children: [
-                const Text(
-                  "Olá GERENTE",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
+                Text(
+                "Olá ${widget.nomeGerente}",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
                 ),
+              ),
 
                 const SizedBox(width: 10),
 
@@ -64,6 +67,7 @@ class _GerenteScreenState extends State<GerenteScreen> {
                           MaterialPageRoute(
                             builder: (context) => SetorScreen(
                               nomeSetor: widget.setorGerente,
+                              nomeUsuario: widget.nomeGerente,
                             ),
                           ),
                         );

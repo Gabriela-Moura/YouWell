@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/main.dart';
+import 'package:youwell/screens/home_screen.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/gerente.dart';
+import 'package:youwell/usuario_ti.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 void main() {
@@ -16,43 +18,88 @@ class LoginScreen extends StatelessWidget {
 
   final _formKey = GlobalKey<FormState>();
 
+  
   void fazerLogin(BuildContext context) {
-    String nomeDigitado = logincontrollerForm.text;
+    String nomeDigitado = logincontrollerForm.text.trim();
     String senhaDigitada = senhacontrollerForm.text;
 
-    // Procura o gerente no banco de dados simulado
-    final gerenteEncontrado = dadosGerentes.where(
-      (gerente) =>
-          gerente["nome"] == nomeDigitado &&
-          gerente["senha"] == senhaDigitada,
+    // Procura o usuário no banco simulado
+    final usuariosEncontrados = usuarios.where(
+      (usuario) =>
+          usuario["nome"] == nomeDigitado &&
+          usuario["senha"] == senhaDigitada,
     );
 
-    if (gerenteEncontrado.isNotEmpty) {
-      final gerente = gerenteEncontrado.first;
-
-      if (gerente["papel"] == "gerente") {
-        // Pega o setor que veio do banco simulado
-        String setorGerente = gerente["setor"];
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GerenteScreen(
-              setorGerente: setorGerente,
-            ),
-          ),
-        );
-
-        return;
-      }
+    if (usuariosEncontrados.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Nome ou senha incorretos"),
+        ),
+      );
+      return;
     }
 
-    // Se não encontrou o usuário
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Nome ou senha incorretos"),
-      ),
-    );
+    final usuario = usuariosEncontrados.first;
+    final papel = usuario["papel"];
+
+    if (papel == "gerente") {
+      // O usuário guarda o ID do setor
+      final idSetor = usuario["setor"];
+
+      // Busca o setor correspondente pelo ID
+      final setorEncontrado = setores.where(
+        (setor) => setor["id"] == idSetor,
+      );
+
+      if (setorEncontrado.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("O setor deste gerente não foi encontrado."),
+          ),
+        );
+        return;
+      }
+
+      final nomeSetor = setorEncontrado.first["nome"] as String;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GerenteScreen(
+            setorGerente: nomeSetor,
+            nomeGerente: usuario["nome"],
+          ),
+        ),
+      );
+      
+    } else if (papel == "admin") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AdminScreen(nomeAdmin: usuario["nome"]),
+        ),
+      );
+    } else if (papel == "ti") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const UsuarioTi(),
+        ),
+      );
+    } else if (papel == "usuario") {
+      // Ainda precisamos definir qual tela esse papel deve abrir.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Login válido, mas a tela deste usuário ainda não foi definida."),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Papel de usuário não reconhecido."),
+        ),
+      );
+    }
   }
 
   @override

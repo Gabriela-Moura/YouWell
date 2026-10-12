@@ -14,7 +14,13 @@ import 'package:youwell/historico.dart';
 
 class ArScreen extends StatelessWidget {
   final String nomeSetor;
-  const ArScreen({super.key, required this.nomeSetor});
+  final String nomeUsuario;
+
+  const ArScreen({
+    super.key,
+    required this.nomeSetor,
+    required this.nomeUsuario,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +37,8 @@ class ArScreen extends StatelessWidget {
               ),
 
               child: Text(
-                nomeSetor,
-
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                "Olá $nomeUsuario",
+                style: const TextStyle(color: Colors.white, fontSize: 20),
               ),
             ),
             ListTile(
@@ -49,7 +50,10 @@ class ArScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TemperaturaScreen(nomeSetor: nomeSetor),
+                    builder: (context) => ArScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
                   ),
                 );
               },
@@ -63,7 +67,12 @@ class ArScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor)),
+                  MaterialPageRoute(
+                    builder: (context) => ArScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
+                  ),
                 );
               },
             ),
@@ -76,7 +85,9 @@ class ArScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor)),
+                  MaterialPageRoute(
+                    builder: (context) => RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario),
+                  ),
                 );
               },
             ),
@@ -115,20 +126,17 @@ class ArScreen extends StatelessWidget {
 
         title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
 
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 20),
-
+            padding: const EdgeInsets.only(right: 20),
             child: Row(
               children: [
                 Text(
-                  "Olá ADMIN",
-                  style: TextStyle(fontSize: 20, color: Colors.white),
+                  "Olá $nomeUsuario",
+                  style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
-
-                SizedBox(width: 10),
-
-                CircleAvatar(child: Icon(Icons.person)),
+                const SizedBox(width: 10),
+                const CircleAvatar(child: Icon(Icons.person)),
               ],
             ),
           ),
@@ -167,8 +175,8 @@ class ArScreen extends StatelessWidget {
                           getTitlesWidget: (value, meta) {
                             int indice = value.toInt();
 
-                            if (indice >= 0 && indice < dadosSensores.length) {
-                              return Text(dadosSensores[indice]["hora"]);
+                            if (indice >= 0 && indice < sensores.length) {
+                              return Text(sensores[indice]["hora"]);
                             }
 
                             return const Text("");
@@ -195,7 +203,7 @@ class ArScreen extends StatelessWidget {
 
                     lineBarsData: [
                       LineChartBarData(
-                        spots: dadosSensores.asMap().entries.map((item) {
+                        spots: sensores.asMap().entries.map((item) {
                           int indice = item.key;
 
                           double ar = item.value["ar"].toDouble();
@@ -263,7 +271,7 @@ class ArScreen extends StatelessWidget {
                       ),
 
                       // DADOS
-                      ...dadosSensores.map((dado) {
+                      ...sensores.map((dado) {
                         return TableRow(
                           children: [
                             Padding(
@@ -292,12 +300,8 @@ class ArScreen extends StatelessWidget {
 
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AdminScreen()),
-                  );
+                  Navigator.pop(context);
                 },
-
                 child: const Text("Voltar"),
               ),
             ],
