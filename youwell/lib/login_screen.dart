@@ -66,7 +66,7 @@ class LoginScreen extends StatelessWidget {
         MaterialPageRoute(
           builder: (context) => GerenteScreen(
             setorGerente: nomeSetor,
-            nomeGerente: usuario["nome"],
+            nomeGerente: usuario["nome"] as String,
           ),
         ),
       ); 
@@ -75,7 +75,8 @@ class LoginScreen extends StatelessWidget {
         context,
         MaterialPageRoute(
           builder: (context) => AdminScreen(
-            nomeAdmin: usuario["nome"],
+            nomeAdmin: usuario["nome"] as String,
+            nomeSetor: 'null',
           ),
         ),
       );
