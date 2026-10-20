@@ -3,7 +3,6 @@ import 'package:youwell/main_original.dart';
 import '../sobre_nos.dart';
 import '../admin.dart';
 import '../gerente.dart';
-import '../usuario_ti.dart';
 import '../login_screen.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
 

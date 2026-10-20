@@ -3,7 +3,6 @@ import 'package:youwell/main.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/gerente.dart';
-import 'package:youwell/usuario_ti.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 void main() {
@@ -70,20 +69,14 @@ class LoginScreen extends StatelessWidget {
             nomeGerente: usuario["nome"],
           ),
         ),
-      );
-      
+      ); 
     } else if (papel == "admin") {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => AdminScreen(nomeAdmin: usuario["nome"]),
-        ),
-      );
-    } else if (papel == "ti") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const UsuarioTi(),
+          builder: (context) => AdminScreen(
+            nomeAdmin: usuario["nome"],
+          ),
         ),
       );
     } else if (papel == "usuario") {
