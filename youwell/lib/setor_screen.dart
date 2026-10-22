@@ -7,6 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:youwell/qualidade_ar.dart';
 import 'package:youwell/ruido.dart';
 import 'package:youwell/alertas.dart';
+import 'package:youwell/admin.dart';
 import 'package:youwell/historico.dart';
 
 class SetorScreen extends StatelessWidget {

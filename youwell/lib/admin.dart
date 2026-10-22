@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/main.dart';
+import 'package:youwell/criar_setor.dart';
+import 'package:youwell/novo_usuario.dart';
 import 'package:youwell/qualidade_ar.dart';
 import 'package:youwell/ruido.dart';
 import 'package:youwell/temperatura_screen.dart';
@@ -23,36 +25,6 @@ class _AdminScreenState extends State<AdminScreen> {
 
   String papelSelecionado = 'usuario';
   int? setorSelecionado;
-
-  void criarSetor() {
-    final nome = nomeSetorController.text.trim();
-
-    if (nome.isEmpty) {
-      mostrarMensagem('Digite o nome do setor.');
-      return;
-    }
-
-    final existe = setores.any(
-      (s) => (s['nome'] as String).toLowerCase() == nome.toLowerCase(),
-    );
-
-    if (existe) {
-      mostrarMensagem('Já existe um setor com esse nome.');
-      return;
-    }
-
-    final novoId = setores.isEmpty
-        ? 1
-        : setores.map((s) => s['id'] as int).reduce((a, b) => a > b ? a : b) +
-              1;
-
-    setState(() {
-      setores.add({'id': novoId, 'nome': nome});
-    });
-
-    nomeSetorController.clear();
-    mostrarMensagem('Setor criado com sucesso!');
-  }
 
   void novoUsuario() {
     final nome = nomeUsuarioController.text.trim();
@@ -194,6 +166,48 @@ Widget build(BuildContext context) {
               },
             ),
 
+            ListTile(
+              leading: const Icon(Icons.access_alarm),
+
+              title: const Text(
+                "Criar Setor",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CriarSetor(
+                      nomeSetor: widget.nomeSetor,
+                      nomeAdmin: widget.nomeAdmin,
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.access_alarm),
+
+              title: const Text(
+                "Novo Usuário",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => novoUsuario(
+                      nomeSetor: widget.nomeSetor,
+                      nomeAdmin: widget.nomeAdmin
+                    ),
+                  ),
+                );
+              },
+            ),
+            
             ListTile(
               leading: const Icon(Icons.access_alarm),
 
@@ -341,57 +355,6 @@ Widget build(BuildContext context) {
                 ),
               );
             }),
-
-          const SizedBox(height: 24),
-
-          // CRIAR SETOR
-          _tituloSecao(
-            Icons.add_business,
-            'Criar setor',
-            verde,
-          ),
-          const SizedBox(height: 12),
-
-          Card(
-            color: Colors.white,
-            elevation: 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: nomeSetorController,
-                    decoration: InputDecoration(
-                      labelText: 'Nome do setor',
-                      hintText: 'Ex.: Recursos Humanos',
-                      prefixIcon: const Icon(Icons.business),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  ElevatedButton.icon(
-                    onPressed: criarSetor,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Criar setor'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: verde,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
 
           const SizedBox(height: 24),
 
