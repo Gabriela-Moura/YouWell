@@ -1,0 +1,29 @@
+Login - linkar com o banco de dados
+Gerente: 
+Página de alertas
+Gerar relatório
+
+Temperatura OK:
+- inicio
+- geral
+- temperatura
+- qualidade do ar
+- ruido
+- alertas
+- historico geral
+
+Ao abrir a página de temperatura logado no gerente aparece ola admin
+
+
+Amin:
+-inicio
+-temperatura
+-qualidade do ar
+-ruido
+-criar setor
+-novo usuario
+-alertas
+-historico geral
+
+SetorScreen está com nome de ADMIN
+Fazer a setinha apontar para o login
