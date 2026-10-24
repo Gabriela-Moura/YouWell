@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/main.dart';
-import 'package:youwell/temperatura_screen.dart';
+import 'package:youwell/Gerente/temperatura_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:youwell/setor_screen.dart';
+import 'package:youwell/Gerente/setor_screen_gerente.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
-import 'package:youwell/qualidade_ar.dart';
-import 'package:youwell/ruido.dart';
+import 'package:youwell/Gerente/temperatura_screen.dart';
+import 'package:youwell/Gerente/qualidade_ar.dart';
+import 'package:youwell/Administrador/ruido.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
+import 'package:youwell/gerente.dart';
 
-class RuidoScreen extends StatelessWidget {
+class ArScreen extends StatelessWidget {
   final String nomeSetor;
   final String nomeUsuario;
 
-  const RuidoScreen({
+  const ArScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
@@ -45,6 +47,48 @@ class RuidoScreen extends StatelessWidget {
                 ),
               ),
             ),
+
+            ListTile(
+              leading: const Icon(Icons.home),
+
+              title: const Text(
+                "Início",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GerenteScreen(
+                      setorGerente: nomeSetor,
+                      nomeGerente: nomeUsuario,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.window),
+
+              title: const Text(
+                "Geral",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SetorScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
+                  ),
+                );
+              },
+            ),
+
             ListTile(
               leading: const Icon(Icons.thermostat),
 
@@ -54,8 +98,10 @@ class RuidoScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        TemperaturaScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario),
+                    builder: (context) => TemperaturaScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
                   ),
                 );
               },
@@ -70,12 +116,10 @@ class RuidoScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ArScreen(
-                      nomeSetor: nomeSetor,
-                      nomeUsuario: nomeUsuario,
-                    ),
+                    builder: (context) =>
+                        ArScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN"),
                   ),
-                ); //ArScreen
+                );
               },
             ),
 
@@ -88,7 +132,8 @@ class RuidoScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario),
+                    builder: (context) =>
+                        RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN"),
                   ),
                 );
               },
@@ -135,15 +180,10 @@ class RuidoScreen extends StatelessWidget {
               children: [
                 Text(
                   "Olá $nomeUsuario",
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
+                  style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(
-                  child: Icon(Icons.person),
-                ),
+                const CircleAvatar(child: Icon(Icons.person)),
               ],
             ),
           ),
@@ -156,7 +196,7 @@ class RuidoScreen extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                'Ruído',
+                'Qualidade do Ar',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
 
@@ -213,9 +253,9 @@ class RuidoScreen extends StatelessWidget {
                         spots: sensores.asMap().entries.map((item) {
                           int indice = item.key;
 
-                          double ruido = item.value["ruido"].toDouble();
+                          double ar = item.value["ar"].toDouble();
 
-                          return FlSpot(indice.toDouble(), ruido);
+                          return FlSpot(indice.toDouble(), ar);
                         }).toList(),
 
                         isCurved: true,
@@ -293,7 +333,7 @@ class RuidoScreen extends StatelessWidget {
 
                             Padding(
                               padding: const EdgeInsets.all(5),
-                              child: Text("${dado["ruido"]}"),
+                              child: Text("${dado["ar"]}"),
                             ),
                           ],
                         );

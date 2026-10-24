@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/main.dart';
-import 'package:youwell/temperatura_screen.dart';
+import 'package:youwell/Administrador/temperatura_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
-import 'package:youwell/temperatura_screen.dart';
-import 'package:youwell/qualidade_ar.dart';
-import 'package:youwell/ruido.dart';
+import 'package:youwell/Administrador/qualidade_ar.dart';
+import 'package:youwell/Administrador/ruido.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:youwell/setor_screen.dart';
+import 'package:youwell/Administrador/setor_screen.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class TemperaturaScreen extends StatelessWidget {
@@ -49,12 +48,20 @@ class TemperaturaScreen extends StatelessWidget {
             ),
 
             ListTile(
-              leading: const Icon(Icons.home),
+              leading: const Icon(Icons.window),
 
-              title: const Text("Início"),
+              title: const Text("Inicio"),
 
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AdminScreen(
+                      nomeSetor: nomeSetor,
+                      nomeAdmin: nomeUsuario,
+                    ),
+                  ),
+                );
               },
             ),
 
@@ -64,20 +71,34 @@ class TemperaturaScreen extends StatelessWidget {
               title: const Text("Geral"),
 
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SetorScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
+                  ),
+                );
               },
             ),
 
             ListTile(
               leading: const Icon(Icons.thermostat),
 
-              title: const Text("Temperatura"),
+              title: const Text(
+                "Temperatura",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
 
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TemperaturaScreen(nomeSetor:nomeSetor, nomeUsuario: nomeUsuario,),
+                    builder: (context) => TemperaturaScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
                   ),
                 );
               },
@@ -86,12 +107,20 @@ class TemperaturaScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.air),
 
-              title: const Text("Qualidade do Ar"),
+              title: const Text(
+                "Qualidade do Ar",
+                style: TextStyle(color: Color.fromARGB(255, 38, 23, 23)),
+              ),
 
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN",)),
+                  MaterialPageRoute(
+                    builder: (context) => ArScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
+                  ),
                 );
               },
             ),
@@ -99,12 +128,20 @@ class TemperaturaScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.volume_up),
 
-              title: const Text("Ruído"),
+              title: const Text(
+                "Ruído",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
 
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN",)),
+                  MaterialPageRoute(
+                    builder: (context) => RuidoScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
+                  ),
                 );
               },
             ),
@@ -112,7 +149,10 @@ class TemperaturaScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.access_alarm),
 
-              title: const Text("Alertas"),
+              title: const Text(
+                "Alertas",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
 
               onTap: () {
                 Navigator.push(
@@ -125,7 +165,10 @@ class TemperaturaScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.picture_as_pdf),
 
-              title: const Text("Histórico Geral (PDF)"),
+              title: const Text(
+                "Histórico Geral (PDF)",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
 
               onTap: () {
                 Navigator.push(
@@ -347,7 +390,9 @@ class TemperaturaScreen extends StatelessWidget {
                   if (index == 2) {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HistoricoScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => HistoricoScreen(),
+                      ),
                     );
                   }
                 },

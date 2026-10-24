@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
+import 'package:youwell/gerente.dart';
 import 'package:youwell/main.dart';
-import 'package:youwell/temperatura_screen.dart';
+import 'package:youwell/Gerente/temperatura_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:youwell/qualidade_ar.dart';
-import 'package:youwell/ruido.dart';
+import 'package:youwell/Gerente/qualidade_ar.dart';
+import 'package:youwell/Gerente/ruido.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/historico.dart';
+import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class SetorScreen extends StatelessWidget {
   final String nomeSetor;
   final String nomeUsuario;
 
-  const SetorScreen({super.key, required this.nomeSetor, required this.nomeUsuario});
+  const SetorScreen({
+    super.key,
+    required this.nomeSetor,
+    required this.nomeUsuario,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +55,35 @@ class SetorScreen extends StatelessWidget {
               ),
 
               onTap: () {
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GerenteScreen(
+                      setorGerente: nomeSetor,
+                      nomeGerente: nomeUsuario,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.window),
+
+              title: const Text(
+                "Geral",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SetorScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -64,7 +98,10 @@ class SetorScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TemperaturaScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario),
+                    builder: (context) => TemperaturaScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
                   ),
                 );
               },
@@ -81,7 +118,12 @@ class SetorScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ArScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario)),
+                  MaterialPageRoute(
+                    builder: (context) => ArScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
+                  ),
                 );
               },
             ),
@@ -97,7 +139,12 @@ class SetorScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario)),
+                  MaterialPageRoute(
+                    builder: (context) => RuidoScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
+                  ),
                 );
               },
             ),
@@ -139,9 +186,7 @@ class SetorScreen extends StatelessWidget {
 
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 10, 85, 64),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
 
         title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
         actions: [
@@ -151,15 +196,10 @@ class SetorScreen extends StatelessWidget {
               children: [
                 Text(
                   "Olá $nomeUsuario",
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
+                  style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(
-                  child: Icon(Icons.person),
-                ),
+                const CircleAvatar(child: Icon(Icons.person)),
               ],
             ),
           ),
@@ -320,37 +360,33 @@ class SetorScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: NavigationBar(
-                onDestinationSelected: (index) {
-                  if (index == 1) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AlertaScreen()),
-                    );
-                  }
+        onDestinationSelected: (index) {
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AlertaScreen()),
+            );
+          }
 
-                  if (index == 2) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HistoricoScreen()),
-                    );
-                  }
-                },
-                destinations: const [
-                  NavigationDestination(
-                    icon: Icon(Icons.window),
-                    label: 'Geral',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.notifications),
-                    label: 'Alertas',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.bar_chart),
-                    label: 'Relatório',
-                  ),
-                ],
-              ),
-      
+          if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HistoricoScreen()),
+            );
+          }
+        },
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.window), label: 'Geral'),
+          NavigationDestination(
+            icon: Icon(Icons.notifications),
+            label: 'Alertas',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart),
+            label: 'Relatório',
+          ),
+        ],
+      ),
     );
   }
 

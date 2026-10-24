@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/main.dart';
-import 'package:youwell/temperatura_screen.dart';
+import 'package:youwell/Gerente/temperatura_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:youwell/setor_screen.dart';
+import 'package:youwell/Gerente/setor_screen_gerente.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
-import 'package:youwell/temperatura_screen.dart';
-import 'package:youwell/qualidade_ar.dart';
-import 'package:youwell/ruido.dart';
+import 'package:youwell/Gerente/qualidade_ar.dart';
+import 'package:youwell/Gerente/ruido.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
+import 'package:youwell/gerente.dart';
 
-class ArScreen extends StatelessWidget {
+class RuidoScreen extends StatelessWidget {
   final String nomeSetor;
   final String nomeUsuario;
 
-  const ArScreen({
+  const RuidoScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
@@ -37,10 +37,57 @@ class ArScreen extends StatelessWidget {
               ),
 
               child: Text(
-                "Olá $nomeUsuario",
-                style: const TextStyle(color: Colors.white, fontSize: 20),
+                nomeSetor,
+
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
+
+            ListTile(
+              leading: const Icon(Icons.home),
+
+              title: const Text(
+                "Início",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GerenteScreen(
+                      setorGerente: nomeSetor,
+                      nomeGerente: nomeUsuario,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.window),
+
+              title: const Text(
+                "Geral",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SetorScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
+                  ),
+                );
+              },
+            ),
+
             ListTile(
               leading: const Icon(Icons.thermostat),
 
@@ -50,7 +97,7 @@ class ArScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ArScreen(
+                    builder: (context) => TemperaturaScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                     ),
@@ -68,10 +115,8 @@ class ArScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ArScreen(
-                      nomeSetor: nomeSetor,
-                      nomeUsuario: nomeUsuario,
-                    ),
+                    builder: (context) =>
+                        ArScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN"),
                   ),
                 );
               },
@@ -86,7 +131,8 @@ class ArScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario),
+                    builder: (context) =>
+                        RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN"),
                   ),
                 );
               },
@@ -133,10 +179,15 @@ class ArScreen extends StatelessWidget {
               children: [
                 Text(
                   "Olá $nomeUsuario",
-                  style: const TextStyle(fontSize: 20, color: Colors.white),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(child: Icon(Icons.person)),
+                const CircleAvatar(
+                  child: Icon(Icons.person),
+                ),
               ],
             ),
           ),
@@ -149,7 +200,7 @@ class ArScreen extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                'Qualidade do Ar',
+                'Ruído',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
 
@@ -206,9 +257,9 @@ class ArScreen extends StatelessWidget {
                         spots: sensores.asMap().entries.map((item) {
                           int indice = item.key;
 
-                          double ar = item.value["ar"].toDouble();
+                          double ruido = item.value["ruido"].toDouble();
 
-                          return FlSpot(indice.toDouble(), ar);
+                          return FlSpot(indice.toDouble(), ruido);
                         }).toList(),
 
                         isCurved: true,
@@ -286,7 +337,7 @@ class ArScreen extends StatelessWidget {
 
                             Padding(
                               padding: const EdgeInsets.all(5),
-                              child: Text("${dado["ar"]}"),
+                              child: Text("${dado["ruido"]}"),
                             ),
                           ],
                         );

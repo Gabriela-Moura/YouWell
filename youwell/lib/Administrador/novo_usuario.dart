@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/main.dart';
-import 'package:youwell/criar_setor.dart';
-import 'package:youwell/qualidade_ar.dart';
-import 'package:youwell/ruido.dart';
-import 'package:youwell/temperatura_screen.dart';
-import 'package:youwell/setor_screen.dart';
+import 'package:youwell/Administrador/criar_setor.dart';
+import 'package:youwell/Administrador/qualidade_ar.dart';
+import 'package:youwell/Administrador/ruido.dart';
+import 'package:youwell/Administrador/temperatura_screen.dart';
+import 'package:youwell/Administrador/setor_screen.dart';
+import 'package:youwell/admin.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class NovoUsuario extends StatefulWidget {
@@ -102,6 +103,21 @@ Widget build(BuildContext context) {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.window),
+
+              title: const Text(
+                "Geral",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AdminScreen(nomeSetor: widget.nomeSetor, nomeAdmin: widget.nomeAdmin)),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.home),
