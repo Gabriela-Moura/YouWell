@@ -12,7 +12,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 10, 85, 64),
+      backgroundColor: const Color.fromRGBO(10, 85, 64, 1),
 
       body: Center(
         child: Column(

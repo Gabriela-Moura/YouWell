@@ -25,7 +25,7 @@ class SetorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+      backgroundColor: const Color(0xFFF4F7F5),
 
       // MENU HAMBÚRGUER
       drawer: Drawer(
@@ -185,7 +185,7 @@ class SetorScreen extends StatelessWidget {
       ),
 
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 10, 85, 64),
+        backgroundColor: const Color.fromARGB(255, 161, 161, 161),
         iconTheme: const IconThemeData(color: Colors.white),
 
         title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
@@ -246,8 +246,15 @@ class SetorScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
 
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(157, 184, 184, 184),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(13),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
 
                 child: Expanded(
@@ -398,7 +405,7 @@ class SetorScreen extends StatelessWidget {
         margin: const EdgeInsets.only(right: 15),
 
         decoration: BoxDecoration(
-          color: Color.fromARGB(122, 10, 85, 64),
+          color: const Color(0xFFE1EFE8),
 
           borderRadius: BorderRadius.circular(10),
         ),
@@ -407,14 +414,21 @@ class SetorScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
-            Text(titulo, style: const TextStyle(fontSize: 15)),
+            Text(
+              titulo,
+              style: const TextStyle(fontSize: 15, color: Color(0xFF0A5540)),
+            ),
 
             const SizedBox(height: 15),
 
             Text(
               valor,
 
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0A5540),
+              ),
             ),
           ],
         ),

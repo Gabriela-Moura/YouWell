@@ -100,7 +100,7 @@ class _AdminScreenState extends State<AdminScreen> {
               ),
 
               child: Text(
-                widget.nomeSetor,
+                'Olá, ${widget.nomeAdmin}',
 
                 style: TextStyle(
                   color: Colors.white,
@@ -114,7 +114,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
               title: const Text(
                 "Início",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -123,11 +123,11 @@ class _AdminScreenState extends State<AdminScreen> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.access_alarm),
+              leading: const Icon(Icons.add),
 
               title: const Text(
                 "Criar Setor",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -144,11 +144,11 @@ class _AdminScreenState extends State<AdminScreen> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.access_alarm),
+              leading: const Icon(Icons.person),
 
               title: const Text(
                 "Novo Usuário",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -169,7 +169,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
               title: const Text(
                 "Alertas",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -185,7 +185,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
               title: const Text(
                 "Histórico Geral (PDF)",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -204,7 +204,7 @@ class _AdminScreenState extends State<AdminScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
-          'Painel administrativo',
+          'Painel Geral',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -214,7 +214,7 @@ class _AdminScreenState extends State<AdminScreen> {
               children: [
                 Text(
                   'Olá, ${widget.nomeAdmin}',
-                  style: const TextStyle(fontSize: 15),
+                  style: const TextStyle(fontSize: 18),
                 ),
                 const SizedBox(width: 10),
                 const CircleAvatar(
@@ -242,14 +242,19 @@ class _AdminScreenState extends State<AdminScreen> {
             const SizedBox(height: 6),
             Text(
               'Gerencie os setores e os usuários do YouWell.',
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+              style: TextStyle(fontSize: 18, color: Colors.grey[700]),
             ),
 
             const SizedBox(height: 24),
 
             // SETORES
-            _tituloSecao(Icons.apartment, 'Setores cadastrados', verde),
-            const SizedBox(height: 12),
+            _tituloSecao(
+              Icons.apartment,
+              'Setores cadastrados',
+              verde,
+              tamanhoFonte: 24,
+            ),
+            const SizedBox(height: 20),
 
             if (setores.isEmpty)
               const Card(
@@ -297,6 +302,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 );
               }),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
                   onPressed: () {
@@ -310,7 +316,23 @@ class _AdminScreenState extends State<AdminScreen> {
                       ),
                     );
                   },
-                  child: const Text('Novo Setor'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: verde,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
+                    ),
+                    minimumSize: const Size(160, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 3,
+                  ),
+                  child: const Text(
+                    'Novo Setor',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
 
                 SizedBox(width: 10),
@@ -327,7 +349,23 @@ class _AdminScreenState extends State<AdminScreen> {
                       ),
                     );
                   },
-                  child: const Text('Novo Usuário'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: verde,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
+                    ),
+                    minimumSize: const Size(160, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 3,
+                  ),
+                  child: const Text(
+                    'Novo Usuário',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -337,7 +375,12 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  Widget _tituloSecao(IconData icone, String titulo, Color cor) {
+  Widget _tituloSecao(
+    IconData icone,
+    String titulo,
+    Color cor, {
+    double tamanhoFonte = 19,
+  }) {
     return Row(
       children: [
         Icon(icone, color: cor, size: 24),
@@ -345,7 +388,7 @@ class _AdminScreenState extends State<AdminScreen> {
         Text(
           titulo,
           style: TextStyle(
-            fontSize: 19,
+            fontSize: tamanhoFonte,
             fontWeight: FontWeight.bold,
             color: cor,
           ),

@@ -19,7 +19,7 @@ List<Map<String, dynamic>> setores = [
 List<Map<String, dynamic>> usuarios = [
   {
     "id": 1,
-    "nome": "Admin",
+    "nome": "Gabi",
     "senha": "1234",
     "papel": "admin",
     "setor": null,
@@ -36,6 +36,13 @@ List<Map<String, dynamic>> usuarios = [
     "nome": "Maria",
     "senha": "5678",
     "papel": "gerente",
+    "setor": 2,
+  },
+  {
+    "id": 3,
+    "nome": "Maria",
+    "senha": "1234",
+    "papel": "admin",
     "setor": 2,
   },
   {

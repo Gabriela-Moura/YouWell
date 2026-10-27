@@ -22,10 +22,27 @@ class SetorScreen extends StatelessWidget {
     required this.nomeUsuario,
   });
 
+  Widget _legendaGrafico(String texto, Color cor) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: cor, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(texto, style: const TextStyle(fontSize: 12)),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    const verde = Color.fromARGB(255, 10, 85, 64);
+    const fundo = Color(0xFFF4F7F5);
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+      backgroundColor: fundo,
 
       // MENU HAMBÚRGUER
       drawer: Drawer(
@@ -47,11 +64,11 @@ class SetorScreen extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.window),
+              leading: const Icon(Icons.home),
 
               title: const Text(
                 "Início",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -71,7 +88,7 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Geral",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -91,7 +108,7 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Temperatura",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -112,7 +129,7 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Qualidade do Ar",
-                style: TextStyle(color: Color.fromARGB(255, 38, 23, 23)),
+                style: TextStyle(color: Color.fromARGB(255, 38, 23, 23), fontSize: 18),
               ),
 
               onTap: () {
@@ -133,7 +150,7 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Ruído",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -154,7 +171,7 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Alertas",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -170,7 +187,7 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Histórico Geral (PDF)",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -215,11 +232,11 @@ class SetorScreen extends StatelessWidget {
               // CARDS
               SizedBox(
                 height: 90,
-                width: 300,
+                width: double.infinity,
                 child: Row(
                   children: [
-                    infoCard("Temperatura", "25°C"),
-                    infoCard("Umidade", "70%"),
+                    infoCard("Temperatura", "25°C", Icons.thermostat),
+                    infoCard("Umidade", "70%", Icons.water_drop),
                   ],
                 ),
               ),
@@ -228,11 +245,11 @@ class SetorScreen extends StatelessWidget {
 
               SizedBox(
                 height: 90,
-                width: 300,
+                width: double.infinity,
                 child: Row(
                   children: [
-                    infoCard("Qualidade do ar", "70%"),
-                    infoCard("Ruído", "30dB"),
+                    infoCard("Qualidade do ar", "70%", Icons.air),
+                    infoCard("Ruído", "30dB", Icons.volume_up),
                   ],
                 ),
               ),
@@ -240,118 +257,149 @@ class SetorScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // GRÁFICO
-              Container(
-                width: double.infinity,
-                height: 300,
-                padding: const EdgeInsets.all(20),
-
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(157, 184, 184, 184),
-                  borderRadius: BorderRadius.circular(10),
+              Card(
+                elevation: 2,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-
-                child: Expanded(
-                  child: LineChart(
-                    LineChartData(
-                      minY: 0,
-                      maxY: 100,
-                      minX: 0,
-                      maxX: 20,
-
-                      // Grade
-                      gridData: FlGridData(
-                        show: true,
-                        horizontalInterval: 25,
-                        verticalInterval: 4,
-                      ),
-
-                      // Borda
-                      borderData: FlBorderData(show: true),
-
-                      // Eixos
-                      titlesData: FlTitlesData(
-                        topTitles: AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-
-                        rightTitles: AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-
-                        // Eixo Y
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            interval: 25,
-                            reservedSize: 35,
-                          ),
-                        ),
-
-                        // Eixo X
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            interval: 2,
-                            getTitlesWidget: (value, meta) {
-                              return Text(
-                                '${value.toInt()}:00',
-                                style: const TextStyle(fontSize: 9),
-                              );
-                            },
-                          ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Indicadores do setor',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 10, 85, 64),
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Acompanhamento ao longo do dia',
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 16),
 
-                      lineBarsData: [
-                        // TEMPERATURA
-                        LineChartBarData(
-                          spots: [
-                            FlSpot(0, 25),
-                            FlSpot(4, 24),
-                            FlSpot(8, 26),
-                            FlSpot(12, 28),
-                            FlSpot(16, 27),
-                            FlSpot(20, 25),
-                          ],
-                          isCurved: true,
-                          color: Color.fromARGB(255, 255, 0, 0),
-                          barWidth: 2,
-                          dotData: FlDotData(show: false),
+                      SizedBox(
+                        height: 230,
+                        child: LineChart(
+                          LineChartData(
+                            minY: 0,
+                            maxY: 100,
+                            minX: 0,
+                            maxX: 20,
+                            gridData: FlGridData(
+                              show: true,
+                              horizontalInterval: 25,
+                              verticalInterval: 4,
+                              getDrawingHorizontalLine: (value) => FlLine(
+                                color: Colors.grey.withValues(alpha: 0.18),
+                                strokeWidth: 1,
+                              ),
+                              getDrawingVerticalLine: (value) => FlLine(
+                                color: Colors.grey.withValues(alpha: 0.12),
+                                strokeWidth: 1,
+                              ),
+                            ),
+                            borderData: FlBorderData(show: false),
+                            titlesData: FlTitlesData(
+                              topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 25,
+                                  reservedSize: 36,
+                                  getTitlesWidget: (value, meta) => Text(
+                                    value.toInt().toString(),
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 4,
+                                  reservedSize: 30,
+                                  getTitlesWidget: (value, meta) => Text(
+                                    '${value.toInt().toString().padLeft(2, '0')}:00',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: const [
+                                  FlSpot(0, 25),
+                                  FlSpot(4, 24),
+                                  FlSpot(8, 26),
+                                  FlSpot(12, 28),
+                                  FlSpot(16, 27),
+                                  FlSpot(20, 25),
+                                ],
+                                isCurved: true,
+                                color: Colors.deepOrange,
+                                barWidth: 3,
+                                dotData: const FlDotData(show: true),
+                              ),
+                              LineChartBarData(
+                                spots: const [
+                                  FlSpot(0, 45),
+                                  FlSpot(4, 40),
+                                  FlSpot(8, 65),
+                                  FlSpot(12, 70),
+                                  FlSpot(16, 60),
+                                  FlSpot(20, 50),
+                                ],
+                                isCurved: true,
+                                color: Colors.blue,
+                                barWidth: 3,
+                                dotData: const FlDotData(show: true),
+                              ),
+                              LineChartBarData(
+                                spots: const [
+                                  FlSpot(0, 80),
+                                  FlSpot(4, 82),
+                                  FlSpot(8, 75),
+                                  FlSpot(12, 78),
+                                  FlSpot(16, 80),
+                                  FlSpot(20, 82),
+                                ],
+                                isCurved: true,
+                                color: Colors.teal,
+                                barWidth: 3,
+                                dotData: const FlDotData(show: true),
+                              ),
+                            ],
+                          ),
                         ),
-
-                        // RUÍDO
-                        LineChartBarData(
-                          spots: [
-                            FlSpot(0, 45),
-                            FlSpot(4, 40),
-                            FlSpot(8, 65),
-                            FlSpot(12, 70),
-                            FlSpot(16, 60),
-                            FlSpot(20, 50),
-                          ],
-                          isCurved: true,
-                          color: Color.fromARGB(255, 255, 230, 0),
-                          barWidth: 2,
-                          dotData: FlDotData(show: false),
-                        ),
-
-                        // QUALIDADE DO AR
-                        LineChartBarData(
-                          spots: [
-                            FlSpot(0, 80),
-                            FlSpot(4, 82),
-                            FlSpot(8, 75),
-                            FlSpot(12, 78),
-                            FlSpot(16, 80),
-                            FlSpot(20, 82),
-                          ],
-                          isCurved: true,
-                          color: Color.fromARGB(255, 0, 60, 255),
-                          barWidth: 2,
-                          dotData: FlDotData(show: false),
-                        ),
-                      ],
-                    ),
+                      ),
+                      // Legenda
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 8,
+                        children: [
+                          _legendaGrafico('Temperatura', Colors.deepOrange),
+                          _legendaGrafico('Ruído', Colors.blue),
+                          _legendaGrafico('Qualidade do ar', Colors.teal),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
                 ),
               ),
@@ -359,64 +407,55 @@ class SetorScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (index) {
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AlertaScreen()),
-            );
-          }
-
-          if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HistoricoScreen()),
-            );
-          }
-        },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.window), label: 'Geral'),
-          NavigationDestination(
-            icon: Icon(Icons.notifications),
-            label: 'Alertas',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart),
-            label: 'Relatório',
-          ),
-        ],
-      ),
     );
   }
 
   // CARD
-  static Widget infoCard(String titulo, String valor) {
+  static Widget infoCard(String titulo, String valor, IconData icone) {
     return Expanded(
-      child: Container(
-        height: 120,
-        margin: const EdgeInsets.only(right: 15),
-
-        decoration: BoxDecoration(
-          color: Color.fromARGB(122, 10, 85, 64),
-
-          borderRadius: BorderRadius.circular(10),
-        ),
-
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-
-          children: [
-            Text(titulo, style: const TextStyle(fontSize: 15)),
-
-            const SizedBox(height: 15),
-
-            Text(
-              valor,
-
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ],
+      child: Card(
+        elevation: 1,
+        margin: const EdgeInsets.only(right: 10),
+        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: const Color(0xFFE1EFE8),
+                child: Icon(
+                  icone,
+                  color: const Color.fromARGB(255, 10, 85, 64),
+                  size: 25,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      titulo,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      valor,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
