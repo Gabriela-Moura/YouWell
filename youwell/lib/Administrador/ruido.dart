@@ -26,7 +26,6 @@ class RuidoScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 230, 230, 230),
 
-      // MENU HAMBÚRGUER
       drawer: Drawer(
         child: ListView(
           children: [
@@ -44,6 +43,24 @@ class RuidoScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.window),
+
+              title: const Text("Inicio"),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AdminScreen(
+                      nomeSetor: nomeSetor,
+                      nomeAdmin: nomeUsuario,
+                    ),
+                  ),
+                );
+              },
             ),
 
             ListTile(
@@ -67,7 +84,10 @@ class RuidoScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.thermostat),
 
-              title: const Text("Temperatura"),
+              title: const Text(
+                "Temperatura",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
 
               onTap: () {
                 Navigator.push(
@@ -85,14 +105,19 @@ class RuidoScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.air),
 
-              title: const Text("Qualidade do Ar"),
+              title: const Text(
+                "Qualidade do Ar",
+                style: TextStyle(color: Color.fromARGB(255, 38, 23, 23)),
+              ),
 
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        ArScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN"),
+                    builder: (context) => ArScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
                   ),
                 );
               },
@@ -101,14 +126,19 @@ class RuidoScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.volume_up),
 
-              title: const Text("Ruído"),
+              title: const Text(
+                "Ruído",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
 
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN"),
+                    builder: (context) => RuidoScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
                   ),
                 );
               },
@@ -117,7 +147,10 @@ class RuidoScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.access_alarm),
 
-              title: const Text("Alertas"),
+              title: const Text(
+                "Alertas",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
 
               onTap: () {
                 Navigator.push(
@@ -130,7 +163,10 @@ class RuidoScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.picture_as_pdf),
 
-              title: const Text("Histórico Geral (PDF)"),
+              title: const Text(
+                "Histórico Geral (PDF)",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
 
               onTap: () {
                 Navigator.push(
@@ -155,15 +191,10 @@ class RuidoScreen extends StatelessWidget {
               children: [
                 Text(
                   "Olá $nomeUsuario",
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
+                  style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(
-                  child: Icon(Icons.person),
-                ),
+                const CircleAvatar(child: Icon(Icons.person)),
               ],
             ),
           ),

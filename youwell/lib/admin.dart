@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:youwell/alertas.dart';
+import 'package:youwell/historico.dart';
 import 'package:youwell/main.dart';
 import 'package:youwell/Administrador/criar_setor.dart';
 import 'package:youwell/Administrador/novo_usuario.dart';
@@ -119,68 +121,6 @@ class _AdminScreenState extends State<AdminScreen> {
                 Navigator.pop(context);
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.thermostat),
-
-              title: const Text(
-                "Temperatura",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
-              ),
-
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TemperaturaScreen(
-                      nomeSetor: widget.nomeSetor,
-                      nomeUsuario: widget.nomeAdmin,
-                    ),
-                  ),
-                );
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.air),
-
-              title: const Text(
-                "Qualidade do Ar",
-                style: TextStyle(color: Color.fromARGB(255, 38, 23, 23)),
-              ),
-
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ArScreen(
-                      nomeSetor: widget.nomeSetor,
-                      nomeUsuario: widget.nomeAdmin,
-                    ),
-                  ),
-                );
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.volume_up),
-
-              title: const Text(
-                "Ruído",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
-              ),
-
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RuidoScreen(
-                      nomeSetor: widget.nomeSetor,
-                      nomeUsuario: widget.nomeAdmin,
-                    ),
-                  ),
-                );
-              },
-            ),
 
             ListTile(
               leading: const Icon(Icons.access_alarm),
@@ -235,12 +175,7 @@ class _AdminScreenState extends State<AdminScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => RuidoScreen(
-                      nomeSetor: widget.nomeSetor,
-                      nomeUsuario: widget.nomeAdmin,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (context) => AlertaScreen()),
                 );
               },
             ),
@@ -256,12 +191,7 @@ class _AdminScreenState extends State<AdminScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => RuidoScreen(
-                      nomeSetor: widget.nomeSetor,
-                      nomeUsuario: widget.nomeAdmin,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (context) => HistoricoScreen()),
                 );
               },
             ),
@@ -366,6 +296,41 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                 );
               }),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CriarSetor(
+                          nomeSetor: widget.nomeSetor,
+                          nomeAdmin: widget.nomeAdmin,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Novo Setor'),
+                ),
+
+                SizedBox(width: 10),
+
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NovoUsuario(
+                          nomeSetor: widget.nomeSetor,
+                          nomeAdmin: widget.nomeAdmin,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Novo Usuário'),
+                ),
+              ],
+            ),
           ],
         ),
       ),

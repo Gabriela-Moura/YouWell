@@ -15,7 +15,7 @@ Temperatura OK:
 Ao abrir a página de temperatura logado no gerente aparece ola admin
 
 
-Amin:
+Admin:
 -inicio
 -temperatura
 -qualidade do ar
@@ -27,3 +27,5 @@ Amin:
 
 SetorScreen está com nome de ADMIN
 Fazer a setinha apontar para o login
+
+ADD um botão novo setor e novo usuario

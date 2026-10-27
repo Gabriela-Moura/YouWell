@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/main.dart';
+import 'package:youwell/alertas.dart';
+import 'package:youwell/historico.dart';
 import 'package:youwell/Administrador/qualidade_ar.dart';
+import 'package:youwell/Administrador/novo_usuario.dart';
 import 'package:youwell/Administrador/ruido.dart';
 import 'package:youwell/Administrador/temperatura_screen.dart';
 import 'package:youwell/Administrador/setor_screen.dart';
@@ -73,67 +76,37 @@ class _CriarSetorState extends State<CriarSetor> {
     return Scaffold(
       backgroundColor: fundo,
 
-      // MENU HAMBÚRGUER
       drawer: Drawer(
         child: ListView(
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 10, 85, 64),
+                color: Color.fromARGB(255, 161, 161, 161),
               ),
 
               child: Text(
-                "Oi",
+                "Novo Usuário",
 
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
+
             ListTile(
               leading: const Icon(Icons.window),
 
-              title: const Text(
-                "Geral",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
-              ),
-
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AdminScreen(nomeSetor: widget.nomeSetor, nomeAdmin: widget.nomeAdmin)),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-
-              title: const Text(
-                "Início",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
-              ),
-
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.thermostat),
-
-              title: const Text(
-                "Temperatura",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
-              ),
+              title: const Text("Inicio"),
 
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TemperaturaScreen(
-                      nomeSetor: widget.nomeSetor,
-                      nomeUsuario: widget.nomeAdmin,
+                    builder: (context) => AdminScreen(
+                      nomeSetor: widget.nomeAdmin,
+                      nomeAdmin: widget.nomeSetor,
                     ),
                   ),
                 );
@@ -141,41 +114,17 @@ class _CriarSetorState extends State<CriarSetor> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.air),
+              leading: const Icon(Icons.window),
 
-              title: const Text(
-                "Qualidade do Ar",
-                style: TextStyle(color: Color.fromARGB(255, 38, 23, 23)),
-              ),
+              title: const Text("Geral"),
 
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ArScreen(
-                      nomeSetor: widget.nomeSetor,
-                      nomeUsuario: widget.nomeAdmin,
-                    ),
-                  ),
-                );
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.volume_up),
-
-              title: const Text(
-                "Ruído",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
-              ),
-
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RuidoScreen(
-                      nomeSetor: widget.nomeSetor,
-                      nomeUsuario: widget.nomeAdmin,
+                    builder: (context) => SetorScreen(
+                      nomeSetor: widget.nomeAdmin,
+                      nomeUsuario: widget.nomeSetor,
                     ),
                   ),
                 );
@@ -207,7 +156,7 @@ class _CriarSetorState extends State<CriarSetor> {
               leading: const Icon(Icons.access_alarm),
 
               title: const Text(
-                "Alertas",
+                "Novo Usuário",
                 style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
               ),
 
@@ -215,11 +164,27 @@ class _CriarSetorState extends State<CriarSetor> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RuidoScreen(
+                    builder: (context) => NovoUsuario(
                       nomeSetor: widget.nomeSetor,
-                      nomeUsuario: widget.nomeAdmin,
+                      nomeAdmin: widget.nomeAdmin,
                     ),
                   ),
+                );
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.access_alarm),
+
+              title: const Text(
+                "Alertas",
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AlertaScreen()),
                 );
               },
             ),
@@ -235,12 +200,7 @@ class _CriarSetorState extends State<CriarSetor> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => RuidoScreen(
-                      nomeSetor: widget.nomeSetor,
-                      nomeUsuario: widget.nomeAdmin,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (context) => HistoricoScreen()),
                 );
               },
             ),
