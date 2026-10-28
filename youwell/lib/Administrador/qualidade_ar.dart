@@ -22,17 +22,24 @@ class ArScreen extends StatelessWidget {
     required this.nomeUsuario,
   });
 
+  String _formatarData(String data) {
+    final partes = data.split('-');
+    if (partes.length != 3) return data;
+
+    return '${partes[2].padLeft(2, '0')}/${partes[1].padLeft(2, '0')}/${partes[0]}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+      backgroundColor: const Color(0xFFF4F7F5),
 
       drawer: Drawer(
         child: ListView(
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 161, 161, 161),
+                color: Color.fromARGB(255, 10, 85, 64),
               ),
 
               child: Text(
@@ -47,7 +54,7 @@ class ArScreen extends StatelessWidget {
             ),
 
             ListTile(
-              leading: const Icon(Icons.window),
+              leading: const Icon(Icons.home),
 
               title: const Text("Inicio"),
 
@@ -207,24 +214,41 @@ class ArScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Text(
-                'Qualidade do Ar',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-
-              SizedBox(height: 10),
-
-              Container(
-                width: double.infinity,
-                color: const Color.fromARGB(255, 184, 184, 184),
-                height: 300,
-                padding: const EdgeInsets.all(20),
-
-                child: LineChart(
+              Card(
+                elevation: 2,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(
+                        child: Text(
+                          'Qualidade do Ar',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 10, 85, 64),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Center(child: Text('Variação ao longo do dia', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.grey[600]))),
+                      const SizedBox(height: 16),
+                      SizedBox(height: 230, child: LineChart(
                   LineChartData(
                     minY: 40,
                     maxY: 80,
-
+                    gridData: FlGridData(
+                      show: true,
+                      horizontalInterval: 5,
+                      verticalInterval: 2,
+                      getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey.withValues(alpha: 0.18), strokeWidth: 1),
+                      getDrawingVerticalLine: (value) => FlLine(color: Colors.grey.withValues(alpha: 0.12), strokeWidth: 1),
+                    ),
+                    borderData: FlBorderData(show: false),
                     titlesData: FlTitlesData(
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
@@ -271,28 +295,40 @@ class ArScreen extends StatelessWidget {
                         }).toList(),
 
                         isCurved: true,
-
+                        color: Colors.teal,
+                        barWidth: 3,
                         dotData: const FlDotData(show: true),
-
-                        belowBarData: BarAreaData(show: true),
+                        belowBarData: BarAreaData(show: true, color: Colors.teal.withValues(alpha: 0.12)),
                       ),
                     ],
                   ),
                 ),
               ),
-
-              SizedBox(height: 10),
-
-              Text(
-                'Histórico detalhado',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    ],
+                  ),
+                ),
               ),
 
-              // tabela
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Table(
+              const SizedBox(height: 20),
+
+              Card(
+                elevation: 2,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(
+                        child: Text(
+                          'Histórico detalhado',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 10, 85, 64)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Table(
                     columnWidths: const {
                       0: FlexColumnWidth(1.5),
                       1: FlexColumnWidth(1),
@@ -335,7 +371,7 @@ class ArScreen extends StatelessWidget {
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(5),
-                              child: Text(dado["data"]),
+                              child: Text(_formatarData(dado["data"])),
                             ),
 
                             Padding(
@@ -354,14 +390,7 @@ class ArScreen extends StatelessWidget {
                   ),
                 ],
               ),
-
-              SizedBox(height: 10),
-
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("Voltar"),
+                ),
               ),
             ],
           ),

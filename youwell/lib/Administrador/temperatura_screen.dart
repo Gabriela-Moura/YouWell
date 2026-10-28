@@ -55,7 +55,7 @@ class TemperaturaScreen extends StatelessWidget {
             ),
 
             ListTile(
-              leading: const Icon(Icons.window),
+              leading: const Icon(Icons.home),
 
               title: const Text("Inicio"),
 
@@ -95,10 +95,9 @@ class TemperaturaScreen extends StatelessWidget {
 
               title: const Text(
                 'Temperatura',
-                textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Color.fromARGB(255, 3, 3, 3),
-                  fontSize: 40,
+                  fontSize: 18,
                 ),
               ),
 

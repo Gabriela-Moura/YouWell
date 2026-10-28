@@ -81,13 +81,12 @@ class _CriarSetorState extends State<CriarSetor> {
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 161, 161, 161),
+                color: verde,
               ),
 
               child: Text(
-                "Novo Usuário",
-
-                style: const TextStyle(
+                widget.nomeAdmin,
+                style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -96,9 +95,15 @@ class _CriarSetorState extends State<CriarSetor> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.window),
+              leading: const Icon(Icons.home),
 
-              title: const Text("Inicio"),
+              title: const Text(
+                "Inicio",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18
+                ),
+              ),
 
               onTap: () {
                 Navigator.push(
@@ -116,7 +121,13 @@ class _CriarSetorState extends State<CriarSetor> {
             ListTile(
               leading: const Icon(Icons.window),
 
-              title: const Text("Geral"),
+              title: const Text(
+                "Geral",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18
+                ),
+              ),
 
               onTap: () {
                 Navigator.push(
@@ -132,11 +143,11 @@ class _CriarSetorState extends State<CriarSetor> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.access_alarm),
+              leading: const Icon(Icons.add),
 
               title: const Text(
                 "Criar Setor",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -153,11 +164,11 @@ class _CriarSetorState extends State<CriarSetor> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.access_alarm),
+              leading: const Icon(Icons.person),
 
               title: const Text(
                 "Novo Usuário",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -178,7 +189,7 @@ class _CriarSetorState extends State<CriarSetor> {
 
               title: const Text(
                 "Alertas",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {
@@ -194,7 +205,7 @@ class _CriarSetorState extends State<CriarSetor> {
 
               title: const Text(
                 "Histórico Geral (PDF)",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3)),
+                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
               ),
 
               onTap: () {

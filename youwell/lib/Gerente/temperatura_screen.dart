@@ -23,10 +23,17 @@ class TemperaturaScreen extends StatelessWidget {
     required this.nomeUsuario,
   });
 
+  String _formatarData(String data) {
+    final partes = data.split('-');
+    if (partes.length != 3) return data;
+
+    return '${partes[2].padLeft(2, '0')}/${partes[1].padLeft(2, '0')}/${partes[0]}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+      backgroundColor: const Color(0xFFF4F7F5),
 
       // MENU HAMBÚRGUER
       drawer: Drawer(
@@ -34,7 +41,7 @@ class TemperaturaScreen extends StatelessWidget {
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 161, 161, 161),
+                color: Color.fromARGB(255, 10, 85, 64),
               ),
 
               child: Text(
@@ -47,9 +54,9 @@ class TemperaturaScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             ListTile(
-              leading: const Icon(Icons.home),
+              leading: const Icon(Icons.home_outlined),
 
               title: const Text(
                 "Início",
@@ -173,14 +180,14 @@ class TemperaturaScreen extends StatelessWidget {
 
         title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
 
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 20),
+            padding: const EdgeInsets.only(right: 20),
 
             child: Row(
               children: [
                 Text(
-                  "Olá ADMIN",
+                  "Olá $nomeUsuario",
                   style: TextStyle(fontSize: 20, color: Colors.white),
                 ),
 
@@ -198,205 +205,192 @@ class TemperaturaScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Text(
-                'Temperatura',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-
-              SizedBox(height: 10),
-
-              Container(
-                width: double.infinity,
-                height: 300,
-                padding: const EdgeInsets.all(20),
-
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(157, 184, 184, 184),
-                  borderRadius: BorderRadius.circular(10),
+              Card(
+                elevation: 2,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-
-                child: LineChart(
-                  LineChartData(
-                    minY: 20,
-                    maxY: 32,
-
-                    titlesData: FlTitlesData(
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          interval: 1,
-
-                          getTitlesWidget: (value, meta) {
-                            int indice = value.toInt();
-
-                            if (indice >= 0 && indice < sensores.length) {
-                              return Text(sensores[indice]["hora"]);
-                            }
-
-                            return const Text("");
-                          },
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(
+                        child: Text(
+                          'Temperatura',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 10, 85, 64),
+                          ),
                         ),
                       ),
-
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 45,
-                          interval: 2,
+                      const SizedBox(height: 4),
+                      Center(
+                        child: Text(
+                          'Variação ao longo do dia',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                       ),
-
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                    ),
-
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: sensores.asMap().entries.map((item) {
-                          int indice = item.key;
-
-                          double temperatura = item.value["temperatura"]
-                              .toDouble();
-
-                          return FlSpot(indice.toDouble(), temperatura);
-                        }).toList(),
-
-                        isCurved: true,
-
-                        dotData: const FlDotData(show: true),
-
-                        belowBarData: BarAreaData(show: true),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 230,
+                        child: LineChart(
+                          LineChartData(
+                            minY: 20,
+                            maxY: 32,
+                            gridData: FlGridData(
+                              show: true,
+                              horizontalInterval: 2,
+                              verticalInterval: 2,
+                              getDrawingHorizontalLine: (value) => FlLine(
+                                color: Colors.grey.withValues(alpha: 0.18),
+                                strokeWidth: 1,
+                              ),
+                              getDrawingVerticalLine: (value) => FlLine(
+                                color: Colors.grey.withValues(alpha: 0.12),
+                                strokeWidth: 1,
+                              ),
+                            ),
+                            borderData: FlBorderData(show: false),
+                            titlesData: FlTitlesData(
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  getTitlesWidget: (value, meta) {
+                                    final indice = value.toInt();
+                                    if (indice >= 0 &&
+                                        indice < sensores.length) {
+                                      return Text(sensores[indice]["hora"]);
+                                    }
+                                    return const Text("");
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 45,
+                                  interval: 2,
+                                ),
+                              ),
+                              topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                            ),
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: sensores.asMap().entries.map((item) {
+                                  final indice = item.key;
+                                  final temperatura = item.value["temperatura"]
+                                      .toDouble();
+                                  return FlSpot(indice.toDouble(), temperatura);
+                                }).toList(),
+                                isCurved: true,
+                                color: Colors.deepOrange,
+                                barWidth: 3,
+                                dotData: const FlDotData(show: true),
+                                belowBarData: BarAreaData(
+                                  show: true,
+                                  color: Colors.deepOrange.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-
-              SizedBox(height: 20),
-
-              Text(
-                'Histórico detalhado',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-
-              SizedBox(height: 20),
-
-              // tabela
-              Container(
-                width: double.infinity,
-                height: 200,
-                padding: const EdgeInsets.all(20),
-
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(157, 184, 184, 184),
-                  borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 20),
+              Card(
+                elevation: 2,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Table(
-                      columnWidths: const {
-                        0: FlexColumnWidth(1.5),
-                        1: FlexColumnWidth(1),
-                        2: FlexColumnWidth(1),
-                      },
-
-                      children: [
-                        // CABEÇALHO
-                        const TableRow(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.all(5),
-                              child: Text(
-                                "Data",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-
-                            Padding(
-                              padding: EdgeInsets.all(5),
-                              child: Text(
-                                "Hora",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-
-                            Padding(
-                              padding: EdgeInsets.all(5),
-                              child: Text(
-                                "Valor",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(
+                        child: Text(
+                          'Histórico detalhado',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 10, 85, 64),
+                          ),
                         ),
-
-                        // DADOS
-                        ...sensores.map((dado) {
-                          return TableRow(
+                      ),
+                      const SizedBox(height: 16),
+                      Table(
+                        columnWidths: const {
+                          0: FlexColumnWidth(1.5),
+                          1: FlexColumnWidth(1),
+                          2: FlexColumnWidth(1),
+                        },
+                        children: [
+                          const TableRow(
                             children: [
                               Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: Text(dado["data"]),
+                                padding: EdgeInsets.all(5),
+                                child: Text(
+                                  "Data",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
-
                               Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: Text(dado["hora"]),
+                                padding: EdgeInsets.all(5),
+                                child: Text(
+                                  "Hora",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
-
                               Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: Text("${dado["temperatura"]} °C"),
+                                padding: EdgeInsets.all(5),
+                                child: Text(
+                                  "Valor",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ],
-                          );
-                        }),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 10),
-
-              NavigationBar(
-                onDestinationSelected: (index) {
-                  if (index == 1) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AlertaScreen()),
-                    );
-                  }
-
-                  if (index == 2) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HistoricoScreen(),
+                          ),
+                          ...sensores.map((dado) {
+                            return TableRow(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Text(_formatarData(dado["data"])),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Text(dado["hora"]),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Text("${dado["temperatura"]} °C"),
+                                ),
+                              ],
+                            );
+                          }),
+                        ],
                       ),
-                    );
-                  }
-                },
-                destinations: const [
-                  NavigationDestination(
-                    icon: Icon(Icons.window),
-                    label: 'Geral',
+                    ],
                   ),
-                  NavigationDestination(
-                    icon: Icon(Icons.notifications),
-                    label: 'Alertas',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.bar_chart),
-                    label: 'Relatório',
-                  ),
-                ],
+                ),
               ),
             ],
           ),

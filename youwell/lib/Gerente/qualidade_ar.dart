@@ -23,10 +23,17 @@ class ArScreen extends StatelessWidget {
     required this.nomeUsuario,
   });
 
+  String _formatarData(String data) {
+    final partes = data.split('-');
+    if (partes.length != 3) return data;
+
+    return '${partes[2].padLeft(2, '0')}/${partes[1].padLeft(2, '0')}/${partes[0]}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+      backgroundColor: const Color(0xFFF4F7F5),
 
       // MENU HAMBÚRGUER
       drawer: Drawer(
@@ -34,7 +41,7 @@ class ArScreen extends StatelessWidget {
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 161, 161, 161),
+                color: Color.fromARGB(255, 10, 85, 64),
               ),
 
               child: Text(
@@ -195,161 +202,212 @@ class ArScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Text(
-                'Qualidade do Ar',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-
-              SizedBox(height: 10),
-
-              Container(
-                width: double.infinity,
-                color: const Color.fromARGB(255, 184, 184, 184),
-                height: 300,
-                padding: const EdgeInsets.all(20),
-
-                child: LineChart(
-                  LineChartData(
-                    minY: 40,
-                    maxY: 80,
-
-                    titlesData: FlTitlesData(
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          interval: 1,
-
-                          getTitlesWidget: (value, meta) {
-                            int indice = value.toInt();
-
-                            if (indice >= 0 && indice < sensores.length) {
-                              return Text(sensores[indice]["hora"]);
-                            }
-
-                            return const Text("");
-                          },
+              Card(
+                elevation: 2,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(
+                        child: Text(
+                          'Qualidade do Ar',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 10, 85, 64),
+                          ),
                         ),
                       ),
-
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 45,
-                          interval: 5,
+                      const SizedBox(height: 4),
+                      Center(
+                        child: Text(
+                          'Variação ao longo do dia',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 230,
+                        child: LineChart(
+                          LineChartData(
+                            minY: 40,
+                            maxY: 80,
+                            gridData: FlGridData(
+                              show: true,
+                              horizontalInterval: 5,
+                              verticalInterval: 2,
+                              getDrawingHorizontalLine: (value) => FlLine(
+                                color: Colors.grey.withValues(alpha: 0.18),
+                                strokeWidth: 1,
+                              ),
+                              getDrawingVerticalLine: (value) => FlLine(
+                                color: Colors.grey.withValues(alpha: 0.12),
+                                strokeWidth: 1,
+                              ),
+                            ),
+                            borderData: FlBorderData(show: false),
+                            titlesData: FlTitlesData(
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
 
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
+                                  getTitlesWidget: (value, meta) {
+                                    int indice = value.toInt();
 
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                    ),
+                                    if (indice >= 0 &&
+                                        indice < sensores.length) {
+                                      return Text(sensores[indice]["hora"]);
+                                    }
 
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: sensores.asMap().entries.map((item) {
-                          int indice = item.key;
+                                    return const Text("");
+                                  },
+                                ),
+                              ),
 
-                          double ar = item.value["ar"].toDouble();
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 45,
+                                  interval: 5,
+                                ),
+                              ),
 
-                          return FlSpot(indice.toDouble(), ar);
-                        }).toList(),
+                              topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
 
-                        isCurved: true,
+                              rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                            ),
 
-                        dotData: const FlDotData(show: true),
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: sensores.asMap().entries.map((item) {
+                                  int indice = item.key;
 
-                        belowBarData: BarAreaData(show: true),
+                                  double ar = item.value["ar"].toDouble();
+
+                                  return FlSpot(indice.toDouble(), ar);
+                                }).toList(),
+
+                                isCurved: true,
+                                color: Colors.teal,
+                                barWidth: 3,
+                                dotData: const FlDotData(show: true),
+                                belowBarData: BarAreaData(
+                                  show: true,
+                                  color: Colors.teal.withValues(alpha: 0.12),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
 
-              SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-              Text(
-                'Histórico detalhado',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-
-              // tabela
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Table(
-                    columnWidths: const {
-                      0: FlexColumnWidth(1.5),
-                      1: FlexColumnWidth(1),
-                      2: FlexColumnWidth(1),
-                    },
-
+              Card(
+                elevation: 2,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // CABEÇALHO
-                      const TableRow(
+                      const Center(
+                        child: Text(
+                          'Histórico detalhado',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 10, 85, 64),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Table(
+                        columnWidths: const {
+                          0: FlexColumnWidth(1.5),
+                          1: FlexColumnWidth(1),
+                          2: FlexColumnWidth(1),
+                        },
+
                         children: [
-                          Padding(
-                            padding: EdgeInsets.all(5),
-                            child: Text(
-                              "Data",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                          // CABEÇALHO
+                          const TableRow(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(5),
+                                child: Text(
+                                  "Data",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+
+                              Padding(
+                                padding: EdgeInsets.all(5),
+                                child: Text(
+                                  "Hora",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+
+                              Padding(
+                                padding: EdgeInsets.all(5),
+                                child: Text(
+                                  "Valor",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
                           ),
 
-                          Padding(
-                            padding: EdgeInsets.all(5),
-                            child: Text(
-                              "Hora",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
+                          // DADOS
+                          ...sensores.map((dado) {
+                            return TableRow(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Text(_formatarData(dado["data"])),
+                                ),
 
-                          Padding(
-                            padding: EdgeInsets.all(5),
-                            child: Text(
-                              "Valor",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
+                                Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Text(dado["hora"]),
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Text("${dado["ar"]}"),
+                                ),
+                              ],
+                            );
+                          }),
                         ],
                       ),
-
-                      // DADOS
-                      ...sensores.map((dado) {
-                        return TableRow(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Text(dado["data"]),
-                            ),
-
-                            Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Text(dado["hora"]),
-                            ),
-
-                            Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Text("${dado["ar"]}"),
-                            ),
-                          ],
-                        );
-                      }),
                     ],
                   ),
-                ],
-              ),
-
-              SizedBox(height: 10),
-
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text("Voltar"),
+                ),
               ),
             ],
           ),
