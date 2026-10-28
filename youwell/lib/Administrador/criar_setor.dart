@@ -85,7 +85,7 @@ class _CriarSetorState extends State<CriarSetor> {
               ),
 
               child: Text(
-                widget.nomeAdmin,
+                'Olá, ${widget.nomeAdmin}',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,
@@ -110,8 +110,8 @@ class _CriarSetorState extends State<CriarSetor> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => AdminScreen(
-                      nomeSetor: widget.nomeAdmin,
-                      nomeAdmin: widget.nomeSetor,
+                      nomeSetor: widget.nomeSetor,
+                      nomeAdmin: widget.nomeAdmin,
                     ),
                   ),
                 );
@@ -134,8 +134,8 @@ class _CriarSetorState extends State<CriarSetor> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => SetorScreen(
-                      nomeSetor: widget.nomeAdmin,
-                      nomeUsuario: widget.nomeSetor,
+                      nomeSetor: widget.nomeSetor,
+                      nomeUsuario: widget.nomeAdmin,
                     ),
                   ),
                 );

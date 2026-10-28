@@ -43,7 +43,7 @@ class ArScreen extends StatelessWidget {
               ),
 
               child: Text(
-                nomeSetor,
+                'Olá, $nomeUsuario',
 
                 style: const TextStyle(
                   color: Colors.white,

@@ -54,7 +54,7 @@ class SetorScreen extends StatelessWidget {
               ),
 
               child: Text(
-                nomeSetor,
+                'Olá, $nomeUsuario',
 
                 style: TextStyle(
                   color: Colors.white,

@@ -97,7 +97,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
               decoration: const BoxDecoration(color: verde),
 
               child: Text(
-                widget.nomeAdmin,
+                'Olá, ${widget.nomeAdmin}',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,
@@ -122,8 +122,8 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => AdminScreen(
-                      nomeSetor: widget.nomeAdmin,
-                      nomeAdmin: widget.nomeSetor,
+                      nomeSetor: widget.nomeSetor,
+                      nomeAdmin: widget.nomeAdmin,
                     ),
                   ),
                 );
@@ -146,8 +146,8 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => SetorScreen(
-                      nomeSetor: widget.nomeAdmin,
-                      nomeUsuario: widget.nomeSetor,
+                      nomeSetor: widget.nomeSetor,
+                      nomeUsuario: widget.nomeAdmin,
                     ),
                   ),
                 );

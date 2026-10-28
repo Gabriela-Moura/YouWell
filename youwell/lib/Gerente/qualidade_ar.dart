@@ -45,7 +45,7 @@ class ArScreen extends StatelessWidget {
               ),
 
               child: Text(
-                nomeSetor,
+                'Olá, $nomeUsuario',
 
                 style: const TextStyle(
                   color: Colors.white,
@@ -123,8 +123,10 @@ class ArScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        ArScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN"),
+                    builder: (context) => ArScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
                   ),
                 );
               },
@@ -139,8 +141,10 @@ class ArScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: "ADMIN"),
+                    builder: (context) => RuidoScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                    ),
                   ),
                 );
               },
