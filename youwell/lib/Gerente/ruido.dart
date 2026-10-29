@@ -15,11 +15,13 @@ import 'package:youwell/gerente.dart';
 class RuidoScreen extends StatelessWidget {
   final String nomeSetor;
   final String nomeUsuario;
+  final int idSetor;
 
   const RuidoScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
+    required this.idSetor,
   });
 
   String _formatarData(String data) {
@@ -69,6 +71,7 @@ class RuidoScreen extends StatelessWidget {
                     builder: (context) => GerenteScreen(
                       setorGerente: nomeSetor,
                       nomeGerente: nomeUsuario,
+                      idSetor: idSetor,
                     ),
                   ),
                 );
@@ -89,6 +92,7 @@ class RuidoScreen extends StatelessWidget {
                     builder: (context) => SetorScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: idSetor,
                     ),
                   ),
                 );
@@ -107,6 +111,7 @@ class RuidoScreen extends StatelessWidget {
                     builder: (context) => TemperaturaScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: idSetor,
                     ),
                   ),
                 );
@@ -123,7 +128,7 @@ class RuidoScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        ArScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario),
+                        ArScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario, idSetor: idSetor),
                   ),
                 );
               },
@@ -139,7 +144,7 @@ class RuidoScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario),
+                        RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario, idSetor: idSetor),
                   ),
                 );
               },
@@ -185,7 +190,7 @@ class RuidoScreen extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  "Olá $nomeUsuario",
+                  "Olá, $nomeUsuario",
                   style: const TextStyle(
                     fontSize: 20,
                     color: Colors.white,

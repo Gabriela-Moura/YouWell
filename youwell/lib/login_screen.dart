@@ -1,220 +1,283 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:youwell/main.dart';
-import 'package:youwell/screens/home_screen.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/gerente.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
-void main() {
-  runApp(LoginScreen());
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
-
+class _LoginScreenState extends State<LoginScreen> {
   final logincontrollerForm = TextEditingController();
   final senhacontrollerForm = TextEditingController();
-
   final _formKey = GlobalKey<FormState>();
 
-  
-  void fazerLogin(BuildContext context) {
-    String nomeDigitado = logincontrollerForm.text.trim();
-    String senhaDigitada = senhacontrollerForm.text;
+  bool carregando = false;
+  bool ocultarSenha = true;
 
-    // Procura o usuário no banco simulado
-    final usuariosEncontrados = usuarios.where(
-      (usuario) =>
-          usuario["nome"] == nomeDigitado &&
-          usuario["senha"] == senhaDigitada,
-    );
+  static const String urlLogin =
+      'http://10.140.169.19/You-Well/controllers/login.php';
 
-    if (usuariosEncontrados.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Nome ou senha incorretos"),
-        ),
-      );
-      return;
-    }
+  Future<void> fazerLogin() async {
+    if (!_formKey.currentState!.validate()) return;
 
-    final usuario = usuariosEncontrados.first;
-    final papel = usuario["papel"];
+    setState(() => carregando = true);
 
-    if (papel == "gerente") {
-      // O usuário guarda o ID do setor
-      final idSetor = usuario["setor"];
+    try {
+      final resposta = await http
+          .post(
+            Uri.parse(urlLogin),
+            headers: {'Accept': 'application/json'},
+            body: {
+              'nome': logincontrollerForm.text.trim(),
+              'senha': senhacontrollerForm.text,
+            },
+          )
+          .timeout(const Duration(seconds: 15));
 
-      // Busca o setor correspondente pelo ID
-      final setorEncontrado = setores.where(
-        (setor) => setor["id"] == idSetor,
-      );
+      if (!mounted) return;
 
-      if (setorEncontrado.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("O setor deste gerente não foi encontrado."),
-          ),
+      if (resposta.statusCode != 200) {
+        mostrarMensagem('Erro no servidor (${resposta.statusCode}).');
+        return;
+      }
+
+      final Map<String, dynamic> dados =
+          jsonDecode(utf8.decode(resposta.bodyBytes)) as Map<String, dynamic>;
+
+      if (dados['success'] != true) {
+        mostrarMensagem(
+          dados['mensagem']?.toString() ?? 'Nome ou senha inválidos.',
         );
         return;
       }
 
-      final nomeSetor = setorEncontrado.first["nome"] as String;
+      final String nome = dados['nome'].toString();
+      final String papel = dados['papel'].toString().trim().toLowerCase();
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => GerenteScreen(
-            setorGerente: nomeSetor,
-            nomeGerente: usuario["nome"] as String,
+      final dynamic setorRecebido = dados['setor'];
+      debugPrint('Dados recebidos no login: $dados');
+      debugPrint('Papel do usuário: $papel');
+      debugPrint('Setor recebido: $setorRecebido');
+      final int? idSetor = setorRecebido == null
+          ? null
+          : int.tryParse(setorRecebido.toString());
+
+      if (papel == 'gerente') {
+        if (idSetor == null) {
+          mostrarMensagem('Este gerente não possui um setor cadastrado.');
+          return;
+        }
+
+        final String? nomeSetor = await buscarNomeSetor(idSetor);
+
+        if (!mounted) return;
+
+        if (nomeSetor == null) {
+          mostrarMensagem('Não foi possível encontrar o setor deste gerente.');
+          return;
+        }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                GerenteScreen(setorGerente: nomeSetor, nomeGerente: nome, idSetor: idSetor),
           ),
-        ),
-      ); 
-    } else if (papel == "admin") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AdminScreen(
-            nomeAdmin: usuario["nome"] as String,
-            nomeSetor: 'null',
+        );
+      } else if (papel == 'admin') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AdminScreen(nomeAdmin: nome, nomeSetor: 'null'),
           ),
-        ),
+        );
+      } else {
+        mostrarMensagem(
+          'Login válido, mas o papel "$papel" ainda não possui '
+          'uma tela configurada.',
+        );
+      }
+    } on FormatException {
+      if (!mounted) return;
+      mostrarMensagem(
+        'A resposta do servidor não está em formato JSON válido.',
       );
-    } else if (papel == "usuario") {
-      // Ainda precisamos definir qual tela esse papel deve abrir.
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Login válido, mas a tela deste usuário ainda não foi definida."),
-        ),
+    } catch (e) {
+      if (!mounted) return;
+      mostrarMensagem(
+        'Não foi possível acessar a API. '
+        'Verifique a rede e o servidor PHP.',
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Papel de usuário não reconhecido."),
-        ),
-      );
+      debugPrint('Erro no login: $e');
+    } finally {
+      if (mounted) {
+        setState(() => carregando = false);
+      }
     }
+  }
+
+  Future<String?> buscarNomeSetor(int idSetor) async {
+    try {
+      final resposta = await http
+          .post(
+            Uri.parse(
+              'http://10.140.169.19/You-Well/controllers/buscar_setor.php',
+            ),
+            headers: {'Accept': 'application/json'},
+            body: {'id_setor': idSetor.toString()},
+          )
+          .timeout(const Duration(seconds: 15));
+
+      debugPrint('Status buscar setor: ${resposta.statusCode}');
+      debugPrint('Resposta buscar setor: ${resposta.body}');
+
+      if (resposta.statusCode != 200) {
+        return null;
+      }
+
+      final Map<String, dynamic> dados =
+          jsonDecode(utf8.decode(resposta.bodyBytes)) as Map<String, dynamic>;
+
+      if (dados['success'] != true) {
+        debugPrint('Mensagem PHP: ${dados['mensagem']}');
+        return null;
+      }
+
+      final nomeSetor = dados['nome_setor']?.toString().trim();
+
+      if (nomeSetor == null || nomeSetor.isEmpty) {
+        return null;
+      }
+
+      return nomeSetor;
+    } catch (e) {
+      debugPrint('Erro ao consultar setor: $e');
+      return null;
+    }
+  }
+
+  void mostrarMensagem(String mensagem) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(mensagem)));
+  }
+
+  @override
+  void dispose() {
+    logincontrollerForm.dispose();
+    senhacontrollerForm.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 10, 85, 64),
-
       body: SafeArea(
         child: Center(
-          child: Container(
-            height: 450,
-            width: 350,
-
-            padding: const EdgeInsets.all(5),
-
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(163, 220, 220, 220),
-              borderRadius: BorderRadius.circular(15),
-            ),
-
-            child: Padding(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 350),
               padding: const EdgeInsets.all(20),
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-
-                children: [
-                  Form(
-                    key: _formKey,
-
-                    child: Column(
-                      children: [
-                        const Text(
-                          "Login:",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-
-                        TextFormField(
-                          controller: logincontrollerForm,
-
-                          decoration: const InputDecoration(
-                            labelText: "Nome",
-                            border: OutlineInputBorder(),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Campo obrigatório";
-                            }
-
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        const Text(
-                          "Senha:",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-
-                        TextFormField(
-                          controller: senhacontrollerForm,
-
-                          decoration: const InputDecoration(
-                            labelText: "Senha",
-                            border: OutlineInputBorder(),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Campo obrigatório";
-                            }
-
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              fazerLogin(context);
-                            }
-                          },
-
-                          child: const Text(
-                            "Entrar",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-
-                        const SizedBox(height: 30),
-
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MyApp(),
-                              ),
-                            );
-                          },
-
-                          child: const Text("Voltar"),
-                        ),
-                      ],
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(163, 220, 220, 220),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Login:',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20, color: Colors.white),
                     ),
-                  ),
-                ],
+                    TextFormField(
+                      controller: logincontrollerForm,
+                      decoration: const InputDecoration(
+                        labelText: 'Nome',
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Campo obrigatório';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Senha:',
+                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    ),
+                    TextFormField(
+                      controller: senhacontrollerForm,
+                      obscureText: ocultarSenha,
+                      decoration: InputDecoration(
+                        labelText: 'Senha',
+                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            ocultarSenha
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              ocultarSenha = !ocultarSenha;
+                            });
+                          },
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Campo obrigatório';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: carregando ? null : fazerLogin,
+                      child: carregando
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text(
+                              'Entrar',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: carregando
+                          ? null
+                          : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => MyApp()),
+                              );
+                            },
+                      child: const Text('Voltar'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

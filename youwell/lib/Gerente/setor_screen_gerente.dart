@@ -10,17 +10,75 @@ import 'package:youwell/Gerente/ruido.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/historico.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class SetorScreen extends StatelessWidget {
+class SetorScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
+  final int idSetor;
 
   const SetorScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
+    required this.idSetor,
   });
+
+  @override
+  State<SetorScreen> createState() => _SetorScreenState();
+}
+
+class _SetorScreenState extends State<SetorScreen> {
+  Map<String, dynamic>? medicoes;
+  bool carregando = true;
+  String? erro;
+
+  @override
+  void initState() {
+    super.initState();
+    buscarMedicoes();
+  }
+
+  Future<void> buscarMedicoes() async {
+    try {
+      final resposta = await http.post(
+        Uri.parse(
+          'http://10.140.169.19/You-Well/controllers/buscar_medicoes.php',
+        ),
+        body: {'id_setor': widget.idSetor.toString()},
+      );
+
+      if (resposta.statusCode != 200) {
+        throw Exception('Erro ao acessar o servidor PHP.');
+      }
+
+      final dados = jsonDecode(resposta.body);
+
+      if (dados['success'] != true) {
+        throw Exception(
+          dados['mensagem'] ?? 'Não foi possível buscar os dados.',
+        );
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        medicoes = Map<String, dynamic>.from(dados);
+        carregando = false;
+        erro = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        carregando = false;
+        erro = 'Não foi possível carregar as medições.';
+      });
+
+      debugPrint('Erro ao buscar medições: $e');
+    }
+  }
 
   Widget _legendaGrafico(String texto, Color cor) {
     return Row(
@@ -52,7 +110,7 @@ class SetorScreen extends StatelessWidget {
               ),
 
               child: Text(
-                'Olá, $nomeUsuario',
+                'Olá, ${widget.nomeUsuario}',
 
                 style: TextStyle(
                   color: Colors.white,
@@ -74,8 +132,9 @@ class SetorScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => GerenteScreen(
-                      setorGerente: nomeSetor,
-                      nomeGerente: nomeUsuario,
+                      setorGerente: widget.nomeSetor,
+                      nomeGerente: widget.nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -94,8 +153,9 @@ class SetorScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => SetorScreen(
-                      nomeSetor: nomeSetor,
-                      nomeUsuario: nomeUsuario,
+                      nomeSetor: widget.nomeSetor,
+                      nomeUsuario: widget.nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -114,8 +174,9 @@ class SetorScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemperaturaScreen(
-                      nomeSetor: nomeSetor,
-                      nomeUsuario: nomeUsuario,
+                      nomeSetor: widget.nomeSetor,
+                      nomeUsuario: widget.nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -135,8 +196,9 @@ class SetorScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ArScreen(
-                      nomeSetor: nomeSetor,
-                      nomeUsuario: nomeUsuario,
+                      nomeSetor: widget.nomeSetor,
+                      nomeUsuario: widget.nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -156,8 +218,9 @@ class SetorScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => RuidoScreen(
-                      nomeSetor: nomeSetor,
-                      nomeUsuario: nomeUsuario,
+                      nomeSetor: widget.nomeSetor,
+                      nomeUsuario: widget.nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -203,14 +266,14 @@ class SetorScreen extends StatelessWidget {
         backgroundColor: const Color.fromARGB(255, 10, 85, 64),
         iconTheme: const IconThemeData(color: Colors.white),
 
-        title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
+        title: Text(widget.nomeSetor, style: TextStyle(color: Colors.white)),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: Row(
               children: [
                 Text(
-                  "Olá $nomeUsuario",
+                  "Olá, ${widget.nomeUsuario}",
                   style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
@@ -232,8 +295,28 @@ class SetorScreen extends StatelessWidget {
                 width: double.infinity,
                 child: Row(
                   children: [
-                    infoCard("Temperatura", "25°C", Icons.thermostat),
-                    infoCard("Umidade", "70%", Icons.water_drop),
+                    infoCard(
+                      "Temperatura",
+                      carregando
+                          ? "Carregando..."
+                          : erro != null
+                          ? "--"
+                          : medicoes?['temperatura'] == null
+                          ? "Sem dados"
+                          : "${medicoes!['temperatura']['valor']} °C",
+                      Icons.thermostat,
+                    ),
+                    infoCard(
+                      "Qualidade do ar",
+                      carregando
+                          ? "Carregando..."
+                          : erro != null
+                          ? "--"
+                          : medicoes?['qualidade_ar'] == null
+                          ? "Sem dados"
+                          : "${medicoes!['qualidade_ar']['valor']}%",
+                      Icons.air,
+                    ),
                   ],
                 ),
               ),
@@ -245,8 +328,17 @@ class SetorScreen extends StatelessWidget {
                 width: double.infinity,
                 child: Row(
                   children: [
-                    infoCard("Qualidade do ar", "70%", Icons.air),
-                    infoCard("Ruído", "30dB", Icons.volume_up),
+                    infoCard(
+                      "Ruído",
+                      carregando
+                          ? "Carregando..."
+                          : erro != null
+                          ? "--"
+                          : medicoes?['ruido'] == null
+                          ? "Sem dados"
+                          : "${medicoes!['ruido']['valor']} dB",
+                      Icons.volume_up,
+                    ),
                   ],
                 ),
               ),
@@ -301,8 +393,12 @@ class SetorScreen extends StatelessWidget {
                             ),
                             borderData: FlBorderData(show: false),
                             titlesData: FlTitlesData(
-                              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
                               leftTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
@@ -310,7 +406,10 @@ class SetorScreen extends StatelessWidget {
                                   reservedSize: 36,
                                   getTitlesWidget: (value, meta) => Text(
                                     value.toInt().toString(),
-                                    style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 11,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -321,28 +420,52 @@ class SetorScreen extends StatelessWidget {
                                   reservedSize: 30,
                                   getTitlesWidget: (value, meta) => Text(
                                     '${value.toInt().toString().padLeft(2, '0')}:00',
-                                    style: TextStyle(color: Colors.grey[600], fontSize: 10),
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 10,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                             lineBarsData: [
                               LineChartBarData(
-                                spots: const [FlSpot(0, 25), FlSpot(4, 24), FlSpot(8, 26), FlSpot(12, 28), FlSpot(16, 27), FlSpot(20, 25)],
+                                spots: const [
+                                  FlSpot(0, 25),
+                                  FlSpot(4, 24),
+                                  FlSpot(8, 26),
+                                  FlSpot(12, 28),
+                                  FlSpot(16, 27),
+                                  FlSpot(20, 25),
+                                ],
                                 isCurved: true,
                                 color: Colors.deepOrange,
                                 barWidth: 3,
                                 dotData: const FlDotData(show: true),
                               ),
                               LineChartBarData(
-                                spots: const [FlSpot(0, 45), FlSpot(4, 40), FlSpot(8, 65), FlSpot(12, 70), FlSpot(16, 60), FlSpot(20, 50)],
+                                spots: const [
+                                  FlSpot(0, 45),
+                                  FlSpot(4, 40),
+                                  FlSpot(8, 65),
+                                  FlSpot(12, 70),
+                                  FlSpot(16, 60),
+                                  FlSpot(20, 50),
+                                ],
                                 isCurved: true,
                                 color: Colors.blue,
                                 barWidth: 3,
                                 dotData: const FlDotData(show: true),
                               ),
                               LineChartBarData(
-                                spots: const [FlSpot(0, 80), FlSpot(4, 82), FlSpot(8, 75), FlSpot(12, 78), FlSpot(16, 80), FlSpot(20, 82)],
+                                spots: const [
+                                  FlSpot(0, 80),
+                                  FlSpot(4, 82),
+                                  FlSpot(8, 75),
+                                  FlSpot(12, 78),
+                                  FlSpot(16, 80),
+                                  FlSpot(20, 82),
+                                ],
                                 isCurved: true,
                                 color: Colors.teal,
                                 barWidth: 3,

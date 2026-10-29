@@ -7,8 +7,14 @@ import 'package:youwell/simulacaoBD/dados_sensores.dart';
 class GerenteScreen extends StatefulWidget {
   final String setorGerente;
   final String nomeGerente;
+  final int idSetor;
 
-  const GerenteScreen({ super.key, required this.setorGerente, required this.nomeGerente});
+  const GerenteScreen({
+    super.key,
+    required this.setorGerente,
+    required this.nomeGerente,
+    required this.idSetor,
+  });
 
   @override
   State<GerenteScreen> createState() => _GerenteScreenState();
@@ -23,9 +29,7 @@ class _GerenteScreenState extends State<GerenteScreen> {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 10, 85, 64),
 
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
 
         actions: [
           Padding(
@@ -34,18 +38,13 @@ class _GerenteScreenState extends State<GerenteScreen> {
             child: Row(
               children: [
                 Text(
-                "Olá ${widget.nomeGerente}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
+                  "Olá ${widget.nomeGerente}",
+                  style: const TextStyle(color: Colors.white, fontSize: 20),
                 ),
-              ),
 
                 const SizedBox(width: 10),
 
-                const CircleAvatar(
-                  child: Icon(Icons.person),
-                ),
+                const CircleAvatar(child: Icon(Icons.person)),
               ],
             ),
           ),
@@ -68,6 +67,7 @@ class _GerenteScreenState extends State<GerenteScreen> {
                             builder: (context) => SetorScreen(
                               nomeSetor: widget.setorGerente,
                               nomeUsuario: widget.nomeGerente,
+                              idSetor: widget.idSetor,
                             ),
                           ),
                         );

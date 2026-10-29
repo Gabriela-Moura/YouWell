@@ -16,11 +16,13 @@ import 'package:youwell/gerente.dart';
 class ArScreen extends StatelessWidget {
   final String nomeSetor;
   final String nomeUsuario;
+  final int idSetor;
 
   const ArScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
+    required this.idSetor,
   });
 
   String _formatarData(String data) {
@@ -70,6 +72,7 @@ class ArScreen extends StatelessWidget {
                     builder: (context) => GerenteScreen(
                       setorGerente: nomeSetor,
                       nomeGerente: nomeUsuario,
+                      idSetor: idSetor
                     ),
                   ),
                 );
@@ -90,6 +93,7 @@ class ArScreen extends StatelessWidget {
                     builder: (context) => SetorScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: idSetor
                     ),
                   ),
                 );
@@ -108,6 +112,7 @@ class ArScreen extends StatelessWidget {
                     builder: (context) => TemperaturaScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: idSetor
                     ),
                   ),
                 );
@@ -126,6 +131,7 @@ class ArScreen extends StatelessWidget {
                     builder: (context) => ArScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: idSetor,
                     ),
                   ),
                 );
@@ -190,7 +196,7 @@ class ArScreen extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  "Olá $nomeUsuario",
+                  "Olá, $nomeUsuario",
                   style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
