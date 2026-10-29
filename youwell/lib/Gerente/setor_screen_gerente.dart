@@ -34,10 +34,15 @@ class _SetorScreenState extends State<SetorScreen> {
   bool carregando = true;
   String? erro;
 
+  Map<String, dynamic>? historico;
+  bool carregandoHistorico = true;
+  String? erroHistorico;
+
   @override
   void initState() {
     super.initState();
     buscarMedicoes();
+    buscarHistorico();
   }
 
   Future<void> buscarMedicoes() async {
@@ -80,6 +85,90 @@ class _SetorScreenState extends State<SetorScreen> {
     }
   }
 
+  Future<void> buscarHistorico() async {
+    try {
+      final resposta = await http.post(
+        Uri.parse(
+          'http://10.140.169.19/You-Well/controllers/buscar_historico_medicoes.php',
+        ),
+        body: {'id_setor': widget.idSetor.toString()},
+      );
+
+      if (resposta.statusCode != 200) {
+        throw Exception('Erro ao acessar o histórico.');
+      }
+
+      final dados = jsonDecode(resposta.body);
+
+      if (dados['success'] != true) {
+        throw Exception(
+          dados['mensagem'] ?? 'Não foi possível buscar o histórico.',
+        );
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        historico = Map<String, dynamic>.from(dados);
+        carregandoHistorico = false;
+        erroHistorico = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        carregandoHistorico = false;
+        erroHistorico = 'Não foi possível carregar o gráfico.';
+      });
+
+      debugPrint('Erro ao buscar histórico: $e');
+    }
+  }
+
+  List<dynamic> _listaHistorico(String tipo) {
+    final dados = historico?[tipo];
+
+    if (dados is List) {
+      return dados;
+    }
+
+    return [];
+  }
+
+  List<FlSpot> _criarSpots(String tipo) {
+    final lista = _listaHistorico(tipo);
+
+    return List.generate(lista.length, (index) {
+      final valor = double.tryParse(lista[index]['valor'].toString()) ?? 0;
+
+      return FlSpot(index.toDouble(), valor);
+    });
+  }
+
+  String _horarioNoIndice(double indice) {
+    final temperatura = _listaHistorico('temperatura');
+    final ruido = _listaHistorico('ruido');
+    final qualidadeAr = _listaHistorico('qualidade_ar');
+
+    final listas = [temperatura, ruido, qualidadeAr];
+
+    // Procura o horário disponível para este ponto.
+    for (final lista in listas) {
+      final i = indice.toInt();
+
+      if (indice == i.toDouble() && i >= 0 && i < lista.length) {
+        final dataHora = DateTime.tryParse(lista[i]['data_hora'].toString());
+
+        if (dataHora != null) {
+          return '${dataHora.hour.toString().padLeft(2, '0')}:'
+              '${dataHora.minute.toString().padLeft(2, '0')}';
+        }
+      }
+    }
+
+    return '';
+  }
+
   Widget _legendaGrafico(String texto, Color cor) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -97,6 +186,16 @@ class _SetorScreenState extends State<SetorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final quantidadePontos = [
+      _listaHistorico('temperatura').length,
+      _listaHistorico('ruido').length,
+      _listaHistorico('qualidade_ar').length,
+    ].reduce((a, b) => a > b ? a : b);
+
+    final maxXGrafico = quantidadePontos > 1
+        ? (quantidadePontos - 1).toDouble()
+        : 1.0;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F5),
 
@@ -377,7 +476,7 @@ class _SetorScreenState extends State<SetorScreen> {
                             minY: 0,
                             maxY: 100,
                             minX: 0,
-                            maxX: 20,
+                            maxX: maxXGrafico,
                             gridData: FlGridData(
                               show: true,
                               horizontalInterval: 25,
@@ -418,54 +517,44 @@ class _SetorScreenState extends State<SetorScreen> {
                                   showTitles: true,
                                   interval: 4,
                                   reservedSize: 30,
-                                  getTitlesWidget: (value, meta) => Text(
-                                    '${value.toInt().toString().padLeft(2, '0')}:00',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 10,
-                                    ),
-                                  ),
+                                  getTitlesWidget: (value, meta) {
+                                    final horario = _horarioNoIndice(value);
+
+                                    if (horario.isEmpty) {
+                                      return const SizedBox.shrink();
+                                    }
+
+                                    return SideTitleWidget(
+                                      meta: meta,
+                                      child: Text(
+                                        horario,
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
                             lineBarsData: [
                               LineChartBarData(
-                                spots: const [
-                                  FlSpot(0, 25),
-                                  FlSpot(4, 24),
-                                  FlSpot(8, 26),
-                                  FlSpot(12, 28),
-                                  FlSpot(16, 27),
-                                  FlSpot(20, 25),
-                                ],
+                                spots: _criarSpots('temperatura'),
                                 isCurved: true,
                                 color: Colors.deepOrange,
                                 barWidth: 3,
                                 dotData: const FlDotData(show: true),
                               ),
                               LineChartBarData(
-                                spots: const [
-                                  FlSpot(0, 45),
-                                  FlSpot(4, 40),
-                                  FlSpot(8, 65),
-                                  FlSpot(12, 70),
-                                  FlSpot(16, 60),
-                                  FlSpot(20, 50),
-                                ],
+                                spots: _criarSpots('ruido'),
                                 isCurved: true,
                                 color: Colors.blue,
                                 barWidth: 3,
                                 dotData: const FlDotData(show: true),
                               ),
                               LineChartBarData(
-                                spots: const [
-                                  FlSpot(0, 80),
-                                  FlSpot(4, 82),
-                                  FlSpot(8, 75),
-                                  FlSpot(12, 78),
-                                  FlSpot(16, 80),
-                                  FlSpot(20, 82),
-                                ],
+                                spots: _criarSpots('qualidade_ar'),
                                 isCurved: true,
                                 color: Colors.teal,
                                 barWidth: 3,
