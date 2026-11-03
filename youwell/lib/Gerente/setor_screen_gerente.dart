@@ -49,7 +49,7 @@ class _SetorScreenState extends State<SetorScreen> {
     try {
       final resposta = await http.post(
         Uri.parse(
-          'http://10.140.169.19/You-Well/controllers/buscar_medicoes.php',
+          'http://10.140.169.20/You-Well/controllers/buscar_medicoes.php',
         ),
         body: {'id_setor': widget.idSetor.toString()},
       );
@@ -89,7 +89,7 @@ class _SetorScreenState extends State<SetorScreen> {
     try {
       final resposta = await http.post(
         Uri.parse(
-          'http://10.140.169.19/You-Well/controllers/buscar_historico_medicoes.php',
+          'http://10.140.169.20/You-Well/controllers/buscar_historico_medicoes.php',
         ),
         body: {'id_setor': widget.idSetor.toString()},
       );
@@ -397,7 +397,7 @@ class _SetorScreenState extends State<SetorScreen> {
                     infoCard(
                       "Temperatura",
                       carregando
-                          ? "Carregando..."
+                          ? "Carregando"
                           : erro != null
                           ? "--"
                           : medicoes?['temperatura'] == null
@@ -408,7 +408,7 @@ class _SetorScreenState extends State<SetorScreen> {
                     infoCard(
                       "Qualidade do ar",
                       carregando
-                          ? "Carregando..."
+                          ? "Carregando"
                           : erro != null
                           ? "--"
                           : medicoes?['qualidade_ar'] == null
@@ -430,7 +430,7 @@ class _SetorScreenState extends State<SetorScreen> {
                     infoCard(
                       "Ruído",
                       carregando
-                          ? "Carregando..."
+                          ? "Carregando"
                           : erro != null
                           ? "--"
                           : medicoes?['ruido'] == null

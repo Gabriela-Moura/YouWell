@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool ocultarSenha = true;
 
   static const String urlLogin =
-      'http://10.140.169.19/You-Well/controllers/login.php';
+      'http://10.140.169.20/You-Well/controllers/login.php';
 
   Future<void> fazerLogin() async {
     if (!_formKey.currentState!.validate()) return;
@@ -129,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final resposta = await http
           .post(
             Uri.parse(
-              'http://10.140.169.19/You-Well/controllers/buscar_setor.php',
+              'http://10.140.169.20/You-Well/controllers/buscar_setor.php',
             ),
             headers: {'Accept': 'application/json'},
             body: {'id_setor': idSetor.toString()},

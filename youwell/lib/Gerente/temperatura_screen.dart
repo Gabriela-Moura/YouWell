@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/main.dart';
-import 'package:youwell/Gerente/temperatura_screen.dart';
-import 'package:youwell/screens/home_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:youwell/Gerente/qualidade_ar.dart';
 import 'package:youwell/Gerente/ruido.dart';
@@ -10,10 +8,12 @@ import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:youwell/Gerente/setor_screen_gerente.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
 import 'package:youwell/gerente.dart';
 
-class TemperaturaScreen extends StatelessWidget {
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+class TemperaturaScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
   final int idSetor;
@@ -25,13 +25,79 @@ class TemperaturaScreen extends StatelessWidget {
     required this.idSetor,
   });
 
+  @override
+  State<TemperaturaScreen> createState() => _TemperaturaScreenState();
+}
+
+class _TemperaturaScreenState extends State<TemperaturaScreen> {
+  List<Map<String, dynamic>> temperaturas = [];
+
+  bool carregando = true;
+  String? erro;
+
+  String get nomeSetor => widget.nomeSetor;
+  String get nomeUsuario => widget.nomeUsuario;
+  int get idSetor => widget.idSetor;
+
+  @override
+  void initState() {
+    super.initState();
+    buscarTemperaturas();
+  }
+
+  Future<void> buscarTemperaturas() async {
+    try {
+      final resposta = await http.post(
+        Uri.parse(
+          'http://10.140.169.20/You-Well/controllers/buscar_historico_medicoes.php',
+        ),
+        body: {
+          'id_setor': idSetor.toString(),
+        },
+      );
+
+      if (resposta.statusCode != 200) {
+        throw Exception('Erro ao acessar o servidor PHP.');
+      }
+
+      final dados = jsonDecode(resposta.body);
+
+      if (dados['success'] != true) {
+        throw Exception(
+          dados['mensagem'] ?? 'Não foi possível buscar as temperaturas.',
+        );
+      }
+
+      final List lista = dados['temperatura'] ?? [];
+
+      if (!mounted) return;
+
+      setState(() {
+        temperaturas = lista.map((item) {
+          return Map<String, dynamic>.from(item);
+        }).toList();
+
+        carregando = false;
+        erro = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        carregando = false;
+        erro = 'Não foi possível carregar as temperaturas.';
+      });
+
+      debugPrint('Erro ao buscar temperaturas: $e');
+    }
+  }
+
   String _formatarData(String data) {
     final partes = data.split('-');
     if (partes.length != 3) return data;
 
     return '${partes[2].padLeft(2, '0')}/${partes[1].padLeft(2, '0')}/${partes[0]}';
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -205,7 +271,27 @@ class TemperaturaScreen extends StatelessWidget {
         ],
       ),
 
-      body: SingleChildScrollView(
+      body: carregando
+          ? const Center(child: CircularProgressIndicator())
+          : erro != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(erro!),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: buscarTemperaturas,
+                        child: const Text('Tentar novamente'),
+                      ),
+                    ],
+                  ),
+                )
+              : temperaturas.isEmpty
+                  ? const Center(
+                      child: Text('Nenhuma medição de temperatura encontrada.'),
+                    )
+                  : SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -268,9 +354,15 @@ class TemperaturaScreen extends StatelessWidget {
                                   interval: 1,
                                   getTitlesWidget: (value, meta) {
                                     final indice = value.toInt();
-                                    if (indice >= 0 &&
-                                        indice < sensores.length) {
-                                      return Text(sensores[indice]["hora"]);
+                                    if (indice >= 0 && indice < temperaturas.length) {
+                                      final dataHora = DateTime.parse(
+                                        temperaturas[indice]['data_hora'].toString(),
+                                      );
+                                      return Text(
+                                        '${dataHora.hour.toString().padLeft(2, '0')}:'
+                                        '${dataHora.minute.toString().padLeft(2, '0')}',
+                                        style: const TextStyle(fontSize: 10),
+                                      );
                                     }
                                     return const Text("");
                                   },
@@ -292,10 +384,11 @@ class TemperaturaScreen extends StatelessWidget {
                             ),
                             lineBarsData: [
                               LineChartBarData(
-                                spots: sensores.asMap().entries.map((item) {
+                                spots: temperaturas.asMap().entries.map((item) {
                                   final indice = item.key;
-                                  final temperatura = item.value["temperatura"]
-                                      .toDouble();
+                                  final temperatura = double.parse(
+                                    item.value['valor'].toString(),
+                                  );
                                   return FlSpot(indice.toDouble(), temperatura);
                                 }).toList(),
                                 isCurved: true,
@@ -373,20 +466,30 @@ class TemperaturaScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          ...sensores.map((dado) {
+                          ...temperaturas.map((dado) {
+                            final dataHora = DateTime.parse(
+                              dado['data_hora'].toString(),
+                            );
+
                             return TableRow(
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.all(5),
-                                  child: Text(_formatarData(dado["data"])),
+                                  child: Text(
+                                    _formatarData(
+                                      '${dataHora.year}-${dataHora.month.toString().padLeft(2, '0')}-${dataHora.day.toString().padLeft(2, '0')}',
+                                    ),
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(5),
-                                  child: Text(dado["hora"]),
+                                  child: Text(
+                                    '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}',
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(5),
-                                  child: Text("${dado["temperatura"]} °C"),
+                                  child: Text('${dado['valor']} °C'),
                                 ),
                               ],
                             );
