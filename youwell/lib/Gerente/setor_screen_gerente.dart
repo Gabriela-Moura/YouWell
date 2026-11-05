@@ -11,6 +11,7 @@ import 'package:youwell/alertas.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/historico.dart';
 import 'dart:convert';
+import 'package:youwell/services/api_service.dart';
 import 'package:http/http.dart' as http;
 
 class SetorScreen extends StatefulWidget {
@@ -49,7 +50,7 @@ class _SetorScreenState extends State<SetorScreen> {
     try {
       final resposta = await http.post(
         Uri.parse(
-          'http://10.140.169.20/You-Well/controllers/buscar_medicoes.php',
+          'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
         ),
         body: {'id_setor': widget.idSetor.toString()},
       );
@@ -89,7 +90,7 @@ class _SetorScreenState extends State<SetorScreen> {
     try {
       final resposta = await http.post(
         Uri.parse(
-          'http://10.140.169.20/You-Well/controllers/buscar_historico_medicoes.php',
+          'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
         ),
         body: {'id_setor': widget.idSetor.toString()},
       );

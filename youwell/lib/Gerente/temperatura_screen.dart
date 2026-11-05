@@ -9,6 +9,7 @@ import 'package:youwell/historico.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:youwell/Gerente/setor_screen_gerente.dart';
 import 'package:youwell/gerente.dart';
+import 'package:youwell/services/api_service.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -49,7 +50,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
     try {
       final resposta = await http.post(
         Uri.parse(
-          'http://10.140.169.20/You-Well/controllers/buscar_historico_medicoes.php',
+          'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
         ),
         body: {
           'id_setor': idSetor.toString(),

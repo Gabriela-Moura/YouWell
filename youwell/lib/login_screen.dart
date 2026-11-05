@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:youwell/main.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/gerente.dart';
+import 'package:youwell/services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,8 +23,25 @@ class _LoginScreenState extends State<LoginScreen> {
   bool carregando = false;
   bool ocultarSenha = true;
 
+  @override
+  void initState() {
+    super.initState();
+
+    testarAPI();
+  }
+
+  Future<void> testarAPI() async {
+    try {
+      final resultado = await ApiService.testarConexao();
+
+      debugPrint('RESULTADO DA API: $resultado');
+    } catch (e) {
+      debugPrint('ERRO AO CONECTAR COM A API: $e');
+    }
+  }
+
   static const String urlLogin =
-      'http://10.140.169.20/You-Well/controllers/login.php';
+      'https://devsbee.com.br/You-Well/controllers/login.php';
 
   Future<void> fazerLogin() async {
     if (!_formKey.currentState!.validate()) return;
@@ -41,6 +59,9 @@ class _LoginScreenState extends State<LoginScreen> {
             },
           )
           .timeout(const Duration(seconds: 15));
+
+      debugPrint('STATUS LOGIN: ${resposta.statusCode}');
+      debugPrint('RESPOSTA LOGIN: ${resposta.body}');
 
       if (!mounted) return;
 
@@ -88,8 +109,11 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                GerenteScreen(setorGerente: nomeSetor, nomeGerente: nome, idSetor: idSetor),
+            builder: (_) => GerenteScreen(
+              setorGerente: nomeSetor,
+              nomeGerente: nome,
+              idSetor: idSetor,
+            ),
           ),
         );
       } else if (papel == 'admin') {
@@ -129,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final resposta = await http
           .post(
             Uri.parse(
-              'http://10.140.169.20/You-Well/controllers/buscar_setor.php',
+              'https://devsbee.com.br/You-Well/controllers/buscar_setor.php',
             ),
             headers: {'Accept': 'application/json'},
             body: {'id_setor': idSetor.toString()},

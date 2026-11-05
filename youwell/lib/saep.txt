@@ -3,6 +3,4 @@ Sistema deve emitir alertas
 Versão workbench
 windows versão 11
 PHP versão 8
-faezr uma tabela
-
-oi
+fazer uma tabela
