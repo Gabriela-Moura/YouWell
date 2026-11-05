@@ -338,7 +338,12 @@ class _SetorScreenState extends State<SetorScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => AlertaScreen(
+                      idSetor: widget.idSetor,
+                      nomeSetor: widget.nomeSetor,
+                    ),
+                  ),
                 );
               },
             ),

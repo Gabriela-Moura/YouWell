@@ -46,38 +46,133 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
     buscarTemperaturas();
   }
 
+  // RETORNAR AS 12 MEDIÇÕES MAIS RECENTES.
+  List<Map<String, dynamic>> get ultimasTemperaturas {
+    final lista = List<Map<String, dynamic>>.from(temperaturas);
+
+    lista.sort((a, b) {
+      final dataA = DateTime.parse(a['data_hora'].toString());
+      final dataB = DateTime.parse(b['data_hora'].toString());
+
+      return dataA.compareTo(dataB);
+    });
+
+    if (lista.length > 12) {
+      return lista.sublist(lista.length - 12);
+    }
+
+    return lista;
+  }
+
+  // MAIOR TEMPERATURA REGISTRADA.
+  double get maiorTemperatura {
+    final valores = ultimasTemperaturas
+        .map((item) => double.parse(item['valor'].toString()))
+        .toList();
+
+    if (valores.isEmpty) return 30;
+
+    return valores.reduce((a, b) => a > b ? a : b);
+  }
+
+  // MENOR TEMPERATURA REGISTRADA.
+  double get menorTemperatura {
+    final valores = ultimasTemperaturas
+        .map((item) => double.parse(item['valor'].toString()))
+        .toList();
+
+    if (valores.isEmpty) return 0;
+
+    return valores.reduce((a, b) => a < b ? a : b);
+  }
+
+  // INTERVALO AUTOMÁTICO DO EIXO Y.
+  double get intervaloTemperatura {
+    final diferenca = maiorTemperatura - menorTemperatura;
+
+    if (diferenca == 0) {
+      return maiorTemperatura.abs() * 0.2 > 0
+          ? maiorTemperatura.abs() * 0.2
+          : 1;
+    }
+
+    return diferenca / 5;
+  }
+
+  List<Map<String, dynamic>> converterTemperaturas(dynamic resposta) {
+    // Caso o PHP retorne uma lista diretamente.
+    if (resposta is List) {
+      return resposta
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    }
+
+    // Caso o PHP retorne um objeto.
+    if (resposta is Map) {
+      final conteudo =
+          resposta['medicoes'] ??
+          resposta['dados'] ??
+          resposta['leituras'] ??
+          resposta['temperaturas'];
+
+      if (conteudo is List) {
+        return conteudo
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+
+      // Caso tenha vindo apenas uma medição.
+      if (resposta.containsKey('valor') && resposta.containsKey('data_hora')) {
+        return [Map<String, dynamic>.from(resposta)];
+      }
+
+      // Caso as medições estejam dentro de outro objeto.
+      if (resposta.values.isNotEmpty &&
+          resposta.values.every((item) => item is Map)) {
+        return resposta.values
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+    }
+
+    return [];
+  }
+
   Future<void> buscarTemperaturas() async {
     try {
       final resposta = await http.post(
         Uri.parse(
-          'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
+          'https://devsbee.com.br/You-Well/controllers/buscar_historico_medicoes.php',
         ),
-        body: {
-          'id_setor': idSetor.toString(),
-        },
+        body: {'id_setor': idSetor.toString()},
       );
+
+      debugPrint('STATUS TEMPERATURA: ${resposta.statusCode}');
+      debugPrint('RESPOSTA TEMPERATURA: ${resposta.body}');
 
       if (resposta.statusCode != 200) {
         throw Exception('Erro ao acessar o servidor PHP.');
       }
 
-      final dados = jsonDecode(resposta.body);
+      final dados = jsonDecode(utf8.decode(resposta.bodyBytes));
 
-      if (dados['success'] != true) {
+      if (dados is! Map || dados['success'] != true) {
         throw Exception(
-          dados['mensagem'] ?? 'Não foi possível buscar as temperaturas.',
+          dados is Map
+              ? dados['mensagem'] ?? 'Erro ao buscar temperaturas.'
+              : 'Resposta inválida do servidor.',
         );
       }
 
-      final List lista = dados['temperatura'] ?? [];
+      final lista = converterTemperaturas(dados['temperatura']);
 
       if (!mounted) return;
 
       setState(() {
-        temperaturas = lista.map((item) {
-          return Map<String, dynamic>.from(item);
-        }).toList();
-
+        temperaturas = lista;
         carregando = false;
         erro = null;
       });
@@ -99,6 +194,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
 
     return '${partes[2].padLeft(2, '0')}/${partes[1].padLeft(2, '0')}/${partes[0]}';
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,8 +291,11 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        ArScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario, idSetor: idSetor),
+                    builder: (context) => ArScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                      idSetor: idSetor,
+                    ),
                   ),
                 );
               },
@@ -211,8 +310,11 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        RuidoScreen(nomeSetor: nomeSetor, nomeUsuario: nomeUsuario, idSetor: idSetor),
+                    builder: (context) => RuidoScreen(
+                      nomeSetor: nomeSetor,
+                      nomeUsuario: nomeUsuario,
+                      idSetor: idSetor,
+                    ),
                   ),
                 );
               },
@@ -226,7 +328,10 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen()),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AlertaScreen(idSetor: idSetor, nomeSetor: nomeSetor),
+                  ),
                 );
               },
             ),
@@ -275,236 +380,286 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
       body: carregando
           ? const Center(child: CircularProgressIndicator())
           : erro != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(erro!),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: buscarTemperaturas,
-                        child: const Text('Tentar novamente'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(erro!),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: buscarTemperaturas,
+                    child: const Text('Tentar novamente'),
                   ),
-                )
-              : temperaturas.isEmpty
-                  ? const Center(
-                      child: Text('Nenhuma medição de temperatura encontrada.'),
-                    )
-                  : SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Card(
-                elevation: 2,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Center(
-                        child: Text(
-                          'Temperatura',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 10, 85, 64),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Center(
-                        child: Text(
-                          'Variação ao longo do dia',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        height: 230,
-                        child: LineChart(
-                          LineChartData(
-                            minY: 20,
-                            maxY: 32,
-                            gridData: FlGridData(
-                              show: true,
-                              horizontalInterval: 2,
-                              verticalInterval: 2,
-                              getDrawingHorizontalLine: (value) => FlLine(
-                                color: Colors.grey.withValues(alpha: 0.18),
-                                strokeWidth: 1,
-                              ),
-                              getDrawingVerticalLine: (value) => FlLine(
-                                color: Colors.grey.withValues(alpha: 0.12),
-                                strokeWidth: 1,
-                              ),
-                            ),
-                            borderData: FlBorderData(show: false),
-                            titlesData: FlTitlesData(
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  interval: 1,
-                                  getTitlesWidget: (value, meta) {
-                                    final indice = value.toInt();
-                                    if (indice >= 0 && indice < temperaturas.length) {
-                                      final dataHora = DateTime.parse(
-                                        temperaturas[indice]['data_hora'].toString(),
-                                      );
-                                      return Text(
-                                        '${dataHora.hour.toString().padLeft(2, '0')}:'
-                                        '${dataHora.minute.toString().padLeft(2, '0')}',
-                                        style: const TextStyle(fontSize: 10),
-                                      );
-                                    }
-                                    return const Text("");
-                                  },
-                                ),
-                              ),
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 45,
-                                  interval: 2,
-                                ),
-                              ),
-                              topTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              rightTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                            ),
-                            lineBarsData: [
-                              LineChartBarData(
-                                spots: temperaturas.asMap().entries.map((item) {
-                                  final indice = item.key;
-                                  final temperatura = double.parse(
-                                    item.value['valor'].toString(),
-                                  );
-                                  return FlSpot(indice.toDouble(), temperatura);
-                                }).toList(),
-                                isCurved: true,
-                                color: Colors.deepOrange,
-                                barWidth: 3,
-                                dotData: const FlDotData(show: true),
-                                belowBarData: BarAreaData(
-                                  show: true,
-                                  color: Colors.deepOrange.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
               ),
-              const SizedBox(height: 20),
-              Card(
-                elevation: 2,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Center(
-                        child: Text(
-                          'Histórico detalhado',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 10, 85, 64),
-                          ),
-                        ),
+            )
+          : temperaturas.isEmpty
+          ? const Center(
+              child: Text('Nenhuma medição de temperatura encontrada.'),
+            )
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Card(
+                      elevation: 2,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      const SizedBox(height: 16),
-                      Table(
-                        columnWidths: const {
-                          0: FlexColumnWidth(1.5),
-                          1: FlexColumnWidth(1),
-                          2: FlexColumnWidth(1),
-                        },
-                        children: [
-                          const TableRow(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.all(5),
-                                child: Text(
-                                  "Data",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Center(
+                              child: Text(
+                                'Temperatura',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 10, 85, 64),
                                 ),
                               ),
-                              Padding(
-                                padding: EdgeInsets.all(5),
-                                child: Text(
-                                  "Hora",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Center(
+                              child: Text(
+                                'Variação ao longo do dia',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
                                 ),
                               ),
-                              Padding(
-                                padding: EdgeInsets.all(5),
-                                child: Text(
-                                  "Valor",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ],
-                          ),
-                          ...temperaturas.map((dado) {
-                            final dataHora = DateTime.parse(
-                              dado['data_hora'].toString(),
-                            );
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              height: 230,
+                              child: LineChart(
+                                LineChartData(
+                                  // ESCALA AUTOMÁTICA DO EIXO Y.
+                                  minY: menorTemperatura,
+                                  maxY: maiorTemperatura,
 
-                            return TableRow(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Text(
-                                    _formatarData(
-                                      '${dataHora.year}-${dataHora.month.toString().padLeft(2, '0')}-${dataHora.day.toString().padLeft(2, '0')}',
+                                  // INTERVALO AUTOMÁTICO.
+                                  gridData: FlGridData(
+                                    show: true,
+                                    horizontalInterval: intervaloTemperatura,
+                                    getDrawingHorizontalLine: (value) => FlLine(
+                                      color: Colors.grey.withValues(
+                                        alpha: 0.18,
+                                      ),
+                                      strokeWidth: 1,
                                     ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Text(
-                                    '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}',
+
+                                  borderData: FlBorderData(show: false),
+
+                                  titlesData: FlTitlesData(
+                                    bottomTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        interval: ultimasTemperaturas.length > 6
+                                            ? 2
+                                            : 1,
+                                        getTitlesWidget: (value, meta) {
+                                          final indice = value.toInt();
+
+                                          if (indice >= 0 &&
+                                              indice <
+                                                  ultimasTemperaturas.length) {
+                                            final dataHora = DateTime.parse(
+                                              ultimasTemperaturas[indice]['data_hora']
+                                                  .toString(),
+                                            );
+
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 8,
+                                              ),
+                                              child: Text(
+                                                '${dataHora.hour.toString().padLeft(2, '0')}:'
+                                                '${dataHora.minute.toString().padLeft(2, '0')}',
+                                                style: const TextStyle(
+                                                  fontSize: 10,
+                                                ),
+                                              ),
+                                            );
+                                          }
+
+                                          return const SizedBox.shrink();
+                                        },
+                                      ),
+                                    ),
+
+                                    leftTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        reservedSize: 65,
+                                        interval: intervaloTemperatura,
+                                        getTitlesWidget: (value, meta) {
+                                          return Text(
+                                            value.toStringAsFixed(1),
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+
+                                    topTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+
+                                    rightTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
                                   ),
+
+                                  lineBarsData: [
+                                    LineChartBarData(
+                                      spots: ultimasTemperaturas
+                                          .asMap()
+                                          .entries
+                                          .map((item) {
+                                            final indice = item.key;
+
+                                            final temperatura = double.parse(
+                                              item.value['valor'].toString(),
+                                            );
+
+                                            return FlSpot(
+                                              indice.toDouble(),
+                                              temperatura,
+                                            );
+                                          })
+                                          .toList(),
+
+                                      isCurved: true,
+                                      color: Colors.deepOrange,
+                                      barWidth: 3,
+
+                                      dotData: const FlDotData(show: true),
+
+                                      belowBarData: BarAreaData(
+                                        show: true,
+                                        color: Colors.deepOrange.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Text('${dado['valor']} °C'),
-                                ),
-                              ],
-                            );
-                          }),
-                        ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 20),
+                    Card(
+                      elevation: 2,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Center(
+                              child: Text(
+                                'Histórico detalhado',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 10, 85, 64),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Table(
+                              columnWidths: const {
+                                0: FlexColumnWidth(1.5),
+                                1: FlexColumnWidth(1),
+                                2: FlexColumnWidth(1),
+                              },
+                              children: [
+                                const TableRow(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: Text(
+                                        "Data",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: Text(
+                                        "Hora",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: Text(
+                                        "Valor",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                ...temperaturas.map((dado) {
+                                  final dataHora = DateTime.parse(
+                                    dado['data_hora'].toString(),
+                                  );
+
+                                  return TableRow(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(5),
+                                        child: Text(
+                                          _formatarData(
+                                            '${dataHora.year}-${dataHora.month.toString().padLeft(2, '0')}-${dataHora.day.toString().padLeft(2, '0')}',
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(5),
+                                        child: Text(
+                                          '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}',
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(5),
+                                        child: Text('${dado['valor']} °C'),
+                                      ),
+                                    ],
+                                  );
+                                }),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

@@ -13,11 +13,13 @@ import 'package:youwell/simulacaoBD/dados_sensores.dart';
 class AdminScreen extends StatefulWidget {
   final String nomeAdmin;
   final String nomeSetor;
+  final int? idSetor;
 
   const AdminScreen({
     super.key,
     required this.nomeAdmin,
     required this.nomeSetor,
+    required this.idSetor,
   });
 
   @override
@@ -114,7 +116,10 @@ class _AdminScreenState extends State<AdminScreen> {
 
               title: const Text(
                 "Início",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
@@ -127,7 +132,10 @@ class _AdminScreenState extends State<AdminScreen> {
 
               title: const Text(
                 "Criar Setor",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
@@ -148,7 +156,10 @@ class _AdminScreenState extends State<AdminScreen> {
 
               title: const Text(
                 "Novo Usuário",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
@@ -169,13 +180,21 @@ class _AdminScreenState extends State<AdminScreen> {
 
               title: const Text(
                 "Alertas",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => AlertaScreen(
+                      idSetor: widget.idSetor,
+                      nomeSetor: widget.nomeSetor,
+                    ),
+                  ),
                 );
               },
             ),
@@ -185,7 +204,10 @@ class _AdminScreenState extends State<AdminScreen> {
 
               title: const Text(
                 "Histórico Geral (PDF)",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {

@@ -62,6 +62,7 @@ class RuidoScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => AdminScreen(
+                      idSetor: null,
                       nomeSetor: nomeSetor,
                       nomeAdmin: nomeUsuario,
                     ),
@@ -162,7 +163,10 @@ class RuidoScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen()),
+                  MaterialPageRoute(builder: (context) => AlertaScreen( 
+                    idSetor: null,
+                    nomeSetor: nomeSetor,
+                  )),
                 );
               },
             ),

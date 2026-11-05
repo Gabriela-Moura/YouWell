@@ -76,6 +76,7 @@ class SetorScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => AdminScreen(
+                      idSetor: null,
                       nomeSetor: nomeSetor,
                       nomeAdmin: nomeUsuario,
                     ),
@@ -177,7 +178,10 @@ class SetorScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen()),
+                  MaterialPageRoute(builder: (context) => AlertaScreen(
+                    nomeSetor: nomeSetor,
+                    idSetor: null
+                  )),
                 );
               },
             ),

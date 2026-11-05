@@ -17,8 +17,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-import 'package:youwell/alertas.dart' show gerarAlertas;
-
 class HistoricoScreen extends StatefulWidget {
   const HistoricoScreen({super.key});
 
@@ -34,14 +32,6 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
   void initState() {
     super.initState();
     carregarHistorico();
-  }
-
-  String dataHoje() {
-    final agora = DateTime.now();
-
-    return '${agora.year.toString().padLeft(4, '0')}-'
-        '${agora.month.toString().padLeft(2, '0')}-'
-        '${agora.day.toString().padLeft(2, '0')}';
   }
 
   DateTime? interpretarData(dynamic valor) {
@@ -70,28 +60,6 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
       registros = decodificado
           .map((item) => Map<String, dynamic>.from(item))
           .toList();
-    }
-
-    // Registra os alertas gerados a partir das medições simuladas.
-    final alertasAtuais = gerarAlertas();
-    final hoje = dataHoje();
-
-    for (final alerta in alertasAtuais) {
-      final registro = Map<String, dynamic>.from(alerta);
-      registro['data'] = hoje;
-
-      // Evita registrar a mesma ocorrência repetidamente.
-      final existe = registros.any(
-        (item) =>
-            item['idSensor'] == registro['idSensor'] &&
-            item['indicador'] == registro['indicador'] &&
-            item['data'] == registro['data'] &&
-            item['hora'] == registro['hora'],
-      );
-
-      if (!existe) {
-        registros.add(registro);
-      }
     }
 
     // Mantém somente os registros dos últimos 30 dias.

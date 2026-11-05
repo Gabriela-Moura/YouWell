@@ -64,6 +64,7 @@ class ArScreen extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => AdminScreen(
                       nomeSetor: nomeSetor,
+                      idSetor: null,
                       nomeAdmin: nomeUsuario,
                     ),
                   ),
@@ -163,7 +164,10 @@ class ArScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen()),
+                  MaterialPageRoute(builder: (context) => AlertaScreen(
+                    idSetor: null,
+                    nomeSetor: nomeSetor,
+                  )),
                 );
               },
             ),

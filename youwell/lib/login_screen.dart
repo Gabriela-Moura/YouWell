@@ -7,9 +7,12 @@ import 'package:youwell/main.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/gerente.dart';
 import 'package:youwell/services/api_service.dart';
+import 'package:youwell/services/monitor_alertas.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final String nomeSetor;
+
+  const LoginScreen({super.key, required this.nomeSetor});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -106,6 +109,10 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
 
+        debugPrint('ID DO SETOR NO LOGIN: $idSetor');
+
+        MonitorAlertas.iniciar(idSetor: idSetor, nomeSetor: nomeSetor);
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -120,7 +127,8 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => AdminScreen(nomeAdmin: nome, nomeSetor: 'null'),
+            builder: (_) =>
+                AdminScreen(nomeAdmin: nome, nomeSetor: 'null', idSetor: null),
           ),
         );
       } else {

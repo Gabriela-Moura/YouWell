@@ -13,11 +13,13 @@ import 'package:youwell/simulacaoBD/dados_sensores.dart';
 class CriarSetor extends StatefulWidget {
   final String nomeAdmin;
   final String nomeSetor;
+  final int? idSetor;
 
   const CriarSetor({
     super.key,
     required this.nomeAdmin,
     required this.nomeSetor,
+    this.idSetor,
   });
 
   @override
@@ -110,6 +112,7 @@ class _CriarSetorState extends State<CriarSetor> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => AdminScreen(
+                      idSetor: widget.idSetor,
                       nomeSetor: widget.nomeSetor,
                       nomeAdmin: widget.nomeAdmin,
                     ),
@@ -195,7 +198,10 @@ class _CriarSetorState extends State<CriarSetor> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen()),
+                  MaterialPageRoute(builder: (context) => AlertaScreen(
+                    idSetor: widget.idSetor,
+                    nomeSetor: widget.nomeSetor,
+                  )),
                 );
               },
             ),

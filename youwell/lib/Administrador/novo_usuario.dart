@@ -122,6 +122,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => AdminScreen(
+                      idSetor: null,
                       nomeSetor: widget.nomeSetor,
                       nomeAdmin: widget.nomeAdmin,
                     ),
@@ -216,7 +217,9 @@ class _NovoUsuarioState extends State<NovoUsuario> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen()),
+                  MaterialPageRoute(builder: (context) => AlertaScreen(
+                    nomeSetor: widget.nomeSetor,
+                    idSetor: null,)),
                 );
               },
             ),

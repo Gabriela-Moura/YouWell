@@ -7,7 +7,9 @@ import '../login_screen.dart';
 import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final String nomeSetor;
+
+  const HomeScreen({super.key, required this.nomeSetor});
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +60,9 @@ class HomeScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                      MaterialPageRoute(builder: (context) => LoginScreen(
+                        nomeSetor: nomeSetor,
+                      )),
                     );
                   },
 

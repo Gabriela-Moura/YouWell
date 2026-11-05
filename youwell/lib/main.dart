@@ -1,8 +1,10 @@
+
 import 'package:flutter/material.dart';
 import 'package:youwell/screens/home_screen.dart';
+import 'package:youwell/services/monitor_alertas.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -11,9 +13,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // esconde aquela faixa vermelha de DEBUG que aparece no canto superior direito do app quando você roda o Flutter em modo de desenvolvimento.
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      navigatorKey: MonitorAlertas.navigatorKey,
+      home: const HomeScreen(
+        nomeSetor: 'Setor A',
+      ),
     );
   }
 }
