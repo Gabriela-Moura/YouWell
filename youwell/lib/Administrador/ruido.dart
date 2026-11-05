@@ -5,27 +5,89 @@ import 'package:youwell/Administrador/temperatura_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:youwell/Administrador/setor_screen.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:youwell/Administrador/qualidade_ar.dart';
 import 'package:youwell/Administrador/ruido.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
 
-class RuidoScreen extends StatelessWidget {
+class RuidoScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
+  final int? idSetor;
 
   const RuidoScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
+    this.idSetor,
   });
+
+  @override
+  State<RuidoScreen> createState() => _RuidoScreenState();
+}
+
+class _RuidoScreenState extends State<RuidoScreen> {
+  List<Map<String, dynamic>> ruidos = [];
+  bool carregando = true;
+  String? erro;
+
+  String get nomeSetor => widget.nomeSetor;
+  String get nomeUsuario => widget.nomeUsuario;
+
+  @override
+  void initState() {
+    super.initState();
+    buscarRuidos();
+  }
+
+  Future<void> buscarRuidos() async {
+    try {
+      final resposta = await http.post(
+        Uri.parse('https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php'),
+        body: widget.idSetor == null
+            ? <String, String>{}
+            : {'id_setor': widget.idSetor.toString()},
+      );
+      final dados = jsonDecode(resposta.body);
+      if (dados['success'] != true) {
+        throw Exception(dados['mensagem'] ?? 'Não foi possível buscar ruídos.');
+      }
+      final lista = dados['ruido'] is List ? dados['ruido'] as List : [];
+      if (!mounted) return;
+      setState(() {
+        ruidos = lista.map((item) => Map<String, dynamic>.from(item)).toList();
+        ruidos.sort((a, b) => (a['data_hora'] ?? '').toString().compareTo((b['data_hora'] ?? '').toString()));
+        carregando = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        carregando = false;
+        erro = 'Não foi possível carregar os ruídos.';
+      });
+    }
+  }
 
   String _formatarData(String data) {
     final partes = data.split('-');
     if (partes.length != 3) return data;
 
     return '${partes[2].padLeft(2, '0')}/${partes[1].padLeft(2, '0')}/${partes[0]}';
+  }
+
+  List<Map<String, dynamic>> get ultimosRuidos =>
+      ruidos.length > 12 ? ruidos.sublist(ruidos.length - 12) : ruidos;
+
+  double get menorRuido {
+    if (ultimosRuidos.isEmpty) return 0;
+    return ultimosRuidos.map((item) => double.tryParse(item['valor'].toString()) ?? 0).reduce((a, b) => a < b ? a : b);
+  }
+
+  double get maiorRuido {
+    if (ultimosRuidos.isEmpty) return 100;
+    return ultimosRuidos.map((item) => double.tryParse(item['valor'].toString()) ?? 0).reduce((a, b) => a > b ? a : b);
   }
 
   @override
@@ -242,8 +304,8 @@ class RuidoScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       SizedBox(height: 230, child: LineChart(
                   LineChartData(
-                    minY: 40,
-                    maxY: 80,
+                    minY: menorRuido - 5,
+                    maxY: maiorRuido + 5,
                     gridData: FlGridData(
                       show: true,
                       horizontalInterval: 5,
@@ -261,8 +323,9 @@ class RuidoScreen extends StatelessWidget {
                           getTitlesWidget: (value, meta) {
                             int indice = value.toInt();
 
-                            if (indice >= 0 && indice < sensores.length) {
-                              return Text(sensores[indice]["hora"]);
+                            if (indice >= 0 && indice < ultimosRuidos.length) {
+                              final dataHora = DateTime.tryParse(ultimosRuidos[indice]['data_hora'].toString());
+                              return Text(dataHora == null ? '' : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}');
                             }
 
                             return const Text("");
@@ -289,10 +352,10 @@ class RuidoScreen extends StatelessWidget {
 
                     lineBarsData: [
                       LineChartBarData(
-                        spots: sensores.asMap().entries.map((item) {
+                        spots: ultimosRuidos.asMap().entries.map((item) {
                           int indice = item.key;
 
-                          double ruido = item.value["ruido"].toDouble();
+                          double ruido = double.tryParse(item.value["valor"].toString()) ?? 0;
 
                           return FlSpot(indice.toDouble(), ruido);
                         }).toList(),
@@ -369,22 +432,23 @@ class RuidoScreen extends StatelessWidget {
                       ),
 
                       // DADOS
-                      ...sensores.map((dado) {
+                      ...ultimosRuidos.map((dado) {
+                        final dataHora = DateTime.tryParse(dado['data_hora'].toString());
                         return TableRow(
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(5),
-                              child: Text(_formatarData(dado["data"])),
+                              child: Text(dataHora == null ? '' : _formatarData('${dataHora.year}-${dataHora.month.toString().padLeft(2, '0')}-${dataHora.day.toString().padLeft(2, '0')}')),
                             ),
 
                             Padding(
                               padding: const EdgeInsets.all(5),
-                              child: Text(dado["hora"]),
+                              child: Text(dataHora == null ? '' : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}'),
                             ),
 
                             Padding(
                               padding: const EdgeInsets.all(5),
-                              child: Text("${dado["ruido"]}"),
+                              child: Text("${dado["valor"]} dB"),
                             ),
                           ],
                         );

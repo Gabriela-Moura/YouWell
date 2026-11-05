@@ -10,23 +10,97 @@ import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:youwell/Administrador/setor_screen.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class TemperaturaScreen extends StatelessWidget {
+class TemperaturaScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
+  final int? idSetor;
 
   const TemperaturaScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
+    this.idSetor,
   });
+
+  @override
+  State<TemperaturaScreen> createState() => _TemperaturaScreenState();
+}
+
+class _TemperaturaScreenState extends State<TemperaturaScreen> {
+  List<Map<String, dynamic>> temperaturas = [];
+  bool carregando = true;
+  String? erro;
+
+  String get nomeSetor => widget.nomeSetor;
+  String get nomeUsuario => widget.nomeUsuario;
+
+  @override
+  void initState() {
+    super.initState();
+    buscarTemperaturas();
+  }
+
+  Future<void> buscarTemperaturas() async {
+    try {
+      final resposta = await http.post(
+        Uri.parse('https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php'),
+        body: widget.idSetor == null
+            ? <String, String>{}
+            : {'id_setor': widget.idSetor.toString()},
+      );
+      if (resposta.statusCode != 200) {
+        throw Exception('Erro HTTP: ${resposta.statusCode}');
+      }
+      final dados = jsonDecode(resposta.body);
+      if (dados['success'] != true) {
+        throw Exception(dados['mensagem'] ?? 'Não foi possível carregar as medições.');
+      }
+      final lista = dados['temperatura'] is List ? dados['temperatura'] as List : [];
+      if (!mounted) return;
+      setState(() {
+        temperaturas = lista.map((item) => Map<String, dynamic>.from(item)).toList();
+        temperaturas.sort((a, b) =>
+            (a['data_hora'] ?? '').toString().compareTo((b['data_hora'] ?? '').toString()));
+        carregando = false;
+        erro = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        carregando = false;
+        erro = 'Não foi possível carregar as temperaturas.';
+      });
+      debugPrint('Erro ao buscar temperaturas: $e');
+    }
+  }
 
   String _formatarData(String data) {
     final partes = data.split('-');
     if (partes.length != 3) return data;
 
     return '${partes[2].padLeft(2, '0')}/${partes[1].padLeft(2, '0')}/${partes[0]}';
+  }
+
+  List<Map<String, dynamic>> get ultimasTemperaturas {
+    final lista = List<Map<String, dynamic>>.from(temperaturas);
+    return lista.length > 12 ? lista.sublist(lista.length - 12) : lista;
+  }
+
+  double get menorTemperatura {
+    if (ultimasTemperaturas.isEmpty) return 0;
+    return ultimasTemperaturas
+        .map((item) => double.tryParse(item['valor'].toString()) ?? 0)
+        .reduce((a, b) => a < b ? a : b);
+  }
+
+  double get maiorTemperatura {
+    if (ultimasTemperaturas.isEmpty) return 30;
+    return ultimasTemperaturas
+        .map((item) => double.tryParse(item['valor'].toString()) ?? 0)
+        .reduce((a, b) => a > b ? a : b);
   }
 
   @override
@@ -264,8 +338,8 @@ class TemperaturaScreen extends StatelessWidget {
                         height: 230,
                         child: LineChart(
                           LineChartData(
-                            minY: 20,
-                            maxY: 32,
+                            minY: menorTemperatura - 2,
+                            maxY: maiorTemperatura + 2,
                             gridData: FlGridData(
                               show: true,
                               horizontalInterval: 2,
@@ -290,8 +364,12 @@ class TemperaturaScreen extends StatelessWidget {
                                     int indice = value.toInt();
 
                                     if (indice >= 0 &&
-                                        indice < sensores.length) {
-                                      return Text(sensores[indice]["hora"]);
+                                        indice < ultimasTemperaturas.length) {
+                                      final dataHora = DateTime.tryParse(
+                                          ultimasTemperaturas[indice]['data_hora'].toString());
+                                      return Text(dataHora == null
+                                          ? ''
+                                          : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}');
                                     }
 
                                     return const Text("");
@@ -318,11 +396,10 @@ class TemperaturaScreen extends StatelessWidget {
 
                             lineBarsData: [
                               LineChartBarData(
-                                spots: sensores.asMap().entries.map((item) {
+                                spots: ultimasTemperaturas.asMap().entries.map((item) {
                                   int indice = item.key;
-
-                                  double temperatura = item.value["temperatura"]
-                                      .toDouble();
+                                  double temperatura =
+                                      double.tryParse(item.value["valor"].toString()) ?? 0;
 
                                   return FlSpot(indice.toDouble(), temperatura);
                                 }).toList(),
@@ -410,22 +487,27 @@ class TemperaturaScreen extends StatelessWidget {
                           ),
 
                           // DADOS
-                          ...sensores.map((dado) {
+                          ...ultimasTemperaturas.map((dado) {
+                            final dataHora = DateTime.tryParse(dado['data_hora'].toString());
                             return TableRow(
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.all(5),
-                                  child: Text(_formatarData(dado["data"])),
+                                  child: Text(dataHora == null
+                                      ? ''
+                                      : _formatarData('${dataHora.year}-${dataHora.month.toString().padLeft(2, '0')}-${dataHora.day.toString().padLeft(2, '0')}')),
                                 ),
 
                                 Padding(
                                   padding: const EdgeInsets.all(5),
-                                  child: Text(dado["hora"]),
+                                  child: Text(dataHora == null
+                                      ? ''
+                                      : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}'),
                                 ),
 
                                 Padding(
                                   padding: const EdgeInsets.all(5),
-                                  child: Text("${dado["temperatura"]} °C"),
+                                  child: Text("${dado["valor"]} °C"),
                                 ),
                               ],
                             );

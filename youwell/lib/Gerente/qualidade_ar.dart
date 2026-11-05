@@ -34,6 +34,30 @@ class _ArScreenState extends State<ArScreen> {
   String get nomeUsuario => widget.nomeUsuario;
   int get idSetor => widget.idSetor;
 
+  List<Map<String, dynamic>> get ultimasMedicoes {
+    final lista = List<Map<String, dynamic>>.from(qualidadeAr);
+    lista.sort((a, b) =>
+        (a['data_hora'] ?? '').toString().compareTo(
+              (b['data_hora'] ?? '').toString(),
+            ));
+    return lista.length > 12 ? lista.sublist(lista.length - 12) : lista;
+  }
+
+  List<double> get valoresQualidade =>
+      ultimasMedicoes
+          .map((item) => double.tryParse(item['valor'].toString()) ?? 0)
+          .toList();
+
+  double get menorQualidade {
+    if (valoresQualidade.isEmpty) return 0;
+    return valoresQualidade.reduce((a, b) => a < b ? a : b);
+  }
+
+  double get maiorQualidade {
+    if (valoresQualidade.isEmpty) return 100;
+    return valoresQualidade.reduce((a, b) => a > b ? a : b);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +92,10 @@ class _ArScreenState extends State<ArScreen> {
         qualidadeAr = lista
             .map((item) => Map<String, dynamic>.from(item))
             .toList();
+        qualidadeAr.sort((a, b) =>
+            (a['data_hora'] ?? '').toString().compareTo(
+                  (b['data_hora'] ?? '').toString(),
+                ));
         carregando = false;
         erro = null;
       });
@@ -334,8 +362,8 @@ class _ArScreenState extends State<ArScreen> {
                               height: 230,
                               child: LineChart(
                                 LineChartData(
-                                  minY: 40,
-                                  maxY: 80,
+                                  minY: menorQualidade - 5,
+                                  maxY: maiorQualidade + 5,
                                   gridData: FlGridData(
                                     show: true,
                                     horizontalInterval: 5,
@@ -364,9 +392,9 @@ class _ArScreenState extends State<ArScreen> {
                                           int indice = value.toInt();
 
                                           if (indice >= 0 &&
-                                              indice < qualidadeAr.length) {
+                                              indice < ultimasMedicoes.length) {
                                             final dataHora = _obterDataHora(
-                                              qualidadeAr[indice],
+                                              ultimasMedicoes[indice],
                                             );
                                             return Text(
                                               dataHora == null
@@ -399,7 +427,7 @@ class _ArScreenState extends State<ArScreen> {
 
                                   lineBarsData: [
                                     LineChartBarData(
-                                      spots: qualidadeAr.asMap().entries.map((
+                                      spots: ultimasMedicoes.asMap().entries.map((
                                         item,
                                       ) {
                                         int indice = item.key;
@@ -501,7 +529,7 @@ class _ArScreenState extends State<ArScreen> {
                                 ),
 
                                 // DADOS
-                                ...qualidadeAr.map((dado) {
+                                ...ultimasMedicoes.map((dado) {
                                   final dataHora = _obterDataHora(dado);
                                   return TableRow(
                                     children: [

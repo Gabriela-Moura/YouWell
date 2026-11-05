@@ -146,6 +146,30 @@ class _SetorScreenState extends State<SetorScreen> {
     });
   }
 
+  double get _menorValorGrafico {
+    final valores = <double>[];
+    for (final tipo in ['temperatura', 'ruido', 'qualidade_ar']) {
+      for (final spot in _criarSpots(tipo)) {
+        valores.add(spot.y);
+      }
+    }
+    return valores.isEmpty
+        ? 0
+        : valores.reduce((a, b) => a < b ? a : b);
+  }
+
+  double get _maiorValorGrafico {
+    final valores = <double>[];
+    for (final tipo in ['temperatura', 'ruido', 'qualidade_ar']) {
+      for (final spot in _criarSpots(tipo)) {
+        valores.add(spot.y);
+      }
+    }
+    return valores.isEmpty
+        ? 100
+        : valores.reduce((a, b) => a > b ? a : b);
+  }
+
   String _horarioNoIndice(double indice) {
     final temperatura = _listaHistorico('temperatura');
     final ruido = _listaHistorico('ruido');
@@ -479,13 +503,13 @@ class _SetorScreenState extends State<SetorScreen> {
                         height: 230,
                         child: LineChart(
                           LineChartData(
-                            minY: 0,
-                            maxY: 100,
+                            minY: _menorValorGrafico - 5,
+                            maxY: _maiorValorGrafico + 5,
                             minX: 0,
                             maxX: maxXGrafico,
                             gridData: FlGridData(
                               show: true,
-                              horizontalInterval: 25,
+                              horizontalInterval: 5,
                               verticalInterval: 4,
                               getDrawingHorizontalLine: (value) => FlLine(
                                 color: Colors.grey.withValues(alpha: 0.18),
@@ -507,7 +531,7 @@ class _SetorScreenState extends State<SetorScreen> {
                               leftTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
-                                  interval: 25,
+                                  interval: 5,
                                   reservedSize: 36,
                                   getTitlesWidget: (value, meta) => Text(
                                     value.toInt().toString(),

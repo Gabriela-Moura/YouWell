@@ -5,28 +5,90 @@ import 'package:youwell/Administrador/temperatura_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:youwell/Administrador/setor_screen.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:youwell/Administrador/temperatura_screen.dart';
 import 'package:youwell/Administrador/qualidade_ar.dart';
 import 'package:youwell/Administrador/ruido.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
 
-class ArScreen extends StatelessWidget {
+class ArScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
+  final int? idSetor;
 
   const ArScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
+    this.idSetor,
   });
+
+  @override
+  State<ArScreen> createState() => _ArScreenState();
+}
+
+class _ArScreenState extends State<ArScreen> {
+  List<Map<String, dynamic>> qualidadeAr = [];
+  bool carregando = true;
+  String? erro;
+
+  String get nomeSetor => widget.nomeSetor;
+  String get nomeUsuario => widget.nomeUsuario;
+
+  @override
+  void initState() {
+    super.initState();
+    buscarQualidadeAr();
+  }
+
+  Future<void> buscarQualidadeAr() async {
+    try {
+      final resposta = await http.post(
+        Uri.parse('https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php'),
+        body: widget.idSetor == null
+            ? <String, String>{}
+            : {'id_setor': widget.idSetor.toString()},
+      );
+      final dados = jsonDecode(resposta.body);
+      if (dados['success'] != true) {
+        throw Exception(dados['mensagem'] ?? 'Não foi possível buscar qualidade do ar.');
+      }
+      final lista = dados['qualidade_ar'] is List ? dados['qualidade_ar'] as List : [];
+      if (!mounted) return;
+      setState(() {
+        qualidadeAr = lista.map((item) => Map<String, dynamic>.from(item)).toList();
+        qualidadeAr.sort((a, b) => (a['data_hora'] ?? '').toString().compareTo((b['data_hora'] ?? '').toString()));
+        carregando = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        carregando = false;
+        erro = 'Não foi possível carregar a qualidade do ar.';
+      });
+    }
+  }
 
   String _formatarData(String data) {
     final partes = data.split('-');
     if (partes.length != 3) return data;
 
     return '${partes[2].padLeft(2, '0')}/${partes[1].padLeft(2, '0')}/${partes[0]}';
+  }
+
+  List<Map<String, dynamic>> get ultimasMedicoes =>
+      qualidadeAr.length > 12 ? qualidadeAr.sublist(qualidadeAr.length - 12) : qualidadeAr;
+
+  double get menorQualidade {
+    if (ultimasMedicoes.isEmpty) return 0;
+    return ultimasMedicoes.map((item) => double.tryParse(item['valor'].toString()) ?? 0).reduce((a, b) => a < b ? a : b);
+  }
+
+  double get maiorQualidade {
+    if (ultimasMedicoes.isEmpty) return 100;
+    return ultimasMedicoes.map((item) => double.tryParse(item['valor'].toString()) ?? 0).reduce((a, b) => a > b ? a : b);
   }
 
   @override
@@ -243,8 +305,8 @@ class ArScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       SizedBox(height: 230, child: LineChart(
                   LineChartData(
-                    minY: 40,
-                    maxY: 80,
+                    minY: menorQualidade - 5,
+                    maxY: maiorQualidade + 5,
                     gridData: FlGridData(
                       show: true,
                       horizontalInterval: 5,
@@ -262,8 +324,9 @@ class ArScreen extends StatelessWidget {
                           getTitlesWidget: (value, meta) {
                             int indice = value.toInt();
 
-                            if (indice >= 0 && indice < sensores.length) {
-                              return Text(sensores[indice]["hora"]);
+                            if (indice >= 0 && indice < ultimasMedicoes.length) {
+                              final dataHora = DateTime.tryParse(ultimasMedicoes[indice]['data_hora'].toString());
+                              return Text(dataHora == null ? '' : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}');
                             }
 
                             return const Text("");
@@ -290,10 +353,10 @@ class ArScreen extends StatelessWidget {
 
                     lineBarsData: [
                       LineChartBarData(
-                        spots: sensores.asMap().entries.map((item) {
+                        spots: ultimasMedicoes.asMap().entries.map((item) {
                           int indice = item.key;
 
-                          double ar = item.value["ar"].toDouble();
+                          double ar = double.tryParse(item.value["valor"].toString()) ?? 0;
 
                           return FlSpot(indice.toDouble(), ar);
                         }).toList(),
@@ -370,22 +433,21 @@ class ArScreen extends StatelessWidget {
                       ),
 
                       // DADOS
-                      ...sensores.map((dado) {
+                      ...ultimasMedicoes.map((dado) {
+                        final dataHora = DateTime.tryParse(dado['data_hora'].toString());
                         return TableRow(
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(5),
-                              child: Text(_formatarData(dado["data"])),
+                              child: Text(dataHora == null ? '' : _formatarData('${dataHora.year}-${dataHora.month.toString().padLeft(2, '0')}-${dataHora.day.toString().padLeft(2, '0')}')),
                             ),
-
                             Padding(
                               padding: const EdgeInsets.all(5),
-                              child: Text(dado["hora"]),
+                              child: Text(dataHora == null ? '' : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}'),
                             ),
-
                             Padding(
                               padding: const EdgeInsets.all(5),
-                              child: Text("${dado["ar"]}"),
+                              child: Text("${dado["valor"]}%"),
                             ),
                           ],
                         );

@@ -34,47 +34,122 @@ class _RuidoScreenState extends State<RuidoScreen> {
   String get nomeUsuario => widget.nomeUsuario;
   int get idSetor => widget.idSetor;
 
+  List<Map<String, dynamic>> get ultimosRuidos {
+    final lista = List<Map<String, dynamic>>.from(ruidos);
+    lista.sort(
+      (a, b) => (a['data_hora'] ?? '').toString().compareTo(
+        (b['data_hora'] ?? '').toString(),
+      ),
+    );
+    return lista.length > 12 ? lista.sublist(lista.length - 12) : lista;
+  }
+
+  List<double> get valoresRuidos => ultimosRuidos
+      .map((item) => double.tryParse(item['valor'].toString()) ?? 0)
+      .toList();
+
+  double get menorRuido {
+    if (valoresRuidos.isEmpty) return 0;
+    return valoresRuidos.reduce((a, b) => a < b ? a : b);
+  }
+
+  double get maiorRuido {
+    if (valoresRuidos.isEmpty) return 100;
+    return valoresRuidos.reduce((a, b) => a > b ? a : b);
+  }
+
   @override
   void initState() {
     super.initState();
     buscarRuidos();
   }
 
+  List<Map<String, dynamic>> converterRuidos(dynamic resposta) {
+    if (resposta is List) {
+      return resposta
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    }
+
+    if (resposta is Map) {
+      final conteudo =
+          resposta['medicoes'] ??
+          resposta['dados'] ??
+          resposta['leituras'] ??
+          resposta['ruidos'];
+
+      if (conteudo is List) {
+        return conteudo
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+
+      if (resposta.containsKey('valor') && resposta.containsKey('data_hora')) {
+        return [Map<String, dynamic>.from(resposta)];
+      }
+    }
+
+    return [];
+  }
+
   Future<void> buscarRuidos() async {
     try {
-      final resposta = await http.post(
-        Uri.parse(
-          'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
-        ),
-        body: {'id_setor': idSetor.toString()},
-      );
+      final resposta = await http
+          .post(
+            Uri.parse(
+              'https://devsbee.com.br/You-Well/controllers/buscar_historico_medicoes.php',
+            ),
+            body: widget.idSetor == null
+                ? <String, String>{}
+                : {'id_setor': widget.idSetor.toString()},
+          )
+          .timeout(const Duration(seconds: 20));
+
+      debugPrint('STATUS RUÍDO: ${resposta.statusCode}');
+      debugPrint('RESPOSTA RUÍDO: ${resposta.body}');
 
       if (resposta.statusCode != 200) {
         throw Exception('Erro ao acessar o servidor PHP.');
       }
 
-      final dados = jsonDecode(resposta.body);
-      if (dados['success'] != true) {
+      final dados = jsonDecode(utf8.decode(resposta.bodyBytes));
+
+      if (dados is! Map || dados['success'] != true) {
         throw Exception(
-          dados['mensagem'] ?? 'Não foi possível buscar os dados de ruído.',
+          dados is Map
+              ? dados['mensagem'] ?? 'Não foi possível buscar ruídos.'
+              : 'Resposta inválida do servidor.',
         );
       }
 
-      final List lista = dados['ruido'] ?? [];
+      final lista = converterRuidos(dados['ruido']);
+
+      lista.sort((a, b) {
+        return (a['data_hora'] ?? '').toString().compareTo(
+          (b['data_hora'] ?? '').toString(),
+        );
+      });
+
+      debugPrint('TOTAL DE RUÍDOS RECEBIDOS: ${lista.length}');
+
       if (!mounted) return;
 
       setState(() {
-        ruidos = lista.map((item) => Map<String, dynamic>.from(item)).toList();
+        ruidos = lista;
         carregando = false;
         erro = null;
       });
     } catch (e) {
       if (!mounted) return;
+
       setState(() {
         carregando = false;
-        erro = 'Não foi possível carregar os dados de ruído.';
+        erro = 'Não foi possível carregar os ruídos.';
       });
-      debugPrint('Erro ao buscar ruídos: $e');
+
+      debugPrint('ERRO AO BUSCAR RUÍDOS: $e');
     }
   }
 
@@ -222,10 +297,10 @@ class _RuidoScreenState extends State<RuidoScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen(
-                    idSetor: idSetor,
-                    nomeSetor: nomeSetor,
-                  )),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AlertaScreen(idSetor: idSetor, nomeSetor: nomeSetor),
+                  ),
                 );
               },
             ),
@@ -329,8 +404,8 @@ class _RuidoScreenState extends State<RuidoScreen> {
                               height: 230,
                               child: LineChart(
                                 LineChartData(
-                                  minY: 40,
-                                  maxY: 80,
+                                  minY: menorRuido - 5,
+                                  maxY: maiorRuido + 5,
                                   gridData: FlGridData(
                                     show: true,
                                     horizontalInterval: 5,
@@ -359,9 +434,9 @@ class _RuidoScreenState extends State<RuidoScreen> {
                                           int indice = value.toInt();
 
                                           if (indice >= 0 &&
-                                              indice < ruidos.length) {
+                                              indice < ultimosRuidos.length) {
                                             final dataHora = _obterDataHora(
-                                              ruidos[indice],
+                                              ultimosRuidos[indice],
                                             );
                                             return Text(
                                               dataHora == null
@@ -394,7 +469,9 @@ class _RuidoScreenState extends State<RuidoScreen> {
 
                                   lineBarsData: [
                                     LineChartBarData(
-                                      spots: ruidos.asMap().entries.map((item) {
+                                      spots: ultimosRuidos.asMap().entries.map((
+                                        item,
+                                      ) {
                                         int indice = item.key;
                                         double ruido =
                                             double.tryParse(
@@ -494,7 +571,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                                 ),
 
                                 // DADOS
-                                ...ruidos.map((dado) {
+                                ...ultimosRuidos.map((dado) {
                                   final dataHora = _obterDataHora(dado);
                                   return TableRow(
                                     children: [

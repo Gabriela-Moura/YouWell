@@ -1,26 +1,173 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
-import 'package:youwell/gerente.dart';
-import 'package:youwell/main.dart';
 import 'package:youwell/Administrador/temperatura_screen.dart';
-import 'package:youwell/screens/home_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:youwell/Administrador/qualidade_ar.dart';
 import 'package:youwell/Administrador/ruido.dart';
 import 'package:youwell/alertas.dart';
-import 'package:youwell/admin.dart';
 import 'package:youwell/historico.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class SetorScreen extends StatelessWidget {
+class SetorScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
+  final int? idSetor;
 
   const SetorScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
+    this.idSetor,
   });
+
+  @override
+  State<SetorScreen> createState() => _SetorScreenState();
+}
+
+class _SetorScreenState extends State<SetorScreen> {
+  Map<String, dynamic>? medicoes;
+  Map<String, dynamic>? historico;
+  bool carregando = true;
+  bool carregandoHistorico = true;
+  String? erro;
+
+  String get nomeSetor => widget.nomeSetor;
+  String get nomeUsuario => widget.nomeUsuario;
+
+  @override
+  void initState() {
+    super.initState();
+    buscarDados();
+    buscarHistorico();
+  }
+
+  Future<void> buscarDados() async {
+    try {
+      final resposta = await http.post(
+        Uri.parse(
+          'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
+        ),
+        body: widget.idSetor == null
+            ? <String, String>{}
+            : {'id_setor': widget.idSetor.toString()},
+      );
+      if (resposta.statusCode != 200) {
+        throw Exception('Erro HTTP: ${resposta.statusCode}');
+      }
+      final dados = jsonDecode(resposta.body);
+      if (dados['success'] != true) {
+        throw Exception(
+          dados['mensagem'] ?? 'Não foi possível buscar os dados.',
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        medicoes = Map<String, dynamic>.from(dados);
+        carregando = false;
+        erro = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        carregando = false;
+        erro = 'Não foi possível carregar as medições.';
+      });
+      debugPrint('Erro ao buscar medições: $e');
+    }
+  }
+
+  Future<void> buscarHistorico() async {
+    try {
+      final resposta = await http.post(
+        Uri.parse(
+          'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
+        ),
+        body: widget.idSetor == null
+            ? <String, String>{}
+            : {'id_setor': widget.idSetor.toString()},
+      );
+      final dados = jsonDecode(resposta.body);
+      if (dados['success'] != true) {
+        throw Exception(
+          dados['mensagem'] ?? 'Não foi possível buscar o histórico.',
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        historico = Map<String, dynamic>.from(dados);
+        carregandoHistorico = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        carregandoHistorico = false;
+      });
+      debugPrint('Erro ao buscar histórico: $e');
+    }
+  }
+
+  List<dynamic> _listaHistorico(String tipo) {
+    final dados = historico?[tipo];
+    List<dynamic> lista = [];
+    if (dados is List) {
+      lista = dados;
+    } else if (dados is Map &&
+        dados['valor'] != null &&
+        dados['data_hora'] != null) {
+      lista = [Map<String, dynamic>.from(dados)];
+    }
+
+    lista.sort((a, b) {
+      final dataA = a['data_hora']?.toString() ?? '';
+      final dataB = b['data_hora']?.toString() ?? '';
+      return dataA.compareTo(dataB);
+    });
+
+    return lista.length > 12 ? lista.sublist(lista.length - 12) : lista;
+  }
+
+  List<FlSpot> _criarSpots(String tipo) {
+    final lista = _listaHistorico(tipo);
+    return List.generate(lista.length, (index) {
+      final valor = double.tryParse(lista[index]['valor'].toString()) ?? 0;
+      return FlSpot(index.toDouble(), valor);
+    });
+  }
+
+  double get _menorValorGrafico {
+    final valores = <double>[
+      for (final tipo in ['temperatura', 'ruido', 'qualidade_ar'])
+        for (final spot in _criarSpots(tipo)) spot.y,
+    ];
+    if (valores.isEmpty) return 0;
+    final menor = valores.reduce((a, b) => a < b ? a : b);
+    return menor < 0 ? menor - 5 : 0;
+  }
+
+  double get _maiorValorGrafico {
+    final valores = <double>[
+      for (final tipo in ['temperatura', 'ruido', 'qualidade_ar'])
+        for (final spot in _criarSpots(tipo)) spot.y,
+    ];
+    if (valores.isEmpty) return 100;
+    return valores.reduce((a, b) => a > b ? a : b) + 5;
+  }
+
+  String _horarioNoIndice(double indice) {
+    for (final tipo in ['temperatura', 'ruido', 'qualidade_ar']) {
+      final lista = _listaHistorico(tipo);
+      final i = indice.toInt();
+      if (indice == i.toDouble() && i >= 0 && i < lista.length) {
+        final dataHora = DateTime.tryParse(lista[i]['data_hora'].toString());
+        if (dataHora != null) {
+          return '${dataHora.hour.toString().padLeft(2, '0')}:'
+              '${dataHora.minute.toString().padLeft(2, '0')}';
+        }
+      }
+    }
+    return '';
+  }
 
   Widget _legendaGrafico(String texto, Color cor) {
     return Row(
@@ -39,7 +186,6 @@ class SetorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const verde = Color.fromARGB(255, 10, 85, 64);
     const fundo = Color(0xFFF4F7F5);
     return Scaffold(
       backgroundColor: fundo,
@@ -68,7 +214,10 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Início",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
@@ -89,7 +238,10 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Geral",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
@@ -99,6 +251,7 @@ class SetorScreen extends StatelessWidget {
                     builder: (context) => SetorScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -109,7 +262,10 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Temperatura",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
@@ -119,6 +275,7 @@ class SetorScreen extends StatelessWidget {
                     builder: (context) => TemperaturaScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -130,7 +287,10 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Qualidade do Ar",
-                style: TextStyle(color: Color.fromARGB(255, 38, 23, 23), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 38, 23, 23),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
@@ -140,6 +300,7 @@ class SetorScreen extends StatelessWidget {
                     builder: (context) => ArScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -151,7 +312,10 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Ruído",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
@@ -161,6 +325,7 @@ class SetorScreen extends StatelessWidget {
                     builder: (context) => RuidoScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -172,16 +337,21 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Alertas",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen(
-                    nomeSetor: nomeSetor,
-                    idSetor: null
-                  )),
+                  MaterialPageRoute(
+                    builder: (context) => AlertaScreen(
+                      nomeSetor: nomeSetor,
+                      idSetor: widget.idSetor,
+                    ),
+                  ),
                 );
               },
             ),
@@ -191,7 +361,10 @@ class SetorScreen extends StatelessWidget {
 
               title: const Text(
                 "Histórico Geral (PDF)",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
               ),
 
               onTap: () {
@@ -239,8 +412,28 @@ class SetorScreen extends StatelessWidget {
                 width: double.infinity,
                 child: Row(
                   children: [
-                    infoCard("Temperatura", "25°C", Icons.thermostat),
-                    infoCard("Umidade", "70%", Icons.water_drop),
+                    infoCard(
+                      "Temperatura",
+                      carregando
+                          ? "Carregando"
+                          : erro != null
+                          ? "--"
+                          : medicoes?['temperatura'] == null
+                          ? "Sem dados"
+                          : "${medicoes!['temperatura']['valor']} °C",
+                      Icons.thermostat,
+                    ),
+                    infoCard(
+                      "Qualidade do ar",
+                      carregando
+                          ? "Carregando"
+                          : erro != null
+                          ? "--"
+                          : medicoes?['qualidade_ar'] == null
+                          ? "Sem dados"
+                          : "${medicoes!['qualidade_ar']['valor']}%",
+                      Icons.air,
+                    ),
                   ],
                 ),
               ),
@@ -252,8 +445,17 @@ class SetorScreen extends StatelessWidget {
                 width: double.infinity,
                 child: Row(
                   children: [
-                    infoCard("Qualidade do ar", "70%", Icons.air),
-                    infoCard("Ruído", "30dB", Icons.volume_up),
+                    infoCard(
+                      "Ruído",
+                      carregando
+                          ? "Carregando"
+                          : erro != null
+                          ? "--"
+                          : medicoes?['ruido'] == null
+                          ? "Sem dados"
+                          : "${medicoes!['ruido']['valor']} dB",
+                      Icons.volume_up,
+                    ),
                   ],
                 ),
               ),
@@ -291,13 +493,23 @@ class SetorScreen extends StatelessWidget {
                         height: 230,
                         child: LineChart(
                           LineChartData(
-                            minY: 0,
-                            maxY: 100,
+                            minY: _menorValorGrafico,
+                            maxY: _maiorValorGrafico,
                             minX: 0,
-                            maxX: 20,
+                            maxX:
+                                ([
+                                          _listaHistorico('temperatura').length,
+                                          _listaHistorico('ruido').length,
+                                          _listaHistorico(
+                                            'qualidade_ar',
+                                          ).length,
+                                        ].reduce((a, b) => a > b ? a : b) -
+                                        1)
+                                    .clamp(1, 1000)
+                                    .toDouble(),
                             gridData: FlGridData(
                               show: true,
-                              horizontalInterval: 25,
+                              horizontalInterval: 5,
                               verticalInterval: 4,
                               getDrawingHorizontalLine: (value) => FlLine(
                                 color: Colors.grey.withValues(alpha: 0.18),
@@ -319,7 +531,7 @@ class SetorScreen extends StatelessWidget {
                               leftTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
-                                  interval: 25,
+                                  interval: 5,
                                   reservedSize: 36,
                                   getTitlesWidget: (value, meta) => Text(
                                     value.toInt().toString(),
@@ -335,54 +547,42 @@ class SetorScreen extends StatelessWidget {
                                   showTitles: true,
                                   interval: 4,
                                   reservedSize: 30,
-                                  getTitlesWidget: (value, meta) => Text(
-                                    '${value.toInt().toString().padLeft(2, '0')}:00',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 10,
-                                    ),
-                                  ),
+                                  getTitlesWidget: (value, meta) {
+                                    final horario = _horarioNoIndice(value);
+                                    if (horario.isEmpty) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return SideTitleWidget(
+                                      meta: meta,
+                                      child: Text(
+                                        horario,
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
                             lineBarsData: [
                               LineChartBarData(
-                                spots: const [
-                                  FlSpot(0, 25),
-                                  FlSpot(4, 24),
-                                  FlSpot(8, 26),
-                                  FlSpot(12, 28),
-                                  FlSpot(16, 27),
-                                  FlSpot(20, 25),
-                                ],
+                                spots: _criarSpots('temperatura'),
                                 isCurved: true,
                                 color: Colors.deepOrange,
                                 barWidth: 3,
                                 dotData: const FlDotData(show: true),
                               ),
                               LineChartBarData(
-                                spots: const [
-                                  FlSpot(0, 45),
-                                  FlSpot(4, 40),
-                                  FlSpot(8, 65),
-                                  FlSpot(12, 70),
-                                  FlSpot(16, 60),
-                                  FlSpot(20, 50),
-                                ],
+                                spots: _criarSpots('ruido'),
                                 isCurved: true,
                                 color: Colors.blue,
                                 barWidth: 3,
                                 dotData: const FlDotData(show: true),
                               ),
                               LineChartBarData(
-                                spots: const [
-                                  FlSpot(0, 80),
-                                  FlSpot(4, 82),
-                                  FlSpot(8, 75),
-                                  FlSpot(12, 78),
-                                  FlSpot(16, 80),
-                                  FlSpot(20, 82),
-                                ],
+                                spots: _criarSpots('qualidade_ar'),
                                 isCurved: true,
                                 color: Colors.teal,
                                 barWidth: 3,

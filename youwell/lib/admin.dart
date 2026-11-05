@@ -316,6 +316,7 @@ class _AdminScreenState extends State<AdminScreen> {
                           builder: (context) => SetorScreen(
                             nomeSetor: setor['nome'] as String,
                             nomeUsuario: widget.nomeAdmin,
+                            idSetor: setor['id'] as int?,
                           ),
                         ),
                       );
