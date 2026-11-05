@@ -1,14 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:youwell/admin.dart';
-import 'package:youwell/main.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
-import 'package:youwell/Administrador/qualidade_ar.dart';
 import 'package:youwell/Administrador/novo_usuario.dart';
-import 'package:youwell/Administrador/ruido.dart';
-import 'package:youwell/Administrador/temperatura_screen.dart';
 import 'package:youwell/Administrador/setor_screen.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class CriarSetor extends StatefulWidget {
   final String nomeAdmin;
@@ -27,14 +26,69 @@ class CriarSetor extends StatefulWidget {
 }
 
 class _CriarSetorState extends State<CriarSetor> {
+  static const String baseUrl = 'https://devsbee.com.br/You-Well/controllers/';
+
   final nomeSetorController = TextEditingController();
-  final nomeUsuarioController = TextEditingController();
-  final senhaController = TextEditingController();
 
-  String papelSelecionado = 'usuario';
-  int? setorSelecionado;
+  List<Map<String, dynamic>> gerentes = [];
 
-  void criarSetor() {
+  int? gerenteSelecionado;
+
+  bool carregandoGerentes = true;
+  bool salvando = false;
+
+  @override
+  void initState() {
+    super.initState();
+    buscarGerentes();
+  }
+
+  // BUSCAR GERENTES NO BANCO REAL
+  Future<void> buscarGerentes() async {
+    setState(() {
+      carregandoGerentes = true;
+    });
+
+    try {
+      final resposta = await http.get(
+        Uri.parse('${baseUrl}listar_gerentes.php'),
+      );
+
+      final dados = jsonDecode(resposta.body);
+
+      if (resposta.statusCode == 200 && dados['success'] == true) {
+        final List lista = dados['gerentes'];
+
+        if (!mounted) return;
+
+        setState(() {
+          gerentes = lista.map((item) {
+            return Map<String, dynamic>.from(item);
+          }).toList();
+
+          if (!gerentes.any((g) => g['id_usuario'] == gerenteSelecionado)) {
+            gerenteSelecionado = null;
+          }
+
+          carregandoGerentes = false;
+        });
+      } else {
+        throw Exception(dados['message'] ?? 'Erro ao buscar gerentes.');
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        carregandoGerentes = false;
+      });
+
+      mostrarMensagem('Não foi possível carregar os gerentes.');
+    }
+  }
+
+  // CADASTRAR SETOR NO BANCO REAL
+
+  Future<void> criarSetor() async {
     final nome = nomeSetorController.text.trim();
 
     if (nome.isEmpty) {
@@ -42,29 +96,61 @@ class _CriarSetorState extends State<CriarSetor> {
       return;
     }
 
-    final existe = setores.any(
-      (s) => (s['nome'] as String).toLowerCase() == nome.toLowerCase(),
-    );
-
-    if (existe) {
-      mostrarMensagem('Já existe um setor com esse nome.');
+    if (gerenteSelecionado == null) {
+      mostrarMensagem('Selecione um gerente responsável.');
       return;
     }
 
-    final novoId = setores.isEmpty
-        ? 1
-        : setores.map((s) => s['id'] as int).reduce((a, b) => a > b ? a : b) +
-              1;
-
     setState(() {
-      setores.add({'id': novoId, 'nome': nome});
+      salvando = true;
     });
 
-    nomeSetorController.clear();
-    mostrarMensagem('Setor criado com sucesso!');
+    try {
+      final url = Uri.parse('${baseUrl}criar_setor.php');
+
+      debugPrint('ENVIANDO CADASTRO DE SETOR...');
+      debugPrint('URL: $url');
+      debugPrint('Nome: $nome');
+      debugPrint('ID gerente: $gerenteSelecionado');
+
+      final resposta = await http.post(
+        url,
+        body: {'nome': nome, 'id_gerente': gerenteSelecionado.toString()},
+      );
+
+      debugPrint('STATUS HTTP: ${resposta.statusCode}');
+      debugPrint('RESPOSTA PHP: ${resposta.body}');
+
+      final dados = jsonDecode(resposta.body);
+
+      if (resposta.statusCode == 200 && dados['success'] == true) {
+        nomeSetorController.clear();
+
+        setState(() {
+          gerenteSelecionado = null;
+        });
+
+        mostrarMensagem('Setor criado com sucesso!');
+      } else {
+        mostrarMensagem(dados['message'] ?? 'Não foi possível criar o setor.');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('ERRO AO CRIAR SETOR: $e');
+      debugPrint('STACK TRACE: $stackTrace');
+
+      mostrarMensagem('Erro de comunicação com o servidor.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          salvando = false;
+        });
+      }
+    }
   }
 
   void mostrarMensagem(String mensagem) {
+    if (!mounted) return;
+
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(mensagem)));
@@ -82,13 +168,10 @@ class _CriarSetorState extends State<CriarSetor> {
         child: ListView(
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(
-                color: verde,
-              ),
-
+              decoration: const BoxDecoration(color: verde),
               child: Text(
                 'Olá, ${widget.nomeAdmin}',
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -98,15 +181,7 @@ class _CriarSetorState extends State<CriarSetor> {
 
             ListTile(
               leading: const Icon(Icons.home),
-
-              title: const Text(
-                "Inicio",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 3, 3, 3),
-                  fontSize: 18
-                ),
-              ),
-
+              title: const Text('Início'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -123,15 +198,7 @@ class _CriarSetorState extends State<CriarSetor> {
 
             ListTile(
               leading: const Icon(Icons.window),
-
-              title: const Text(
-                "Geral",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 3, 3, 3),
-                  fontSize: 18
-                ),
-              ),
-
+              title: const Text('Geral'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -147,33 +214,15 @@ class _CriarSetorState extends State<CriarSetor> {
 
             ListTile(
               leading: const Icon(Icons.add),
-
-              title: const Text(
-                "Criar Setor",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
-              ),
-
+              title: const Text('Criar Setor'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CriarSetor(
-                      nomeSetor: widget.nomeSetor,
-                      nomeAdmin: widget.nomeAdmin,
-                    ),
-                  ),
-                );
+                Navigator.pop(context);
               },
             ),
 
             ListTile(
               leading: const Icon(Icons.person),
-
-              title: const Text(
-                "Novo Usuário",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
-              ),
-
+              title: const Text('Novo Usuário'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -189,31 +238,23 @@ class _CriarSetorState extends State<CriarSetor> {
 
             ListTile(
               leading: const Icon(Icons.access_alarm),
-
-              title: const Text(
-                "Alertas",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
-              ),
-
+              title: const Text('Alertas'),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen(
-                    idSetor: widget.idSetor,
-                    nomeSetor: widget.nomeSetor,
-                  )),
+                  MaterialPageRoute(
+                    builder: (context) => AlertaScreen(
+                      idSetor: widget.idSetor,
+                      nomeSetor: widget.nomeSetor,
+                    ),
+                  ),
                 );
               },
             ),
 
             ListTile(
               leading: const Icon(Icons.picture_as_pdf),
-
-              title: const Text(
-                "Histórico Geral (PDF)",
-                style: TextStyle(color: Color.fromARGB(255, 3, 3, 3), fontSize: 18),
-              ),
-
+              title: const Text('Histórico Geral (PDF)'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -265,7 +306,9 @@ class _CriarSetorState extends State<CriarSetor> {
                 color: verde,
               ),
             ),
+
             const SizedBox(height: 6),
+
             Text(
               'Gerencie os setores e os usuários do YouWell.',
               style: TextStyle(fontSize: 14, color: Colors.grey[700]),
@@ -273,8 +316,8 @@ class _CriarSetorState extends State<CriarSetor> {
 
             const SizedBox(height: 24),
 
-            // CRIAR SETOR
             _tituloSecao(Icons.add_business, 'Criar setor', verde),
+
             const SizedBox(height: 12),
 
             Card(
@@ -299,11 +342,69 @@ class _CriarSetorState extends State<CriarSetor> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 14),
+
+                    const SizedBox(height: 18),
+
+                    // LISTA DE GERENTES
+                    if (carregandoGerentes)
+                      const Center(child: CircularProgressIndicator())
+                    else if (gerentes.isEmpty)
+                      Column(
+                        children: [
+                          const Text(
+                            'Nenhum gerente encontrado.',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          TextButton.icon(
+                            onPressed: buscarGerentes,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Tentar novamente'),
+                          ),
+                        ],
+                      )
+                    else
+                      DropdownButtonFormField<int>(
+                        value: gerenteSelecionado,
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          labelText: 'Gerente responsável',
+                          prefixIcon: const Icon(Icons.person),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        hint: const Text('Selecione um gerente'),
+                        items: gerentes.map((gerente) {
+                          return DropdownMenuItem<int>(
+                            value: int.parse(gerente['id_usuario'].toString()),
+                            child: Text(gerente['nome'].toString()),
+                          );
+                        }).toList(),
+                        onChanged: (valor) {
+                          setState(() {
+                            gerenteSelecionado = valor;
+                          });
+                        },
+                      ),
+
+                    const SizedBox(height: 20),
+
                     ElevatedButton.icon(
-                      onPressed: criarSetor,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Criar setor'),
+                      onPressed:
+                          salvando || carregandoGerentes || gerentes.isEmpty
+                          ? null
+                          : criarSetor,
+                      icon: salvando
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.add),
+                      label: Text(salvando ? 'Criando...' : 'Criar setor'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: verde,
                         foregroundColor: Colors.white,
@@ -317,8 +418,6 @@ class _CriarSetorState extends State<CriarSetor> {
                 ),
               ),
             ),
-
-            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -345,8 +444,6 @@ class _CriarSetorState extends State<CriarSetor> {
   @override
   void dispose() {
     nomeSetorController.dispose();
-    nomeUsuarioController.dispose();
-    senhaController.dispose();
     super.dispose();
   }
 }
