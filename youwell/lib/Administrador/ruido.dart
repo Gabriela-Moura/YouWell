@@ -43,23 +43,50 @@ class _RuidoScreenState extends State<RuidoScreen> {
   }
 
   Future<void> buscarRuidos() async {
+    setState(() {
+      carregando = true;
+      erro = null;
+    });
+
     try {
-      final resposta = await http.post(
-        Uri.parse('https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php'),
-        body: widget.idSetor == null
-            ? <String, String>{}
-            : {'id_setor': widget.idSetor.toString()},
-      );
-      final dados = jsonDecode(resposta.body);
-      if (dados['success'] != true) {
-        throw Exception(dados['mensagem'] ?? 'Não foi possível buscar ruídos.');
+      final resposta = await http
+          .post(
+            Uri.parse(
+              'https://devsbee.com.br/You-Well/controllers/buscar_historico_medicoes.php',
+            ),
+            headers: {'Accept': 'application/json'},
+            body: widget.idSetor == null
+                ? <String, String>{}
+                : {'id_setor': widget.idSetor.toString()},
+          )
+          .timeout(const Duration(seconds: 20));
+      if (resposta.statusCode != 200) {
+        throw Exception('Erro HTTP ${resposta.statusCode}: ${resposta.body}');
       }
-      final lista = dados['ruido'] is List ? dados['ruido'] as List : [];
+
+      final dados = jsonDecode(utf8.decode(resposta.bodyBytes));
+      if (dados is! Map || dados['success'] != true) {
+        throw Exception(
+          dados is Map
+              ? dados['mensagem'] ?? 'Não foi possível buscar ruídos.'
+              : 'Resposta inválida do servidor.',
+        );
+      }
+      if (!dados.containsKey('ruido')) {
+        throw const FormatException(
+          'A resposta do servidor não contém medições de ruído.',
+        );
+      }
+
+      final lista = converterRuidos(dados['ruido']);
+      lista.sort((a, b) => (a['data_hora'] ?? '')
+          .toString()
+          .compareTo((b['data_hora'] ?? '').toString()));
       if (!mounted) return;
       setState(() {
-        ruidos = lista.map((item) => Map<String, dynamic>.from(item)).toList();
-        ruidos.sort((a, b) => (a['data_hora'] ?? '').toString().compareTo((b['data_hora'] ?? '').toString()));
+        ruidos = lista;
         carregando = false;
+        erro = null;
       });
     } catch (e) {
       if (!mounted) return;
@@ -67,7 +94,48 @@ class _RuidoScreenState extends State<RuidoScreen> {
         carregando = false;
         erro = 'Não foi possível carregar os ruídos.';
       });
+      debugPrint('Erro ao buscar ruídos: $e');
     }
+  }
+
+  List<Map<String, dynamic>> converterRuidos(dynamic resposta) {
+    if (resposta is List) {
+      return resposta
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    }
+
+    if (resposta is Map) {
+      final conteudo =
+          resposta['medicoes'] ??
+          resposta['dados'] ??
+          resposta['leituras'] ??
+          resposta['ruidos'];
+
+      if (conteudo is List) {
+        return conteudo
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+
+      if (resposta.containsKey('valor') && resposta.containsKey('data_hora')) {
+        return [Map<String, dynamic>.from(resposta)];
+      }
+
+      if (resposta.values.isNotEmpty &&
+          resposta.values.every((item) => item is Map)) {
+        return resposta.values
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+    }
+
+    if (resposta == null) return [];
+
+    throw const FormatException('Formato de medições de ruído inválido.');
   }
 
   String _formatarData(String data) {
@@ -145,6 +213,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                     builder: (context) => SetorScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -166,6 +235,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                     builder: (context) => TemperaturaScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -187,6 +257,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                     builder: (context) => ArScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -208,6 +279,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                     builder: (context) => RuidoScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -274,7 +346,52 @@ class _RuidoScreenState extends State<RuidoScreen> {
         ],
       ),
 
-      body: SingleChildScrollView(
+      body: carregando
+          ? const Center(child: CircularProgressIndicator())
+          : erro != null
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                    const SizedBox(height: 12),
+                    Text(erro!, textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: buscarRuidos,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Tentar novamente'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : ruidos.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.volume_off, color: Colors.grey, size: 40),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Nenhuma medição de ruído encontrada para este setor.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: buscarRuidos,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Atualizar'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(

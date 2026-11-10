@@ -45,23 +45,39 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
 
   Future<void> buscarTemperaturas() async {
     try {
-      final resposta = await http.post(
-        Uri.parse('https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php'),
-        body: widget.idSetor == null
-            ? <String, String>{}
-            : {'id_setor': widget.idSetor.toString()},
-      );
+      final resposta = await http
+          .post(
+            Uri.parse(
+              'https://devsbee.com.br/You-Well/controllers/buscar_historico_medicoes.php',
+            ),
+            headers: {'Accept': 'application/json'},
+            body: widget.idSetor == null
+                ? <String, String>{}
+                : {'id_setor': widget.idSetor.toString()},
+          )
+          .timeout(const Duration(seconds: 15));
       if (resposta.statusCode != 200) {
-        throw Exception('Erro HTTP: ${resposta.statusCode}');
+        throw Exception('Erro HTTP ${resposta.statusCode}: ${resposta.body}');
       }
-      final dados = jsonDecode(resposta.body);
-      if (dados['success'] != true) {
-        throw Exception(dados['mensagem'] ?? 'Não foi possível carregar as medições.');
+
+      final dados = jsonDecode(utf8.decode(resposta.bodyBytes));
+      if (dados is! Map || dados['success'] != true) {
+        throw Exception(
+          dados is Map
+              ? dados['mensagem'] ?? 'Não foi possível carregar as medições.'
+              : 'Resposta inválida do servidor.',
+        );
       }
-      final lista = dados['temperatura'] is List ? dados['temperatura'] as List : [];
+      if (!dados.containsKey('temperatura')) {
+        throw const FormatException(
+          'A resposta do servidor não contém medições de temperatura.',
+        );
+      }
+
+      final lista = converterTemperaturas(dados['temperatura']);
       if (!mounted) return;
       setState(() {
-        temperaturas = lista.map((item) => Map<String, dynamic>.from(item)).toList();
+        temperaturas = lista;
         temperaturas.sort((a, b) =>
             (a['data_hora'] ?? '').toString().compareTo((b['data_hora'] ?? '').toString()));
         carregando = false;
@@ -75,6 +91,46 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
       });
       debugPrint('Erro ao buscar temperaturas: $e');
     }
+  }
+
+  List<Map<String, dynamic>> converterTemperaturas(dynamic resposta) {
+    if (resposta is List) {
+      return resposta
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    }
+
+    if (resposta is Map) {
+      final conteudo =
+          resposta['medicoes'] ??
+          resposta['dados'] ??
+          resposta['leituras'] ??
+          resposta['temperaturas'];
+
+      if (conteudo is List) {
+        return conteudo
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+
+      if (resposta.containsKey('valor') && resposta.containsKey('data_hora')) {
+        return [Map<String, dynamic>.from(resposta)];
+      }
+
+      if (resposta.values.isNotEmpty &&
+          resposta.values.every((item) => item is Map)) {
+        return resposta.values
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+    }
+
+    if (resposta == null) return [];
+
+    throw const FormatException('Formato de medições de temperatura inválido.');
   }
 
   String _formatarData(String data) {
@@ -101,6 +157,18 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
     return ultimasTemperaturas
         .map((item) => double.tryParse(item['valor'].toString()) ?? 0)
         .reduce((a, b) => a > b ? a : b);
+  }
+
+  double get intervaloTemperatura {
+    final diferenca = maiorTemperatura - menorTemperatura;
+
+    if (diferenca == 0) {
+      return maiorTemperatura.abs() * 0.2 > 0
+          ? maiorTemperatura.abs() * 0.2
+          : 1;
+    }
+
+    return diferenca / 5;
   }
 
   @override
@@ -159,6 +227,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                     builder: (context) => SetorScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -183,6 +252,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                     builder: (context) => TemperaturaScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -204,6 +274,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                     builder: (context) => ArScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -225,6 +296,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                     builder: (context) => RuidoScreen(
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
+                      idSetor: widget.idSetor,
                     ),
                   ),
                 );
@@ -294,7 +366,56 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
         ],
       ),
 
-      body: SingleChildScrollView(
+      body: carregando
+          ? const Center(child: CircularProgressIndicator())
+          : erro != null
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                    const SizedBox(height: 12),
+                    Text(erro!, textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: buscarTemperaturas,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Tentar novamente'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : temperaturas.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.thermostat_outlined,
+                      color: Colors.grey,
+                      size: 40,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Nenhuma medição de temperatura encontrada para este setor.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: buscarTemperaturas,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Atualizar'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -327,10 +448,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                         child: Text(
                           'Variação ao longo do dia',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -338,18 +456,13 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                         height: 230,
                         child: LineChart(
                           LineChartData(
-                            minY: menorTemperatura - 2,
-                            maxY: maiorTemperatura + 2,
+                            minY: menorTemperatura,
+                            maxY: maiorTemperatura,
                             gridData: FlGridData(
                               show: true,
-                              horizontalInterval: 2,
-                              verticalInterval: 2,
+                              horizontalInterval: intervaloTemperatura,
                               getDrawingHorizontalLine: (value) => FlLine(
                                 color: Colors.grey.withValues(alpha: 0.18),
-                                strokeWidth: 1,
-                              ),
-                              getDrawingVerticalLine: (value) => FlLine(
-                                color: Colors.grey.withValues(alpha: 0.12),
                                 strokeWidth: 1,
                               ),
                             ),
@@ -358,7 +471,9 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                               bottomTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
-                                  interval: 1,
+                                  interval: ultimasTemperaturas.length > 6
+                                      ? 2
+                                      : 1,
 
                                   getTitlesWidget: (value, meta) {
                                     int indice = value.toInt();
@@ -366,13 +481,22 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                                     if (indice >= 0 &&
                                         indice < ultimasTemperaturas.length) {
                                       final dataHora = DateTime.tryParse(
-                                          ultimasTemperaturas[indice]['data_hora'].toString());
-                                      return Text(dataHora == null
-                                          ? ''
-                                          : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}');
+                                        ultimasTemperaturas[indice]['data_hora']
+                                            .toString(),
+                                      );
+                                      return Padding(
+                                        padding: const EdgeInsets.only(top: 8),
+                                        child: Text(
+                                          dataHora == null
+                                              ? ''
+                                              : '${dataHora.hour.toString().padLeft(2, '0')}:'
+                                                    '${dataHora.minute.toString().padLeft(2, '0')}',
+                                          style: const TextStyle(fontSize: 10),
+                                        ),
+                                      );
                                     }
 
-                                    return const Text("");
+                                    return const SizedBox.shrink();
                                   },
                                 ),
                               ),
@@ -380,8 +504,14 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                               leftTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
-                                  reservedSize: 45,
-                                  interval: 2,
+                                  reservedSize: 65,
+                                  interval: intervaloTemperatura,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(
+                                      value.toStringAsFixed(1),
+                                      style: const TextStyle(fontSize: 10),
+                                    );
+                                  },
                                 ),
                               ),
 
