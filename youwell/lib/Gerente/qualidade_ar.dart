@@ -13,12 +13,14 @@ class ArScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
   final int idSetor;
+  final int idUsuario;
 
   const ArScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
     required this.idSetor,
+    required this.idUsuario,
   });
 
   @override
@@ -33,6 +35,7 @@ class _ArScreenState extends State<ArScreen> {
   String get nomeSetor => widget.nomeSetor;
   String get nomeUsuario => widget.nomeUsuario;
   int get idSetor => widget.idSetor;
+  int get idUsuario => widget.idUsuario;
 
   List<Map<String, dynamic>> get ultimasMedicoes {
     final lista = List<Map<String, dynamic>>.from(qualidadeAr);
@@ -158,9 +161,8 @@ class _ArScreenState extends State<ArScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => GerenteScreen(
-                      setorGerente: nomeSetor,
                       nomeGerente: nomeUsuario,
-                      idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -182,6 +184,7 @@ class _ArScreenState extends State<ArScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -201,6 +204,7 @@ class _ArScreenState extends State<ArScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -220,6 +224,7 @@ class _ArScreenState extends State<ArScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -239,6 +244,7 @@ class _ArScreenState extends State<ArScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );

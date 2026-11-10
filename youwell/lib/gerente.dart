@@ -1,19 +1,17 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:youwell/main.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:youwell/Gerente/setor_screen_gerente.dart';
-import 'package:youwell/login_screen.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class GerenteScreen extends StatefulWidget {
-  final String setorGerente;
   final String nomeGerente;
-  final int idSetor;
+  final int idUsuario;
 
   const GerenteScreen({
     super.key,
-    required this.setorGerente,
     required this.nomeGerente,
-    required this.idSetor,
+    required this.idUsuario,
   });
 
   @override
@@ -21,29 +19,107 @@ class GerenteScreen extends StatefulWidget {
 }
 
 class _GerenteScreenState extends State<GerenteScreen> {
+  List<Map<String, dynamic>> setores = [];
+
+  bool carregando = true;
+  String? erro;
+
+  final String urlBuscarSetores =
+      'https://devsbee.com.br/You-Well/controllers/buscar_setor.php';
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint('ENTROU NO INITSTATE DO GERENTESCREEN');
+  debugPrint('ID RECEBIDO PELO GERENTESCREEN: ${widget.idUsuario}');
+    buscarSetores();
+  }
+
+  // BUSCAR TODOS OS SETORES RESPONSÁVEIS PELO GERENTE
+  Future<void> buscarSetores() async {
+    debugPrint('INICIOU A BUSCA DOS SETORES');
+    setState(() {
+      carregando = true;
+      erro = null;
+    });
+
+    try {
+      final resposta = await http
+          .post(
+            Uri.parse(urlBuscarSetores),
+            headers: {'Accept': 'application/json'},
+            body: {'id_usuario': widget.idUsuario.toString()},
+          )
+          .timeout(const Duration(seconds: 15));
+
+      debugPrint('ID USUÁRIO GERENTE: ${widget.idUsuario}');
+      debugPrint('STATUS SETORES GERENTE: ${resposta.statusCode}');
+      debugPrint('RESPOSTA SETORES GERENTE: ${resposta.body}');
+
+      if (resposta.statusCode != 200) {
+        throw Exception('Erro HTTP ${resposta.statusCode}');
+      }
+
+      final dados =
+          jsonDecode(utf8.decode(resposta.bodyBytes)) as Map<String, dynamic>;
+
+      if (dados['success'] != true) {
+        throw Exception(
+          dados['mensagem'] ?? 'Não foi possível buscar os setores.',
+        );
+      }
+
+      final List lista = dados['setores'] ?? [];
+
+      final setoresRecebidos = lista.map((setor) {
+        return {
+          'id_setor': int.parse(setor['id_setor'].toString()),
+          'nome': setor['nome'].toString(),
+        };
+      }).toList();
+
+      debugPrint('QUANTIDADE DE SETORES RECEBIDOS: ${setoresRecebidos.length}');
+debugPrint('SETORES CONVERTIDOS: $setoresRecebidos');
+
+      if (!mounted) return;
+
+      setState(() {
+        setores = setoresRecebidos;
+        carregando = false;
+        debugPrint('SETORES SALVOS NA TELA: ${setores.length}');
+      });
+    } catch (e) {
+      debugPrint('ERRO AO BUSCAR SETORES DO GERENTE: $e');
+
+      if (!mounted) return;
+
+      setState(() {
+        carregando = false;
+        erro = e.toString();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    const verde = Color.fromARGB(255, 10, 85, 64);
+
     return Scaffold(
       backgroundColor: Colors.white,
 
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 10, 85, 64),
-
+        backgroundColor: verde,
         iconTheme: const IconThemeData(color: Colors.white),
-
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 20),
-
             child: Row(
               children: [
                 Text(
                   "Olá ${widget.nomeGerente}",
                   style: const TextStyle(color: Colors.white, fontSize: 20),
                 ),
-
                 const SizedBox(width: 10),
-
                 const CircleAvatar(child: Icon(Icons.person)),
               ],
             ),
@@ -54,52 +130,94 @@ class _GerenteScreenState extends State<GerenteScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
+          child: carregando
+              ? const Center(child: CircularProgressIndicator(color: verde))
+              : erro != null
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 40,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Não foi possível carregar seus setores.',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        erro!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      const SizedBox(height: 15),
+                      ElevatedButton.icon(
+                        onPressed: buscarSetores,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Tentar novamente'),
+                      ),
+                    ],
+                  ),
+                )
+              : setores.isEmpty
+              ? const Center(
+                  child: Text(
+                    'Você não possui setores cadastrados.',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                )
+              : ListView(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SetorScreen(
-                              nomeSetor: widget.setorGerente,
-                              nomeUsuario: widget.nomeGerente,
-                              idSetor: widget.idSetor,
-                            ),
-                          ),
-                        );
-                      },
-
-                      child: Container(
-                        height: 120,
-
-                        padding: const EdgeInsets.all(15),
-
-                        decoration: BoxDecoration(
-                          color: Colors.grey[400],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-
-                        child: Center(
-                          child: Text(
-                            widget.setorGerente,
-
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                    const Text(
+                      'Seus setores',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: verde,
                       ),
                     ),
+                    const SizedBox(height: 20),
+
+                    ...setores.map((setor) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SetorScreen(
+                                nomeSetor: setor['nome'],
+                                nomeUsuario: widget.nomeGerente,
+                                idSetor: setor['id_setor'],
+                                idUsuario: widget.idUsuario,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          height: 120,
+                          margin: const EdgeInsets.only(bottom: 15),
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(
+                            child: Text(
+                              setor['nome'],
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
                   ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

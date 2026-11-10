@@ -1,4 +1,8 @@
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
 import 'package:youwell/main.dart';
@@ -33,6 +37,73 @@ class _AdminScreenState extends State<AdminScreen> {
 
   String papelSelecionado = 'usuario';
   int? setorSelecionado;
+
+  // Lista de setores recebidos do banco de dados real
+  List<Map<String, dynamic>> listaSetores = [];
+
+  bool carregandoSetores = true;
+  String? erroSetores;
+
+  // Endereço da API
+  final String urlBuscarSetores =
+      'https://devsbee.com.br/You-Well/controllers/buscar_setor.php';
+
+  @override
+  void initState() {
+    super.initState();
+    buscarSetores();
+  }
+
+  // BUSCAR TODOS OS SETORES NO BANCO DE DADOS
+  Future<void> buscarSetores() async {
+    setState(() {
+      carregandoSetores = true;
+      erroSetores = null;
+    });
+
+    try {
+      final resposta = await http.post(
+        Uri.parse(urlBuscarSetores),
+      );
+
+      debugPrint('Status setores: ${resposta.statusCode}');
+      debugPrint('Resposta setores: ${resposta.body}');
+
+      if (resposta.statusCode == 200) {
+        final dados = jsonDecode(resposta.body);
+
+        if (dados['success'] == true) {
+          final List setoresRecebidos = dados['setores'] ?? [];
+
+          setState(() {
+            listaSetores = setoresRecebidos.map((setor) {
+              return {
+                'id_setor': int.parse(setor['id_setor'].toString()),
+                'nome': setor['nome'].toString(),
+              };
+            }).toList();
+
+            carregandoSetores = false;
+          });
+        } else {
+          throw Exception(
+            dados['mensagem'] ?? 'Não foi possível buscar os setores.',
+          );
+        }
+      } else {
+        throw Exception(
+          'Erro HTTP ${resposta.statusCode}: ${resposta.body}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Erro ao buscar setores: $e');
+
+      setState(() {
+        carregandoSetores = false;
+        erroSetores = e.toString();
+      });
+    }
+  }
 
   void novoUsuario() {
     final nome = nomeUsuarioController.text.trim();
@@ -100,20 +171,18 @@ class _AdminScreenState extends State<AdminScreen> {
               decoration: const BoxDecoration(
                 color: Color.fromARGB(255, 10, 85, 64),
               ),
-
               child: Text(
                 'Olá, ${widget.nomeAdmin}',
-
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
+
             ListTile(
               leading: const Icon(Icons.home),
-
               title: const Text(
                 "Início",
                 style: TextStyle(
@@ -121,7 +190,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   fontSize: 18,
                 ),
               ),
-
               onTap: () {
                 Navigator.pop(context);
               },
@@ -129,7 +197,6 @@ class _AdminScreenState extends State<AdminScreen> {
 
             ListTile(
               leading: const Icon(Icons.add),
-
               title: const Text(
                 "Criar Setor",
                 style: TextStyle(
@@ -137,7 +204,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   fontSize: 18,
                 ),
               ),
-
               onTap: () {
                 Navigator.push(
                   context,
@@ -153,7 +219,6 @@ class _AdminScreenState extends State<AdminScreen> {
 
             ListTile(
               leading: const Icon(Icons.person),
-
               title: const Text(
                 "Novo Usuário",
                 style: TextStyle(
@@ -161,7 +226,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   fontSize: 18,
                 ),
               ),
-
               onTap: () {
                 Navigator.push(
                   context,
@@ -177,7 +241,6 @@ class _AdminScreenState extends State<AdminScreen> {
 
             ListTile(
               leading: const Icon(Icons.access_alarm),
-
               title: const Text(
                 "Alertas",
                 style: TextStyle(
@@ -185,7 +248,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   fontSize: 18,
                 ),
               ),
-
               onTap: () {
                 Navigator.push(
                   context,
@@ -201,7 +263,6 @@ class _AdminScreenState extends State<AdminScreen> {
 
             ListTile(
               leading: const Icon(Icons.picture_as_pdf),
-
               title: const Text(
                 "Histórico Geral (PDF)",
                 style: TextStyle(
@@ -209,7 +270,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   fontSize: 18,
                 ),
               ),
-
               onTap: () {
                 Navigator.push(
                   context,
@@ -261,7 +321,9 @@ class _AdminScreenState extends State<AdminScreen> {
                 color: verde,
               ),
             ),
+
             const SizedBox(height: 6),
+
             Text(
               'Gerencie os setores e os usuários do YouWell.',
               style: TextStyle(fontSize: 18, color: Colors.grey[700]),
@@ -276,17 +338,68 @@ class _AdminScreenState extends State<AdminScreen> {
               verde,
               tamanhoFonte: 24,
             ),
+
             const SizedBox(height: 20),
 
-            if (setores.isEmpty)
+            // CARREGANDO SETORES
+            if (carregandoSetores)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(25),
+                  child: CircularProgressIndicator(color: verde),
+                ),
+              )
+
+            // ERRO AO BUSCAR SETORES
+            else if (erroSetores != null)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 35,
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Não foi possível carregar os setores.',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        erroSetores!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton.icon(
+                        onPressed: buscarSetores,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Tentar novamente'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: verde,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+
+            // NENHUM SETOR CADASTRADO
+            else if (listaSetores.isEmpty)
               const Card(
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: Text('Nenhum setor cadastrado.'),
                 ),
               )
+
+            // LISTA DE SETORES DO BANCO REAL
             else
-              ...setores.map((setor) {
+              ...listaSetores.map((setor) {
                 return Card(
                   elevation: 1,
                   margin: const EdgeInsets.only(bottom: 10),
@@ -307,8 +420,9 @@ class _AdminScreenState extends State<AdminScreen> {
                       setor['nome'] as String,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text('Setor ${setor['id']}'),
+                    subtitle: Text('Setor ${setor['id_setor']}'),
                     trailing: const Icon(Icons.chevron_right, color: verde),
+
                     onTap: () {
                       Navigator.push(
                         context,
@@ -316,7 +430,7 @@ class _AdminScreenState extends State<AdminScreen> {
                           builder: (context) => SetorScreen(
                             nomeSetor: setor['nome'] as String,
                             nomeUsuario: widget.nomeAdmin,
-                            idSetor: setor['id'] as int?,
+                            idSetor: setor['id_setor'] as int,
                           ),
                         ),
                       );
@@ -324,6 +438,9 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                 );
               }),
+
+            const SizedBox(height: 10),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -337,7 +454,9 @@ class _AdminScreenState extends State<AdminScreen> {
                           nomeAdmin: widget.nomeAdmin,
                         ),
                       ),
-                    );
+                    ).then((_) {
+                      buscarSetores();
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: verde,
@@ -354,11 +473,14 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                   child: const Text(
                     'Novo Setor',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
 
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
 
                 ElevatedButton(
                   onPressed: () {
@@ -387,7 +509,10 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                   child: const Text(
                     'Novo Usuário',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],

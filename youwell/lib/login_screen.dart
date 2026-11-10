@@ -86,6 +86,14 @@ class _LoginScreenState extends State<LoginScreen> {
       final String nome = dados['nome'].toString();
       final String papel = dados['papel'].toString().trim().toLowerCase();
 
+      // ID do usuário que realizou o login
+      final dynamic usuarioRecebido = dados['id_usuario'];
+
+      final int? idUsuario = usuarioRecebido == null
+          ? null
+          : int.tryParse(usuarioRecebido.toString());
+
+      // ID de um setor, caso seja retornado pelo login
       final dynamic setorRecebido = dados['setor'];
       debugPrint('Dados recebidos no login: $dados');
       debugPrint('Papel do usuário: $papel');
@@ -95,35 +103,26 @@ class _LoginScreenState extends State<LoginScreen> {
           : int.tryParse(setorRecebido.toString());
 
       if (papel == 'gerente') {
-        if (idSetor == null) {
-          mostrarMensagem('Este gerente não possui um setor cadastrado.');
+        if (idUsuario == null) {
+          mostrarMensagem('Não foi possível identificar o usuário.');
           return;
         }
 
-        final String? nomeSetor = await buscarNomeSetor(idSetor);
+        // Monitora os alertas de TODOS os setores do gerente
+        MonitorAlertas.iniciarGerente(idUsuario: idUsuario);
 
-        if (!mounted) return;
-
-        if (nomeSetor == null) {
-          mostrarMensagem('Não foi possível encontrar o setor deste gerente.');
-          return;
-        }
-
-        debugPrint('ID DO SETOR NO LOGIN: $idSetor');
-
-        MonitorAlertas.iniciar(idSetor: idSetor, nomeSetor: nomeSetor);
+        debugPrint('ID DO GERENTE: $idUsuario');
 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => GerenteScreen(
-              setorGerente: nomeSetor,
-              nomeGerente: nome,
-              idSetor: idSetor,
-            ),
+            builder: (_) =>
+                GerenteScreen(nomeGerente: nome, idUsuario: idUsuario),
           ),
         );
       } else if (papel == 'admin') {
+        MonitorAlertas.iniciarAdmin(idUsuario: idUsuario);
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

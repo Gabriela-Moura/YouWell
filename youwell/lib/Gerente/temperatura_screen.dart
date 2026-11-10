@@ -18,12 +18,14 @@ class TemperaturaScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
   final int idSetor;
+  final int idUsuario;
 
   const TemperaturaScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
     required this.idSetor,
+    required this.idUsuario,
   });
 
   @override
@@ -39,6 +41,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
   String get nomeSetor => widget.nomeSetor;
   String get nomeUsuario => widget.nomeUsuario;
   int get idSetor => widget.idSetor;
+  int get idUsuario => widget.idUsuario;
 
   @override
   void initState() {
@@ -233,9 +236,8 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => GerenteScreen(
-                      setorGerente: nomeSetor,
                       nomeGerente: nomeUsuario,
-                      idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -257,6 +259,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -276,6 +279,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -295,6 +299,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -314,6 +319,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );

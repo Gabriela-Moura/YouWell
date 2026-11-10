@@ -13,12 +13,14 @@ class RuidoScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
   final int idSetor;
+  final int idUsuario;
 
   const RuidoScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
     required this.idSetor,
+    required this.idUsuario,
   });
 
   @override
@@ -33,6 +35,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
   String get nomeSetor => widget.nomeSetor;
   String get nomeUsuario => widget.nomeUsuario;
   int get idSetor => widget.idSetor;
+  int get idUsuario => widget.idUsuario;
 
   List<Map<String, dynamic>> get ultimosRuidos {
     final lista = List<Map<String, dynamic>>.from(ruidos);
@@ -202,9 +205,8 @@ class _RuidoScreenState extends State<RuidoScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => GerenteScreen(
-                      setorGerente: nomeSetor,
                       nomeGerente: nomeUsuario,
-                      idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -226,6 +228,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -245,6 +248,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -264,6 +268,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );
@@ -283,6 +288,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
+                      idUsuario: idUsuario,
                     ),
                   ),
                 );

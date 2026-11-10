@@ -79,15 +79,23 @@ class _SetorScreenState extends State<SetorScreen> {
 
   Future<void> buscarHistorico() async {
     try {
-      final resposta = await http.post(
-        Uri.parse(
-          'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
-        ),
-        body: widget.idSetor == null
-            ? <String, String>{}
-            : {'id_setor': widget.idSetor.toString()},
-      );
-      final dados = jsonDecode(resposta.body);
+      final resposta = await http
+          .post(
+            Uri.parse(
+              'https://devsbee.com.br/You-Well/controllers/buscar_historico_medicoes.php',
+            ),
+            headers: {'Accept': 'application/json'},
+            body: widget.idSetor == null
+                ? <String, String>{}
+                : {'id_setor': widget.idSetor.toString()},
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (resposta.statusCode != 200) {
+        throw Exception('Erro HTTP ${resposta.statusCode}: ${resposta.body}');
+      }
+
+      final dados = jsonDecode(utf8.decode(resposta.bodyBytes));
       if (dados['success'] != true) {
         throw Exception(
           dados['mensagem'] ?? 'Não foi possível buscar o histórico.',
@@ -109,22 +117,7 @@ class _SetorScreenState extends State<SetorScreen> {
 
   List<dynamic> _listaHistorico(String tipo) {
     final dados = historico?[tipo];
-    List<dynamic> lista = [];
-    if (dados is List) {
-      lista = dados;
-    } else if (dados is Map &&
-        dados['valor'] != null &&
-        dados['data_hora'] != null) {
-      lista = [Map<String, dynamic>.from(dados)];
-    }
-
-    lista.sort((a, b) {
-      final dataA = a['data_hora']?.toString() ?? '';
-      final dataB = b['data_hora']?.toString() ?? '';
-      return dataA.compareTo(dataB);
-    });
-
-    return lista.length > 12 ? lista.sublist(lista.length - 12) : lista;
+    return dados is List ? dados : [];
   }
 
   List<FlSpot> _criarSpots(String tipo) {
@@ -141,8 +134,7 @@ class _SetorScreenState extends State<SetorScreen> {
         for (final spot in _criarSpots(tipo)) spot.y,
     ];
     if (valores.isEmpty) return 0;
-    final menor = valores.reduce((a, b) => a < b ? a : b);
-    return menor < 0 ? menor - 5 : 0;
+    return valores.reduce((a, b) => a < b ? a : b) - 5;
   }
 
   double get _maiorValorGrafico {
@@ -187,6 +179,15 @@ class _SetorScreenState extends State<SetorScreen> {
   @override
   Widget build(BuildContext context) {
     const fundo = Color(0xFFF4F7F5);
+    final quantidadePontos = [
+      _listaHistorico('temperatura').length,
+      _listaHistorico('ruido').length,
+      _listaHistorico('qualidade_ar').length,
+    ].fold<int>(0, (maior, atual) => atual > maior ? atual : maior);
+    final maxXGrafico = quantidadePontos > 1
+        ? (quantidadePontos - 1).toDouble()
+        : 1.0;
+
     return Scaffold(
       backgroundColor: fundo,
 
@@ -496,17 +497,7 @@ class _SetorScreenState extends State<SetorScreen> {
                             minY: _menorValorGrafico,
                             maxY: _maiorValorGrafico,
                             minX: 0,
-                            maxX:
-                                ([
-                                          _listaHistorico('temperatura').length,
-                                          _listaHistorico('ruido').length,
-                                          _listaHistorico(
-                                            'qualidade_ar',
-                                          ).length,
-                                        ].reduce((a, b) => a > b ? a : b) -
-                                        1)
-                                    .clamp(1, 1000)
-                                    .toDouble(),
+                            maxX: maxXGrafico,
                             gridData: FlGridData(
                               show: true,
                               horizontalInterval: 5,

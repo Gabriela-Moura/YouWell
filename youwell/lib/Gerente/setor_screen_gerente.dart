@@ -18,12 +18,14 @@ class SetorScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
   final int idSetor;
+  final int idUsuario;
 
   const SetorScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
     required this.idSetor,
+    required this.idUsuario,
   });
 
   @override
@@ -55,15 +57,18 @@ class _SetorScreenState extends State<SetorScreen> {
         body: {'id_setor': widget.idSetor.toString()},
       );
 
+      debugPrint('STATUS MEDIÇÕES: ${resposta.statusCode}');
+      debugPrint('RESPOSTA MEDIÇÕES: ${resposta.body}');
+
       if (resposta.statusCode != 200) {
-        throw Exception('Erro ao acessar o servidor PHP.');
+        throw Exception('Erro HTTP: ${resposta.statusCode}');
       }
 
-      final dados = jsonDecode(resposta.body);
+      final dados = jsonDecode(utf8.decode(resposta.bodyBytes));
 
       if (dados['success'] != true) {
         throw Exception(
-          dados['mensagem'] ?? 'Não foi possível buscar os dados.',
+          dados['mensagem'] ?? 'Não foi possível buscar as medições.',
         );
       }
 
@@ -88,23 +93,28 @@ class _SetorScreenState extends State<SetorScreen> {
 
   Future<void> buscarHistorico() async {
     try {
-      final resposta = await http.post(
-        Uri.parse(
-          'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
-        ),
-        body: {'id_setor': widget.idSetor.toString()},
-      );
+      final resposta = await http
+          .post(
+            Uri.parse(
+              'https://devsbee.com.br/You-Well/controllers/buscar_historico_medicoes.php',
+            ),
+            headers: {'Accept': 'application/json'},
+            body: {'id_setor': widget.idSetor.toString()},
+          )
+          .timeout(const Duration(seconds: 15));
+
+      debugPrint('STATUS GRÁFICO: ${resposta.statusCode}');
+      debugPrint('RESPOSTA GRÁFICO: ${resposta.body}');
+      debugPrint('ID SETOR: ${widget.idSetor}');
 
       if (resposta.statusCode != 200) {
-        throw Exception('Erro ao acessar o histórico.');
+        throw Exception('Erro HTTP ${resposta.statusCode}: ${resposta.body}');
       }
 
-      final dados = jsonDecode(resposta.body);
+      final dados = jsonDecode(utf8.decode(resposta.bodyBytes));
 
       if (dados['success'] != true) {
-        throw Exception(
-          dados['mensagem'] ?? 'Não foi possível buscar o histórico.',
-        );
+        throw Exception(dados['mensagem'] ?? 'Erro ao buscar histórico.');
       }
 
       if (!mounted) return;
@@ -114,6 +124,12 @@ class _SetorScreenState extends State<SetorScreen> {
         carregandoHistorico = false;
         erroHistorico = null;
       });
+
+      debugPrint('Temperaturas: ${_listaHistorico('temperatura').length}');
+
+      debugPrint('Ruídos: ${_listaHistorico('ruido').length}');
+
+      debugPrint('Qualidade do ar: ${_listaHistorico('qualidade_ar').length}');
     } catch (e) {
       if (!mounted) return;
 
@@ -148,26 +164,34 @@ class _SetorScreenState extends State<SetorScreen> {
 
   double get _menorValorGrafico {
     final valores = <double>[];
+
     for (final tipo in ['temperatura', 'ruido', 'qualidade_ar']) {
       for (final spot in _criarSpots(tipo)) {
         valores.add(spot.y);
       }
     }
-    return valores.isEmpty
-        ? 0
-        : valores.reduce((a, b) => a < b ? a : b);
+
+    if (valores.isEmpty) return 0;
+
+    final menor = valores.reduce((a, b) => a < b ? a : b);
+
+    return menor - 5;
   }
 
   double get _maiorValorGrafico {
     final valores = <double>[];
+
     for (final tipo in ['temperatura', 'ruido', 'qualidade_ar']) {
       for (final spot in _criarSpots(tipo)) {
         valores.add(spot.y);
       }
     }
-    return valores.isEmpty
-        ? 100
-        : valores.reduce((a, b) => a > b ? a : b);
+
+    if (valores.isEmpty) return 100;
+
+    final maior = valores.reduce((a, b) => a > b ? a : b);
+
+    return maior + 5;
   }
 
   String _horarioNoIndice(double indice) {
@@ -211,12 +235,14 @@ class _SetorScreenState extends State<SetorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final quantidadePontos = [
-      _listaHistorico('temperatura').length,
-      _listaHistorico('ruido').length,
-      _listaHistorico('qualidade_ar').length,
-    ].reduce((a, b) => a > b ? a : b);
-
+    final quantidadePontos =
+        [
+          _listaHistorico('temperatura').length,
+          _listaHistorico('ruido').length,
+          _listaHistorico('qualidade_ar').length,
+        ].fold<int>(0, (maior, atual) {
+          return atual > maior ? atual : maior;
+        });
     final maxXGrafico = quantidadePontos > 1
         ? (quantidadePontos - 1).toDouble()
         : 1.0;
@@ -256,9 +282,8 @@ class _SetorScreenState extends State<SetorScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => GerenteScreen(
-                      setorGerente: widget.nomeSetor,
                       nomeGerente: widget.nomeUsuario,
-                      idSetor: widget.idSetor,
+                      idUsuario: widget.idUsuario,
                     ),
                   ),
                 );
@@ -280,6 +305,7 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeSetor: widget.nomeSetor,
                       nomeUsuario: widget.nomeUsuario,
                       idSetor: widget.idSetor,
+                      idUsuario: widget.idUsuario,
                     ),
                   ),
                 );
@@ -301,6 +327,7 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeSetor: widget.nomeSetor,
                       nomeUsuario: widget.nomeUsuario,
                       idSetor: widget.idSetor,
+                      idUsuario: widget.idUsuario,
                     ),
                   ),
                 );
@@ -323,6 +350,7 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeSetor: widget.nomeSetor,
                       nomeUsuario: widget.nomeUsuario,
                       idSetor: widget.idSetor,
+                      idUsuario: widget.idUsuario,
                     ),
                   ),
                 );
@@ -345,6 +373,7 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeSetor: widget.nomeSetor,
                       nomeUsuario: widget.nomeUsuario,
                       idSetor: widget.idSetor,
+                      idUsuario: widget.idUsuario,
                     ),
                   ),
                 );
