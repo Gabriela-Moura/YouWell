@@ -211,6 +211,96 @@ class MonitorAlertas {
     return setores;
   }
 
+  static Future<List<Map<String, dynamic>>> buscarHistoricoAlertas() async {
+    final idUsuario = _idUsuario;
+    if (idUsuario == null) {
+      throw StateError(
+        'Não há uma sessão autenticada para consultar o histórico.',
+      );
+    }
+
+    final sessao = _sessao;
+    final setores = await _buscarSetores(_admin ? null : idUsuario);
+    final resultados = await Future.wait(
+      setores.map((setor) => _buscarHistoricoSetor(setor)),
+    );
+
+    if (sessao != _sessao) {
+      throw StateError('A sessão mudou durante a consulta do histórico.');
+    }
+
+    return resultados.expand((registros) => registros).toList()..sort((a, b) {
+      final dataHoraA = '${a['data']} ${a['hora']}';
+      final dataHoraB = '${b['data']} ${b['hora']}';
+      return dataHoraB.compareTo(dataHoraA);
+    });
+  }
+
+  static Future<List<Map<String, dynamic>>> _buscarHistoricoSetor(
+    Map<String, dynamic> setor,
+  ) async {
+    final idSetor = setor['id_setor'] as int;
+    final nomeSetor = setor['nome'] as String;
+    final resposta = await http
+        .post(
+          Uri.parse(urlMedicoes),
+          headers: {'Accept': 'application/json'},
+          body: {'id_setor': idSetor.toString()},
+        )
+        .timeout(const Duration(seconds: 20));
+
+    if (resposta.statusCode != 200) {
+      throw Exception(
+        'Erro HTTP ${resposta.statusCode} ao buscar histórico de $nomeSetor.',
+      );
+    }
+
+    final dados = jsonDecode(utf8.decode(resposta.bodyBytes));
+    if (dados is! Map || dados['success'] != true) {
+      throw Exception('Não foi possível buscar o histórico de $nomeSetor.');
+    }
+
+    final limiteData = DateTime.now().subtract(const Duration(days: 30));
+    final registros = <Map<String, dynamic>>[];
+
+    for (final indicador in limites.keys) {
+      final medicoes = dados[indicador];
+      if (medicoes is! List) continue;
+
+      for (final medicao in medicoes) {
+        if (medicao is! Map) continue;
+
+        final valor = double.tryParse(medicao['valor']?.toString() ?? '');
+        final dataHora = DateTime.tryParse(
+          medicao['data_hora']?.toString() ?? '',
+        );
+        if (valor == null ||
+            dataHora == null ||
+            valor <= limites[indicador]! ||
+            dataHora.isBefore(limiteData)) {
+          continue;
+        }
+
+        registros.add({
+          'data':
+              '${dataHora.year.toString().padLeft(4, '0')}-'
+              '${dataHora.month.toString().padLeft(2, '0')}-'
+              '${dataHora.day.toString().padLeft(2, '0')}',
+          'hora':
+              '${dataHora.hour.toString().padLeft(2, '0')}:'
+              '${dataHora.minute.toString().padLeft(2, '0')}',
+          'setor': nomeSetor,
+          'indicador': indicador,
+          'valor': valor,
+          'gravidade': 'critico',
+          'mensagem': 'Valor acima do limite máximo configurado.',
+        });
+      }
+    }
+
+    return registros;
+  }
+
   // Devolve TODOS os alertas acima do limite de um setor.
   // Devolve null se a consulta falhou (para não apagar o que já se sabia).
   static Future<List<Map<String, dynamic>>?> _consultarSetor(

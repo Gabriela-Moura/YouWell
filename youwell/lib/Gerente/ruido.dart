@@ -7,6 +7,8 @@ import 'package:youwell/Gerente/qualidade_ar.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
 import 'package:youwell/gerente.dart';
+import 'package:youwell/login_screen.dart';
+import 'package:youwell/services/monitor_alertas.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -321,6 +323,25 @@ class _RuidoScreenState extends State<RuidoScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => HistoricoScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text(
+                'Logout',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
+              ),
+              onTap: () {
+                MonitorAlertas.parar();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (_) => LoginScreen(nomeSetor: nomeSetor),
+                  ),
+                  (_) => false,
                 );
               },
             ),

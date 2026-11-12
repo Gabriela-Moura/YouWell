@@ -1,18 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:youwell/admin.dart';
-import 'package:youwell/main.dart';
-import 'package:youwell/Administrador/temperatura_screen.dart';
-import 'package:youwell/screens/home_screen.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:youwell/Administrador/setor_screen.dart';
-import 'package:youwell/Administrador/temperatura_screen.dart';
-import 'package:youwell/Administrador/qualidade_ar.dart';
-import 'package:youwell/Administrador/ruido.dart';
-import 'package:youwell/alertas.dart';
-import 'package:youwell/historico.dart';
-
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:youwell/services/monitor_alertas.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
@@ -26,6 +13,7 @@ class HistoricoScreen extends StatefulWidget {
 class _HistoricoScreenState extends State<HistoricoScreen> {
   List<Map<String, dynamic>> historico = [];
   bool carregando = true;
+  String? erro;
 
   @override
   void initState() {
@@ -48,42 +36,27 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
   }
 
   Future<void> carregarHistorico() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final salvo = prefs.getString('historico_alertas');
-    List<Map<String, dynamic>> registros = [];
-
-    if (salvo != null) {
-      final decodificado = jsonDecode(salvo) as List;
-
-      registros = decodificado
-          .map((item) => Map<String, dynamic>.from(item))
-          .toList();
-    }
-
-    // Mantém somente os registros dos últimos 30 dias.
-    final limite = DateTime.now().subtract(const Duration(days: 30));
-
-    registros.removeWhere((registro) {
-      final data = interpretarData(registro['data']);
-      return data == null ||
-          data.isBefore(DateTime(limite.year, limite.month, limite.day));
-    });
-
-    registros.sort((a, b) {
-      final dataA = '${a['data']} ${a['hora']}';
-      final dataB = '${b['data']} ${b['hora']}';
-      return dataB.compareTo(dataA);
-    });
-
-    await prefs.setString('historico_alertas', jsonEncode(registros));
-
-    if (!mounted) return;
-
     setState(() {
-      historico = registros;
-      carregando = false;
+      carregando = true;
+      erro = null;
     });
+
+    try {
+      final registros = await MonitorAlertas.buscarHistoricoAlertas();
+      if (!mounted) return;
+
+      setState(() {
+        historico = registros;
+        carregando = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        erro = 'Não foi possível carregar o histórico do banco de dados.\n$e';
+        carregando = false;
+      });
+    }
   }
 
   Map<String, List<Map<String, dynamic>>> agruparPorDia() {
@@ -170,9 +143,40 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
         title: const Text('Histórico de alertas'),
         backgroundColor: const Color(0xFF0A5540),
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: carregando ? null : carregarHistorico,
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Atualizar histórico',
+          ),
+        ],
       ),
       body: carregando
           ? const Center(child: CircularProgressIndicator())
+          : erro != null
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 40,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(erro!, textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: carregarHistorico,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Tentar novamente'),
+                    ),
+                  ],
+                ),
+              ),
+            )
           : Column(
               children: [
                 Container(
