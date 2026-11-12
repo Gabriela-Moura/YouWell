@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:youwell/widgets/sino_alertas.dart';
 import 'package:youwell/Gerente/temperatura_screen.dart';
@@ -34,6 +35,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
   List<Map<String, dynamic>> ruidos = [];
   bool carregando = true;
   String? erro;
+  Timer? _timerAtualizacao;
 
   String get nomeSetor => widget.nomeSetor;
   String get nomeUsuario => widget.nomeUsuario;
@@ -68,6 +70,15 @@ class _RuidoScreenState extends State<RuidoScreen> {
   void initState() {
     super.initState();
     buscarRuidos();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      buscarRuidos();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timerAtualizacao?.cancel();
+    super.dispose();
   }
 
   List<Map<String, dynamic>> converterRuidos(dynamic resposta) {

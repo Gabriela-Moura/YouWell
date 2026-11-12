@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/main.dart';
@@ -36,6 +37,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
   List<Map<String, dynamic>> temperaturas = [];
   bool carregando = true;
   String? erro;
+  Timer? _timerAtualizacao;
 
   String get nomeSetor => widget.nomeSetor;
   String get nomeUsuario => widget.nomeUsuario;
@@ -44,6 +46,15 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
   void initState() {
     super.initState();
     buscarTemperaturas();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      buscarTemperaturas();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timerAtualizacao?.cancel();
+    super.dispose();
   }
 
   Future<void> buscarTemperaturas() async {

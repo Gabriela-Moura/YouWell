@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/main.dart';
@@ -36,6 +37,7 @@ class _ArScreenState extends State<ArScreen> {
   List<Map<String, dynamic>> qualidadeAr = [];
   bool carregando = true;
   String? erro;
+  Timer? _timerAtualizacao;
 
   String get nomeSetor => widget.nomeSetor;
   String get nomeUsuario => widget.nomeUsuario;
@@ -44,13 +46,21 @@ class _ArScreenState extends State<ArScreen> {
   void initState() {
     super.initState();
     buscarQualidadeAr();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      buscarQualidadeAr(mostrarCarregamento: false);
+    });
   }
 
-  Future<void> buscarQualidadeAr() async {
-    setState(() {
-      carregando = true;
-      erro = null;
-    });
+  @override
+  void dispose() {
+    _timerAtualizacao?.cancel();
+    super.dispose();
+  }
+
+  Future<void> buscarQualidadeAr({bool mostrarCarregamento = true}) async {
+    if (mostrarCarregamento) {
+      setState(() => carregando = true);
+    }
 
     try {
       final resposta = await http

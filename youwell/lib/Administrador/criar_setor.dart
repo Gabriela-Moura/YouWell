@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -39,23 +40,30 @@ class _CriarSetorState extends State<CriarSetor> {
 
   bool carregandoGerentes = true;
   bool salvando = false;
+  Timer? _timerAtualizacao;
 
   @override
   void initState() {
     super.initState();
     buscarGerentes();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      buscarGerentes(mostrarCarregamento: false, mostrarErro: false);
+    });
   }
 
   // BUSCAR GERENTES NO BANCO REAL
-  Future<void> buscarGerentes() async {
-    setState(() {
-      carregandoGerentes = true;
-    });
+  Future<void> buscarGerentes({
+    bool mostrarCarregamento = true,
+    bool mostrarErro = true,
+  }) async {
+    if (mostrarCarregamento) {
+      setState(() => carregandoGerentes = true);
+    }
 
     try {
-      final resposta = await http.get(
-        Uri.parse('${baseUrl}listar_gerentes.php'),
-      );
+      final resposta = await http
+          .get(Uri.parse('${baseUrl}listar_gerentes.php'))
+          .timeout(const Duration(seconds: 15));
 
       final dados = jsonDecode(resposta.body);
 
@@ -85,7 +93,9 @@ class _CriarSetorState extends State<CriarSetor> {
         carregandoGerentes = false;
       });
 
-      mostrarMensagem('Não foi possível carregar os gerentes.');
+      if (mostrarErro) {
+        mostrarMensagem('Não foi possível carregar os gerentes.');
+      }
     }
   }
 
@@ -474,6 +484,7 @@ class _CriarSetorState extends State<CriarSetor> {
 
   @override
   void dispose() {
+    _timerAtualizacao?.cancel();
     nomeSetorController.dispose();
     super.dispose();
   }

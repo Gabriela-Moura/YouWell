@@ -16,6 +16,7 @@ import 'package:youwell/services/monitor_alertas.dart';
 import 'dart:convert';
 import 'package:youwell/services/api_service.dart';
 import 'package:http/http.dart' as http;
+import 'dart:async';
 
 class SetorScreen extends StatefulWidget {
   final String nomeSetor;
@@ -44,11 +45,25 @@ class _SetorScreenState extends State<SetorScreen> {
   bool carregandoHistorico = true;
   String? erroHistorico;
 
+  Timer? timer;
+
   @override
   void initState() {
     super.initState();
+
     buscarMedicoes();
     buscarHistorico();
+
+    timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      buscarMedicoes();
+      buscarHistorico();
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   Future<void> buscarMedicoes() async {

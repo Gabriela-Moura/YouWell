@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:youwell/widgets/sino_alertas.dart';
 import 'package:youwell/Gerente/temperatura_screen.dart';
@@ -34,6 +35,7 @@ class _ArScreenState extends State<ArScreen> {
   List<Map<String, dynamic>> qualidadeAr = [];
   bool carregando = true;
   String? erro;
+  Timer? _timerAtualizacao;
 
   String get nomeSetor => widget.nomeSetor;
   String get nomeUsuario => widget.nomeUsuario;
@@ -68,6 +70,15 @@ class _ArScreenState extends State<ArScreen> {
   void initState() {
     super.initState();
     buscarQualidadeAr();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      buscarQualidadeAr();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timerAtualizacao?.cancel();
+    super.dispose();
   }
 
   Future<void> buscarQualidadeAr() async {

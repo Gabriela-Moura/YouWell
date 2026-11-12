@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:youwell/widgets/sino_alertas.dart';
@@ -27,6 +28,7 @@ class _GerenteScreenState extends State<GerenteScreen> {
 
   bool carregando = true;
   String? erro;
+  Timer? _timerAtualizacao;
 
   final String urlBuscarSetores =
       'https://devsbee.com.br/You-Well/controllers/buscar_setor.php';
@@ -38,13 +40,16 @@ class _GerenteScreenState extends State<GerenteScreen> {
     debugPrint('ID RECEBIDO PELO GERENTESCREEN: ${widget.idUsuario}');
     MonitorAlertas.iniciarGerente(idUsuario: widget.idUsuario);
     buscarSetores();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      buscarSetores(mostrarCarregamento: false);
+    });
   }
 
   // BUSCAR TODOS OS SETORES RESPONSÁVEIS PELO GERENTE
-  Future<void> buscarSetores() async {
+  Future<void> buscarSetores({bool mostrarCarregamento = true}) async {
     debugPrint('INICIOU A BUSCA DOS SETORES');
     setState(() {
-      carregando = true;
+      if (mostrarCarregamento) carregando = true;
       erro = null;
     });
 
@@ -99,6 +104,12 @@ class _GerenteScreenState extends State<GerenteScreen> {
         erro = e.toString();
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _timerAtualizacao?.cancel();
+    super.dispose();
   }
 
   @override

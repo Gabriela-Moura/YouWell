@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -37,6 +38,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
   bool carregandoSetores = true;
   String? erroSetores;
+  Timer? _timerAtualizacao;
 
   // Endereço da API
   final String urlBuscarSetores =
@@ -46,6 +48,9 @@ class _AdminScreenState extends State<AdminScreen> {
   void initState() {
     super.initState();
     buscarSetores();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      buscarSetores(mostrarCarregamento: false);
+    });
     final idUsuario = widget.idUsuario;
     if (idUsuario != null) {
       MonitorAlertas.iniciarAdmin(idUsuario: idUsuario);
@@ -53,14 +58,16 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   // BUSCAR TODOS OS SETORES NO BANCO DE DADOS
-  Future<void> buscarSetores() async {
+  Future<void> buscarSetores({bool mostrarCarregamento = true}) async {
     setState(() {
-      carregandoSetores = true;
+      if (mostrarCarregamento) carregandoSetores = true;
       erroSetores = null;
     });
 
     try {
-      final resposta = await http.post(Uri.parse(urlBuscarSetores));
+      final resposta = await http
+          .post(Uri.parse(urlBuscarSetores))
+          .timeout(const Duration(seconds: 15));
 
       debugPrint('Status setores: ${resposta.statusCode}');
       debugPrint('Resposta setores: ${resposta.body}');
@@ -71,6 +78,7 @@ class _AdminScreenState extends State<AdminScreen> {
         if (dados['success'] == true) {
           final List setoresRecebidos = dados['setores'] ?? [];
 
+          if (!mounted) return;
           setState(() {
             listaSetores = setoresRecebidos.map((setor) {
               return {
@@ -92,6 +100,7 @@ class _AdminScreenState extends State<AdminScreen> {
     } catch (e) {
       debugPrint('Erro ao buscar setores: $e');
 
+      if (!mounted) return;
       setState(() {
         carregandoSetores = false;
         erroSetores = e.toString();
@@ -514,6 +523,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   void dispose() {
+    _timerAtualizacao?.cancel();
     super.dispose();
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/main.dart';
@@ -35,6 +36,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
   List<Map<String, dynamic>> ruidos = [];
   bool carregando = true;
   String? erro;
+  Timer? _timerAtualizacao;
 
   String get nomeSetor => widget.nomeSetor;
   String get nomeUsuario => widget.nomeUsuario;
@@ -43,13 +45,21 @@ class _RuidoScreenState extends State<RuidoScreen> {
   void initState() {
     super.initState();
     buscarRuidos();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      buscarRuidos(mostrarCarregamento: false);
+    });
   }
 
-  Future<void> buscarRuidos() async {
-    setState(() {
-      carregando = true;
-      erro = null;
-    });
+  @override
+  void dispose() {
+    _timerAtualizacao?.cancel();
+    super.dispose();
+  }
+
+  Future<void> buscarRuidos({bool mostrarCarregamento = true}) async {
+    if (mostrarCarregamento) {
+      setState(() => carregando = true);
+    }
 
     try {
       final resposta = await http

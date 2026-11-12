@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ class _AlertaScreenState extends State<AlertaScreen> {
 
   bool carregando = true;
   String? erro;
+  Timer? _timerAtualizacao;
 
   // Endereço do PHP hospedado no cPanel.
   static const String url =
@@ -48,6 +50,15 @@ class _AlertaScreenState extends State<AlertaScreen> {
   void initState() {
     super.initState();
     buscarAlertas();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      buscarAlertas(mostrarCarregamento: false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timerAtualizacao?.cancel();
+    super.dispose();
   }
 
   // CONVERTER OS DADOS RECEBIDOS DO PHP PARA UMA LISTA.
@@ -178,11 +189,10 @@ class _AlertaScreenState extends State<AlertaScreen> {
   }
 
   // BUSCAR ALERTAS: UM SETOR (GERENTE) OU TODOS OS SETORES (ADMIN).
-  Future<void> buscarAlertas() async {
-    setState(() {
-      carregando = true;
-      erro = null;
-    });
+  Future<void> buscarAlertas({bool mostrarCarregamento = true}) async {
+    if (mostrarCarregamento) {
+      setState(() => carregando = true);
+    }
 
     try {
       final idSetor = widget.idSetor;

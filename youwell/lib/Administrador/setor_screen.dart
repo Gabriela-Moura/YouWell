@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/Administrador/temperatura_screen.dart';
@@ -34,6 +35,7 @@ class _SetorScreenState extends State<SetorScreen> {
   bool carregando = true;
   bool carregandoHistorico = true;
   String? erro;
+  Timer? _timerAtualizacao;
 
   String get nomeSetor => widget.nomeSetor;
   String get nomeUsuario => widget.nomeUsuario;
@@ -43,18 +45,30 @@ class _SetorScreenState extends State<SetorScreen> {
     super.initState();
     buscarDados();
     buscarHistorico();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      buscarDados();
+      buscarHistorico();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timerAtualizacao?.cancel();
+    super.dispose();
   }
 
   Future<void> buscarDados() async {
     try {
-      final resposta = await http.post(
-        Uri.parse(
-          'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
-        ),
-        body: widget.idSetor == null
-            ? <String, String>{}
-            : {'id_setor': widget.idSetor.toString()},
-      );
+      final resposta = await http
+          .post(
+            Uri.parse(
+              'https://devsbee.com.br/You-Well/controllers/buscar_medicoes.php',
+            ),
+            body: widget.idSetor == null
+                ? <String, String>{}
+                : {'id_setor': widget.idSetor.toString()},
+          )
+          .timeout(const Duration(seconds: 15));
       if (resposta.statusCode != 200) {
         throw Exception('Erro HTTP: ${resposta.statusCode}');
       }

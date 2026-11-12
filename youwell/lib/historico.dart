@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:youwell/services/monitor_alertas.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -14,11 +16,21 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
   List<Map<String, dynamic>> historico = [];
   bool carregando = true;
   String? erro;
+  Timer? _timerAtualizacao;
 
   @override
   void initState() {
     super.initState();
     carregarHistorico();
+    _timerAtualizacao = Timer.periodic(const Duration(minutes: 1), (_) {
+      carregarHistorico(mostrarCarregamento: false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timerAtualizacao?.cancel();
+    super.dispose();
   }
 
   DateTime? interpretarData(dynamic valor) {
@@ -35,11 +47,10 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
         '${d.year}';
   }
 
-  Future<void> carregarHistorico() async {
-    setState(() {
-      carregando = true;
-      erro = null;
-    });
+  Future<void> carregarHistorico({bool mostrarCarregamento = true}) async {
+    if (mostrarCarregamento) {
+      setState(() => carregando = true);
+    }
 
     try {
       final registros = await MonitorAlertas.buscarHistoricoAlertas();
@@ -48,6 +59,7 @@ class _HistoricoScreenState extends State<HistoricoScreen> {
       setState(() {
         historico = registros;
         carregando = false;
+        erro = null;
       });
     } catch (e) {
       if (!mounted) return;
