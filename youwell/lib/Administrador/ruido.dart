@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/main.dart';
+import 'package:youwell/login_screen.dart';
 import 'package:youwell/Administrador/temperatura_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -195,6 +196,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       idSetor: null,
                       nomeSetor: nomeSetor,
                       nomeAdmin: nomeUsuario,
+                      fotoPerfil: null,
                     ),
                   ),
                 );
@@ -317,6 +319,26 @@ class _RuidoScreenState extends State<RuidoScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => HistoricoScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text(
+                "Logout",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(
+                      nomeSetor: nomeSetor,
+                    ),
+                  ),
                 );
               },
             ),

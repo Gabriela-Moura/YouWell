@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:youwell/main.dart';
+import 'package:youwell/login_screen.dart';
 import 'package:youwell/Administrador/criar_setor.dart';
 import 'package:youwell/Administrador/setor_screen.dart';
 import 'package:youwell/alertas.dart';
@@ -254,6 +255,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                       idSetor: null,
                       nomeSetor: widget.nomeSetor,
                       nomeAdmin: widget.nomeAdmin,
+                      fotoPerfil: null,
                     ),
                   ),
                 );
@@ -332,6 +334,26 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => HistoricoScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text(
+                'Logout',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(
+                      nomeSetor: widget.nomeSetor,
+                    ),
                   ),
                 );
               },

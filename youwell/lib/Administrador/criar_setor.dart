@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:youwell/admin.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
+import 'package:youwell/login_screen.dart';
 import 'package:youwell/Administrador/novo_usuario.dart';
 import 'package:youwell/Administrador/setor_screen.dart';
 
@@ -189,6 +190,7 @@ class _CriarSetorState extends State<CriarSetor> {
                     builder: (context) => AdminScreen(
                       idSetor: widget.idSetor,
                       nomeSetor: widget.nomeSetor,
+                      fotoPerfil: null,
                       nomeAdmin: widget.nomeAdmin,
                     ),
                   ),
@@ -259,6 +261,26 @@ class _CriarSetorState extends State<CriarSetor> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => HistoricoScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text(
+                'Logout',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(
+                      nomeSetor: widget.nomeSetor,
+                    ),
+                  ),
                 );
               },
             ),

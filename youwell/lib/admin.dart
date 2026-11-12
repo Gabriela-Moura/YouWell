@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -14,12 +13,14 @@ class AdminScreen extends StatefulWidget {
   final String nomeAdmin;
   final String nomeSetor;
   final int? idSetor;
+  final String? fotoPerfil;
 
   const AdminScreen({
     super.key,
     required this.nomeAdmin,
     required this.nomeSetor,
     required this.idSetor,
+    required this.fotoPerfil,
   });
 
   @override
@@ -51,9 +52,7 @@ class _AdminScreenState extends State<AdminScreen> {
     });
 
     try {
-      final resposta = await http.post(
-        Uri.parse(urlBuscarSetores),
-      );
+      final resposta = await http.post(Uri.parse(urlBuscarSetores));
 
       debugPrint('Status setores: ${resposta.statusCode}');
       debugPrint('Resposta setores: ${resposta.body}');
@@ -80,9 +79,7 @@ class _AdminScreenState extends State<AdminScreen> {
           );
         }
       } else {
-        throw Exception(
-          'Erro HTTP ${resposta.statusCode}: ${resposta.body}',
-        );
+        throw Exception('Erro HTTP ${resposta.statusCode}: ${resposta.body}');
       }
     } catch (e) {
       debugPrint('Erro ao buscar setores: $e');
@@ -228,9 +225,10 @@ class _AdminScreenState extends State<AdminScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginScreen(
-                    nomeSetor: widget.nomeSetor,
-                  )),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        LoginScreen(nomeSetor: widget.nomeSetor),
+                  ),
                 );
               },
             ),
@@ -256,9 +254,15 @@ class _AdminScreenState extends State<AdminScreen> {
                   style: const TextStyle(fontSize: 18),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(
+                CircleAvatar(
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, color: verde),
+                  backgroundImage:
+                      widget.fotoPerfil != null && widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(Icons.person, color: verde)
+                      : null,
                 ),
               ],
             ),
@@ -306,7 +310,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: CircularProgressIndicator(color: verde),
                 ),
               )
-
             // ERRO AO BUSCAR SETORES
             else if (erroSetores != null)
               Card(
@@ -344,7 +347,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                 ),
               )
-
             // NENHUM SETOR CADASTRADO
             else if (listaSetores.isEmpty)
               const Card(
@@ -353,7 +355,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: Text('Nenhum setor cadastrado.'),
                 ),
               )
-
             // LISTA DE SETORES DO BANCO REAL
             else
               ...listaSetores.map((setor) {
@@ -430,10 +431,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                   child: const Text(
                     'Novo Setor',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
 
@@ -466,10 +464,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                   child: const Text(
                     'Novo Usuário',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],

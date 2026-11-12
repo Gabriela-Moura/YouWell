@@ -84,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       final String nome = dados['nome'].toString();
+      final String? fotoPerfil = dados['foto_perfil']?.toString();
       final String papel = dados['papel'].toString().trim().toLowerCase();
 
       // ID do usuário que realizou o login
@@ -126,8 +127,12 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                AdminScreen(nomeAdmin: nome, nomeSetor: 'null', idSetor: null),
+            builder: (_) => AdminScreen(
+              nomeAdmin: nome,
+              nomeSetor: 'null',
+              idSetor: null,
+              fotoPerfil: fotoPerfil,
+            ),
           ),
         );
       } else {

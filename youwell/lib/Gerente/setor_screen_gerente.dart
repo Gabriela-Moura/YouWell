@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/gerente.dart';
 import 'package:youwell/main.dart';
+import 'package:youwell/login_screen.dart';
 import 'package:youwell/Gerente/temperatura_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -413,6 +414,26 @@ class _SetorScreenState extends State<SetorScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => HistoricoScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text(
+                "Logout",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(
+                      nomeSetor: widget.nomeSetor,
+                    ),
+                  ),
                 );
               },
             ),

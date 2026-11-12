@@ -6,6 +6,7 @@ import 'package:youwell/Administrador/qualidade_ar.dart';
 import 'package:youwell/Administrador/ruido.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
+import 'package:youwell/login_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -228,6 +229,7 @@ class _SetorScreenState extends State<SetorScreen> {
                     builder: (context) => AdminScreen(
                       idSetor: null,
                       nomeSetor: nomeSetor,
+                      fotoPerfil: null,
                       nomeAdmin: nomeUsuario,
                     ),
                   ),
@@ -372,6 +374,26 @@ class _SetorScreenState extends State<SetorScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => HistoricoScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text(
+                "Logout",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(
+                      nomeSetor: widget.nomeSetor,
+                    ),
+                  ),
                 );
               },
             ),
