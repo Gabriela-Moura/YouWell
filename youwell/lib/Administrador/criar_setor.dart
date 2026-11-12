@@ -14,12 +14,14 @@ class CriarSetor extends StatefulWidget {
   final String nomeAdmin;
   final String nomeSetor;
   final int? idSetor;
+  final String? fotoPerfil;
 
   const CriarSetor({
     super.key,
     required this.nomeAdmin,
     required this.nomeSetor,
     this.idSetor,
+    this.fotoPerfil,
   });
 
   @override
@@ -190,7 +192,7 @@ class _CriarSetorState extends State<CriarSetor> {
                     builder: (context) => AdminScreen(
                       idSetor: widget.idSetor,
                       nomeSetor: widget.nomeSetor,
-                      fotoPerfil: null,
+                      fotoPerfil: widget.fotoPerfil,
                       nomeAdmin: widget.nomeAdmin,
                     ),
                   ),
@@ -208,6 +210,7 @@ class _CriarSetorState extends State<CriarSetor> {
                     builder: (context) => SetorScreen(
                       nomeSetor: widget.nomeSetor,
                       nomeUsuario: widget.nomeAdmin,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -232,6 +235,7 @@ class _CriarSetorState extends State<CriarSetor> {
                     builder: (context) => NovoUsuario(
                       nomeSetor: widget.nomeSetor,
                       nomeAdmin: widget.nomeAdmin,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -277,9 +281,8 @@ class _CriarSetorState extends State<CriarSetor> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => LoginScreen(
-                      nomeSetor: widget.nomeSetor,
-                    ),
+                    builder: (context) =>
+                        LoginScreen(nomeSetor: widget.nomeSetor),
                   ),
                 );
               },
@@ -306,9 +309,15 @@ class _CriarSetorState extends State<CriarSetor> {
                   style: const TextStyle(fontSize: 15),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(
+                CircleAvatar(
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, color: verde),
+                  backgroundImage:
+                      widget.fotoPerfil != null && widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(Icons.person, color: verde)
+                      : null,
                 ),
               ],
             ),

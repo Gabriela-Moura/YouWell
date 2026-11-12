@@ -147,6 +147,7 @@ class _AdminScreenState extends State<AdminScreen> {
                     builder: (context) => CriarSetor(
                       nomeSetor: widget.nomeSetor,
                       nomeAdmin: widget.nomeAdmin,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -169,6 +170,7 @@ class _AdminScreenState extends State<AdminScreen> {
                     builder: (context) => NovoUsuario(
                       nomeSetor: widget.nomeSetor,
                       nomeAdmin: widget.nomeAdmin,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -389,6 +391,7 @@ class _AdminScreenState extends State<AdminScreen> {
                             nomeSetor: setor['nome'] as String,
                             nomeUsuario: widget.nomeAdmin,
                             idSetor: setor['id_setor'] as int,
+                            fotoPerfil: widget.fotoPerfil,
                           ),
                         ),
                       );
@@ -410,6 +413,7 @@ class _AdminScreenState extends State<AdminScreen> {
                         builder: (context) => CriarSetor(
                           nomeSetor: widget.nomeSetor,
                           nomeAdmin: widget.nomeAdmin,
+                          fotoPerfil: widget.fotoPerfil,
                         ),
                       ),
                     ).then((_) {
@@ -445,6 +449,7 @@ class _AdminScreenState extends State<AdminScreen> {
                         builder: (context) => NovoUsuario(
                           nomeSetor: widget.nomeSetor,
                           nomeAdmin: widget.nomeAdmin,
+                          fotoPerfil: widget.fotoPerfil,
                         ),
                       ),
                     );

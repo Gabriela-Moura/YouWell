@@ -17,12 +17,14 @@ class RuidoScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
   final int? idSetor;
+  final String? fotoPerfil;
 
   const RuidoScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
     this.idSetor,
+    this.fotoPerfil,
   });
 
   @override
@@ -80,9 +82,11 @@ class _RuidoScreenState extends State<RuidoScreen> {
       }
 
       final lista = converterRuidos(dados['ruido']);
-      lista.sort((a, b) => (a['data_hora'] ?? '')
-          .toString()
-          .compareTo((b['data_hora'] ?? '').toString()));
+      lista.sort(
+        (a, b) => (a['data_hora'] ?? '').toString().compareTo(
+          (b['data_hora'] ?? '').toString(),
+        ),
+      );
       if (!mounted) return;
       setState(() {
         ruidos = lista;
@@ -151,12 +155,16 @@ class _RuidoScreenState extends State<RuidoScreen> {
 
   double get menorRuido {
     if (ultimosRuidos.isEmpty) return 0;
-    return ultimosRuidos.map((item) => double.tryParse(item['valor'].toString()) ?? 0).reduce((a, b) => a < b ? a : b);
+    return ultimosRuidos
+        .map((item) => double.tryParse(item['valor'].toString()) ?? 0)
+        .reduce((a, b) => a < b ? a : b);
   }
 
   double get maiorRuido {
     if (ultimosRuidos.isEmpty) return 100;
-    return ultimosRuidos.map((item) => double.tryParse(item['valor'].toString()) ?? 0).reduce((a, b) => a > b ? a : b);
+    return ultimosRuidos
+        .map((item) => double.tryParse(item['valor'].toString()) ?? 0)
+        .reduce((a, b) => a > b ? a : b);
   }
 
   @override
@@ -196,7 +204,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       idSetor: null,
                       nomeSetor: nomeSetor,
                       nomeAdmin: nomeUsuario,
-                      fotoPerfil: null,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -216,6 +224,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -238,6 +247,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -260,6 +270,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -282,6 +293,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -299,10 +311,10 @@ class _RuidoScreenState extends State<RuidoScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen( 
-                    idSetor: null,
-                    nomeSetor: nomeSetor,
-                  )),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AlertaScreen(idSetor: null, nomeSetor: nomeSetor),
+                  ),
                 );
               },
             ),
@@ -335,9 +347,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => LoginScreen(
-                      nomeSetor: nomeSetor,
-                    ),
+                    builder: (context) => LoginScreen(nomeSetor: nomeSetor),
                   ),
                 );
               },
@@ -361,7 +371,19 @@ class _RuidoScreenState extends State<RuidoScreen> {
                   style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(child: Icon(Icons.person)),
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage:
+                      widget.fotoPerfil != null && widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(
+                          Icons.person,
+                          color: Color.fromARGB(255, 10, 85, 64),
+                        )
+                      : null,
+                ),
               ],
             ),
           ),
@@ -377,7 +399,11 @@ class _RuidoScreenState extends State<RuidoScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 40,
+                    ),
                     const SizedBox(height: 12),
                     Text(erro!, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
@@ -414,194 +440,260 @@ class _RuidoScreenState extends State<RuidoScreen> {
               ),
             )
           : SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Card(
-                elevation: 2,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Center(
-                        child: Text(
-                          'Ruído',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 10, 85, 64),
-                          ),
-                        ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Card(
+                      elevation: 2,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      const SizedBox(height: 4),
-                      Center(child: Text('Variação ao longo do dia', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.grey[600]))),
-                      const SizedBox(height: 16),
-                      SizedBox(height: 230, child: LineChart(
-                  LineChartData(
-                    minY: menorRuido - 5,
-                    maxY: maiorRuido + 5,
-                    gridData: FlGridData(
-                      show: true,
-                      horizontalInterval: 5,
-                      verticalInterval: 2,
-                      getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey.withValues(alpha: 0.18), strokeWidth: 1),
-                      getDrawingVerticalLine: (value) => FlLine(color: Colors.grey.withValues(alpha: 0.12), strokeWidth: 1),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    titlesData: FlTitlesData(
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          interval: 1,
-
-                          getTitlesWidget: (value, meta) {
-                            int indice = value.toInt();
-
-                            if (indice >= 0 && indice < ultimosRuidos.length) {
-                              final dataHora = DateTime.tryParse(ultimosRuidos[indice]['data_hora'].toString());
-                              return Text(dataHora == null ? '' : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}');
-                            }
-
-                            return const Text("");
-                          },
-                        ),
-                      ),
-
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 45,
-                          interval: 5,
-                        ),
-                      ),
-
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                    ),
-
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: ultimosRuidos.asMap().entries.map((item) {
-                          int indice = item.key;
-
-                          double ruido = double.tryParse(item.value["valor"].toString()) ?? 0;
-
-                          return FlSpot(indice.toDouble(), ruido);
-                        }).toList(),
-
-                        isCurved: true,
-                        color: Colors.blue,
-                        barWidth: 3,
-                        dotData: const FlDotData(show: true),
-                        belowBarData: BarAreaData(show: true, color: Colors.blue.withValues(alpha: 0.12)),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              Card(
-                elevation: 2,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Center(
-                        child: Text(
-                          'Histórico detalhado',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 10, 85, 64)),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Table(
-                    columnWidths: const {
-                      0: FlexColumnWidth(1.5),
-                      1: FlexColumnWidth(1),
-                      2: FlexColumnWidth(1),
-                    },
-
-                    children: [
-                      // CABEÇALHO
-                      const TableRow(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(5),
-                            child: Text(
-                              "Data",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-
-                          Padding(
-                            padding: EdgeInsets.all(5),
-                            child: Text(
-                              "Hora",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-
-                          Padding(
-                            padding: EdgeInsets.all(5),
-                            child: Text(
-                              "Valor",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // DADOS
-                      ...ultimosRuidos.map((dado) {
-                        final dataHora = DateTime.tryParse(dado['data_hora'].toString());
-                        return TableRow(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Text(dataHora == null ? '' : _formatarData('${dataHora.year}-${dataHora.month.toString().padLeft(2, '0')}-${dataHora.day.toString().padLeft(2, '0')}')),
+                            const Center(
+                              child: Text(
+                                'Ruído',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 10, 85, 64),
+                                ),
+                              ),
                             ),
-
-                            Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Text(dataHora == null ? '' : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}'),
+                            const SizedBox(height: 4),
+                            Center(
+                              child: Text(
+                                'Variação ao longo do dia',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
                             ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              height: 230,
+                              child: LineChart(
+                                LineChartData(
+                                  minY: menorRuido - 5,
+                                  maxY: maiorRuido + 5,
+                                  gridData: FlGridData(
+                                    show: true,
+                                    horizontalInterval: 5,
+                                    verticalInterval: 2,
+                                    getDrawingHorizontalLine: (value) => FlLine(
+                                      color: Colors.grey.withValues(
+                                        alpha: 0.18,
+                                      ),
+                                      strokeWidth: 1,
+                                    ),
+                                    getDrawingVerticalLine: (value) => FlLine(
+                                      color: Colors.grey.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                      strokeWidth: 1,
+                                    ),
+                                  ),
+                                  borderData: FlBorderData(show: false),
+                                  titlesData: FlTitlesData(
+                                    bottomTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        interval: 1,
 
-                            Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Text("${dado["valor"]} dB"),
+                                        getTitlesWidget: (value, meta) {
+                                          int indice = value.toInt();
+
+                                          if (indice >= 0 &&
+                                              indice < ultimosRuidos.length) {
+                                            final dataHora = DateTime.tryParse(
+                                              ultimosRuidos[indice]['data_hora']
+                                                  .toString(),
+                                            );
+                                            return Text(
+                                              dataHora == null
+                                                  ? ''
+                                                  : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}',
+                                            );
+                                          }
+
+                                          return const Text("");
+                                        },
+                                      ),
+                                    ),
+
+                                    leftTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        reservedSize: 45,
+                                        interval: 5,
+                                      ),
+                                    ),
+
+                                    topTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+
+                                    rightTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                  ),
+
+                                  lineBarsData: [
+                                    LineChartBarData(
+                                      spots: ultimosRuidos.asMap().entries.map((
+                                        item,
+                                      ) {
+                                        int indice = item.key;
+
+                                        double ruido =
+                                            double.tryParse(
+                                              item.value["valor"].toString(),
+                                            ) ??
+                                            0;
+
+                                        return FlSpot(indice.toDouble(), ruido);
+                                      }).toList(),
+
+                                      isCurved: true,
+                                      color: Colors.blue,
+                                      barWidth: 3,
+                                      dotData: const FlDotData(show: true),
+                                      belowBarData: BarAreaData(
+                                        show: true,
+                                        color: Colors.blue.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ],
-                        );
-                      }),
-                    ],
-                  ),
-                ],
-              ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Card(
+                      elevation: 2,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Center(
+                              child: Text(
+                                'Histórico detalhado',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 10, 85, 64),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Table(
+                              columnWidths: const {
+                                0: FlexColumnWidth(1.5),
+                                1: FlexColumnWidth(1),
+                                2: FlexColumnWidth(1),
+                              },
+
+                              children: [
+                                // CABEÇALHO
+                                const TableRow(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: Text(
+                                        "Data",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+
+                                    Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: Text(
+                                        "Hora",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+
+                                    Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: Text(
+                                        "Valor",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                // DADOS
+                                ...ultimosRuidos.map((dado) {
+                                  final dataHora = DateTime.tryParse(
+                                    dado['data_hora'].toString(),
+                                  );
+                                  return TableRow(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(5),
+                                        child: Text(
+                                          dataHora == null
+                                              ? ''
+                                              : _formatarData(
+                                                  '${dataHora.year}-${dataHora.month.toString().padLeft(2, '0')}-${dataHora.day.toString().padLeft(2, '0')}',
+                                                ),
+                                        ),
+                                      ),
+
+                                      Padding(
+                                        padding: const EdgeInsets.all(5),
+                                        child: Text(
+                                          dataHora == null
+                                              ? ''
+                                              : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}',
+                                        ),
+                                      ),
+
+                                      Padding(
+                                        padding: const EdgeInsets.all(5),
+                                        child: Text("${dado["valor"]} dB"),
+                                      ),
+                                    ],
+                                  );
+                                }),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

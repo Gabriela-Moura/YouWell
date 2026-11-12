@@ -14,12 +14,14 @@ class SetorScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
   final int? idSetor;
+  final String? fotoPerfil;
 
   const SetorScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
     this.idSetor,
+    this.fotoPerfil,
   });
 
   @override
@@ -229,7 +231,7 @@ class _SetorScreenState extends State<SetorScreen> {
                     builder: (context) => AdminScreen(
                       idSetor: null,
                       nomeSetor: nomeSetor,
-                      fotoPerfil: null,
+                      fotoPerfil: widget.fotoPerfil,
                       nomeAdmin: nomeUsuario,
                     ),
                   ),
@@ -255,6 +257,7 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -279,6 +282,7 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -304,6 +308,7 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -329,6 +334,7 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -390,9 +396,8 @@ class _SetorScreenState extends State<SetorScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => LoginScreen(
-                      nomeSetor: widget.nomeSetor,
-                    ),
+                    builder: (context) =>
+                        LoginScreen(nomeSetor: widget.nomeSetor),
                   ),
                 );
               },
@@ -416,7 +421,19 @@ class _SetorScreenState extends State<SetorScreen> {
                   style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(child: Icon(Icons.person)),
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage:
+                      widget.fotoPerfil != null && widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(
+                          Icons.person,
+                          color: Color.fromARGB(255, 10, 85, 64),
+                        )
+                      : null,
+                ),
               ],
             ),
           ),

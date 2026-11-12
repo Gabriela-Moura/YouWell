@@ -18,12 +18,14 @@ class TemperaturaScreen extends StatefulWidget {
   final String nomeSetor;
   final String nomeUsuario;
   final int? idSetor;
+  final String? fotoPerfil;
 
   const TemperaturaScreen({
     super.key,
     required this.nomeSetor,
     required this.nomeUsuario,
     this.idSetor,
+    this.fotoPerfil,
   });
 
   @override
@@ -79,8 +81,11 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
       if (!mounted) return;
       setState(() {
         temperaturas = lista;
-        temperaturas.sort((a, b) =>
-            (a['data_hora'] ?? '').toString().compareTo((b['data_hora'] ?? '').toString()));
+        temperaturas.sort(
+          (a, b) => (a['data_hora'] ?? '').toString().compareTo(
+            (b['data_hora'] ?? '').toString(),
+          ),
+        );
         carregando = false;
         erro = null;
       });
@@ -210,7 +215,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       idSetor: null,
                       nomeSetor: nomeSetor,
                       nomeAdmin: nomeUsuario,
-                      fotoPerfil: null,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -230,6 +235,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -255,6 +261,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -277,6 +284,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -299,6 +307,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeSetor: nomeSetor,
                       nomeUsuario: nomeUsuario,
                       idSetor: widget.idSetor,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -316,10 +325,10 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AlertaScreen(
-                    nomeSetor: nomeSetor,
-                    idSetor: null
-                  )),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AlertaScreen(nomeSetor: nomeSetor, idSetor: null),
+                  ),
                 );
               },
             ),
@@ -352,9 +361,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => LoginScreen(
-                      nomeSetor: nomeSetor,
-                    ),
+                    builder: (context) => LoginScreen(nomeSetor: nomeSetor),
                   ),
                 );
               },
@@ -381,7 +388,19 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
 
                 SizedBox(width: 10),
 
-                CircleAvatar(child: Icon(Icons.person)),
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage:
+                      widget.fotoPerfil != null && widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(
+                          Icons.person,
+                          color: Color.fromARGB(255, 10, 85, 64),
+                        )
+                      : null,
+                ),
               ],
             ),
           ),
@@ -397,7 +416,11 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 40,
+                    ),
                     const SizedBox(height: 12),
                     Text(erro!, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
@@ -438,242 +461,279 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
               ),
             )
           : SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Card(
-                elevation: 2,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Center(
-                        child: Text(
-                          'Temperatura',
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Card(
+                      elevation: 2,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Center(
+                              child: Text(
+                                'Temperatura',
 
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 10, 85, 64),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Center(
-                        child: Text(
-                          'Variação ao longo do dia',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        height: 230,
-                        child: LineChart(
-                          LineChartData(
-                            minY: menorTemperatura,
-                            maxY: maiorTemperatura,
-                            gridData: FlGridData(
-                              show: true,
-                              horizontalInterval: intervaloTemperatura,
-                              getDrawingHorizontalLine: (value) => FlLine(
-                                color: Colors.grey.withValues(alpha: 0.18),
-                                strokeWidth: 1,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 10, 85, 64),
+                                ),
                               ),
                             ),
-                            borderData: FlBorderData(show: false),
-                            titlesData: FlTitlesData(
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  interval: ultimasTemperaturas.length > 6
-                                      ? 2
-                                      : 1,
+                            const SizedBox(height: 4),
+                            Center(
+                              child: Text(
+                                'Variação ao longo do dia',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              height: 230,
+                              child: LineChart(
+                                LineChartData(
+                                  minY: menorTemperatura,
+                                  maxY: maiorTemperatura,
+                                  gridData: FlGridData(
+                                    show: true,
+                                    horizontalInterval: intervaloTemperatura,
+                                    getDrawingHorizontalLine: (value) => FlLine(
+                                      color: Colors.grey.withValues(
+                                        alpha: 0.18,
+                                      ),
+                                      strokeWidth: 1,
+                                    ),
+                                  ),
+                                  borderData: FlBorderData(show: false),
+                                  titlesData: FlTitlesData(
+                                    bottomTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        interval: ultimasTemperaturas.length > 6
+                                            ? 2
+                                            : 1,
 
-                                  getTitlesWidget: (value, meta) {
-                                    int indice = value.toInt();
+                                        getTitlesWidget: (value, meta) {
+                                          int indice = value.toInt();
 
-                                    if (indice >= 0 &&
-                                        indice < ultimasTemperaturas.length) {
-                                      final dataHora = DateTime.tryParse(
-                                        ultimasTemperaturas[indice]['data_hora']
-                                            .toString(),
-                                      );
-                                      return Padding(
-                                        padding: const EdgeInsets.only(top: 8),
+                                          if (indice >= 0 &&
+                                              indice <
+                                                  ultimasTemperaturas.length) {
+                                            final dataHora = DateTime.tryParse(
+                                              ultimasTemperaturas[indice]['data_hora']
+                                                  .toString(),
+                                            );
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 8,
+                                              ),
+                                              child: Text(
+                                                dataHora == null
+                                                    ? ''
+                                                    : '${dataHora.hour.toString().padLeft(2, '0')}:'
+                                                          '${dataHora.minute.toString().padLeft(2, '0')}',
+                                                style: const TextStyle(
+                                                  fontSize: 10,
+                                                ),
+                                              ),
+                                            );
+                                          }
+
+                                          return const SizedBox.shrink();
+                                        },
+                                      ),
+                                    ),
+
+                                    leftTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        reservedSize: 65,
+                                        interval: intervaloTemperatura,
+                                        getTitlesWidget: (value, meta) {
+                                          return Text(
+                                            value.toStringAsFixed(1),
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+
+                                    topTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+
+                                    rightTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                  ),
+
+                                  lineBarsData: [
+                                    LineChartBarData(
+                                      spots: ultimasTemperaturas
+                                          .asMap()
+                                          .entries
+                                          .map((item) {
+                                            int indice = item.key;
+                                            double temperatura =
+                                                double.tryParse(
+                                                  item.value["valor"]
+                                                      .toString(),
+                                                ) ??
+                                                0;
+
+                                            return FlSpot(
+                                              indice.toDouble(),
+                                              temperatura,
+                                            );
+                                          })
+                                          .toList(),
+
+                                      isCurved: true,
+                                      color: Colors.deepOrange,
+                                      barWidth: 3,
+                                      dotData: const FlDotData(show: true),
+                                      belowBarData: BarAreaData(
+                                        show: true,
+                                        color: Colors.deepOrange.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Card(
+                      elevation: 2,
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Center(
+                              child: Text(
+                                'Histórico detalhado',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 10, 85, 64),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Table(
+                              columnWidths: const {
+                                0: FlexColumnWidth(1.5),
+                                1: FlexColumnWidth(1),
+                                2: FlexColumnWidth(1),
+                              },
+
+                              children: [
+                                // CABEÇALHO
+                                const TableRow(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: Text(
+                                        "Data",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+
+                                    Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: Text(
+                                        "Hora",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+
+                                    Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: Text(
+                                        "Valor",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                // DADOS
+                                ...ultimasTemperaturas.map((dado) {
+                                  final dataHora = DateTime.tryParse(
+                                    dado['data_hora'].toString(),
+                                  );
+                                  return TableRow(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(5),
                                         child: Text(
                                           dataHora == null
                                               ? ''
-                                              : '${dataHora.hour.toString().padLeft(2, '0')}:'
-                                                    '${dataHora.minute.toString().padLeft(2, '0')}',
-                                          style: const TextStyle(fontSize: 10),
+                                              : _formatarData(
+                                                  '${dataHora.year}-${dataHora.month.toString().padLeft(2, '0')}-${dataHora.day.toString().padLeft(2, '0')}',
+                                                ),
                                         ),
-                                      );
-                                    }
+                                      ),
 
-                                    return const SizedBox.shrink();
-                                  },
-                                ),
-                              ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(5),
+                                        child: Text(
+                                          dataHora == null
+                                              ? ''
+                                              : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}',
+                                        ),
+                                      ),
 
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 65,
-                                  interval: intervaloTemperatura,
-                                  getTitlesWidget: (value, meta) {
-                                    return Text(
-                                      value.toStringAsFixed(1),
-                                      style: const TextStyle(fontSize: 10),
-                                    );
-                                  },
-                                ),
-                              ),
-
-                              topTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-
-                              rightTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                            ),
-
-                            lineBarsData: [
-                              LineChartBarData(
-                                spots: ultimasTemperaturas.asMap().entries.map((item) {
-                                  int indice = item.key;
-                                  double temperatura =
-                                      double.tryParse(item.value["valor"].toString()) ?? 0;
-
-                                  return FlSpot(indice.toDouble(), temperatura);
-                                }).toList(),
-
-                                isCurved: true,
-                                color: Colors.deepOrange,
-                                barWidth: 3,
-                                dotData: const FlDotData(show: true),
-                                belowBarData: BarAreaData(
-                                  show: true,
-                                  color: Colors.deepOrange.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              Card(
-                elevation: 2,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Center(
-                        child: Text(
-                          'Histórico detalhado',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 10, 85, 64),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Table(
-                        columnWidths: const {
-                          0: FlexColumnWidth(1.5),
-                          1: FlexColumnWidth(1),
-                          2: FlexColumnWidth(1),
-                        },
-
-                        children: [
-                          // CABEÇALHO
-                          const TableRow(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.all(5),
-                                child: Text(
-                                  "Data",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-
-                              Padding(
-                                padding: EdgeInsets.all(5),
-                                child: Text(
-                                  "Hora",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-
-                              Padding(
-                                padding: EdgeInsets.all(5),
-                                child: Text(
-                                  "Valor",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          // DADOS
-                          ...ultimasTemperaturas.map((dado) {
-                            final dataHora = DateTime.tryParse(dado['data_hora'].toString());
-                            return TableRow(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Text(dataHora == null
-                                      ? ''
-                                      : _formatarData('${dataHora.year}-${dataHora.month.toString().padLeft(2, '0')}-${dataHora.day.toString().padLeft(2, '0')}')),
-                                ),
-
-                                Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Text(dataHora == null
-                                      ? ''
-                                      : '${dataHora.hour.toString().padLeft(2, '0')}:${dataHora.minute.toString().padLeft(2, '0')}'),
-                                ),
-
-                                Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Text("${dado["valor"]} °C"),
-                                ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(5),
+                                        child: Text("${dado["valor"]} °C"),
+                                      ),
+                                    ],
+                                  );
+                                }),
                               ],
-                            );
-                          }),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

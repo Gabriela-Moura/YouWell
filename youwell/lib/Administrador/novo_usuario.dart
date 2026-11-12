@@ -13,11 +13,13 @@ import 'package:youwell/admin.dart';
 class NovoUsuario extends StatefulWidget {
   final String nomeAdmin;
   final String nomeSetor;
+  final String? fotoPerfil;
 
   const NovoUsuario({
     super.key,
     required this.nomeAdmin,
     required this.nomeSetor,
+    this.fotoPerfil,
   });
 
   @override
@@ -32,7 +34,9 @@ class _NovoUsuarioState extends State<NovoUsuario> {
   final String baseUrl = 'https://devsbee.com.br/You-Well/controllers/';
 
   // Mesma regra de caractere especial usada no PHP.
-  static final RegExp _regexEspecial = RegExp(r'[@#$%^&*()_+\-=\[\]{};":\\|,.<>/?]');
+  static final RegExp _regexEspecial = RegExp(
+    r'[@#$%^&*()_+\-=\[\]{};":\\|,.<>/?]',
+  );
   static final RegExp _regexMaiuscula = RegExp(r'[A-Z]');
 
   String papelSelecionado = 'gerente';
@@ -184,7 +188,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
         mostrarMensagem(
           resposta.body.trim().isEmpty
               ? 'O servidor respondeu vazio (HTTP ${resposta.statusCode}). '
-                  'Verifique o cadastrar_usuario.php no servidor.'
+                    'Verifique o cadastrar_usuario.php no servidor.'
               : 'Resposta inesperada do servidor (HTTP ${resposta.statusCode}).',
         );
       } else if (dados['success'] == true) {
@@ -216,9 +220,9 @@ class _NovoUsuarioState extends State<NovoUsuario> {
   void mostrarMensagem(String mensagem) {
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensagem)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(mensagem)));
   }
 
   @override
@@ -255,7 +259,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                       idSetor: null,
                       nomeSetor: widget.nomeSetor,
                       nomeAdmin: widget.nomeAdmin,
-                      fotoPerfil: null,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -272,6 +276,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                     builder: (context) => SetorScreen(
                       nomeSetor: widget.nomeSetor,
                       nomeUsuario: widget.nomeAdmin,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -288,6 +293,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                     builder: (context) => CriarSetor(
                       nomeSetor: widget.nomeSetor,
                       nomeAdmin: widget.nomeAdmin,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -304,6 +310,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                     builder: (context) => NovoUsuario(
                       nomeSetor: widget.nomeSetor,
                       nomeAdmin: widget.nomeAdmin,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -332,9 +339,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => HistoricoScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => HistoricoScreen()),
                 );
               },
             ),
@@ -351,9 +356,8 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => LoginScreen(
-                      nomeSetor: widget.nomeSetor,
-                    ),
+                    builder: (context) =>
+                        LoginScreen(nomeSetor: widget.nomeSetor),
                   ),
                 );
               },
@@ -380,9 +384,15 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                   style: const TextStyle(fontSize: 15),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(
+                CircleAvatar(
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, color: verde),
+                  backgroundImage:
+                      widget.fotoPerfil != null && widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(Icons.person, color: verde)
+                      : null,
                 ),
               ],
             ),
@@ -407,19 +417,12 @@ class _NovoUsuarioState extends State<NovoUsuario> {
 
             Text(
               'Gerencie os setores e os usuários do YouWell.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[700],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
             ),
 
             const SizedBox(height: 24),
 
-            _tituloSecao(
-              Icons.person_add_alt_1,
-              'Criar usuário',
-              verde,
-            ),
+            _tituloSecao(Icons.person_add_alt_1, 'Criar usuário', verde),
 
             const SizedBox(height: 12),
 
@@ -512,7 +515,8 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                             });
                           },
                         ),
-                        errorText: confirmarSenhaController.text.isNotEmpty &&
+                        errorText:
+                            confirmarSenhaController.text.isNotEmpty &&
                                 confirmarSenhaController.text !=
                                     senhaController.text
                             ? 'As senhas não coincidem'
@@ -587,11 +591,9 @@ class _NovoUsuarioState extends State<NovoUsuario> {
                                   papelSelecionado == 'admin'
                                       ? 'Todos os setores'
                                       : 'Os setores do gerente são definidos em '
-                                          '"Criar Setor", escolhendo este '
-                                          'gerente como responsável.',
-                                  style: const TextStyle(
-                                    color: Colors.black87,
-                                  ),
+                                            '"Criar Setor", escolhendo este '
+                                            'gerente como responsável.',
+                                  style: const TextStyle(color: Colors.black87),
                                 ),
                               ],
                             ),
@@ -662,11 +664,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
     );
   }
 
-  Widget _tituloSecao(
-    IconData icone,
-    String titulo,
-    Color cor,
-  ) {
+  Widget _tituloSecao(IconData icone, String titulo, Color cor) {
     return Row(
       children: [
         Icon(icone, color: cor, size: 24),
