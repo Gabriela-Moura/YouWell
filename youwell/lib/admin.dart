@@ -30,13 +30,6 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
-  final nomeSetorController = TextEditingController();
-  final nomeUsuarioController = TextEditingController();
-  final senhaController = TextEditingController();
-
-  String papelSelecionado = 'usuario';
-  int? setorSelecionado;
-
   // Lista de setores recebidos do banco de dados real
   List<Map<String, dynamic>> listaSetores = [];
 
@@ -102,56 +95,6 @@ class _AdminScreenState extends State<AdminScreen> {
         erroSetores = e.toString();
       });
     }
-  }
-
-  void novoUsuario() {
-    final nome = nomeUsuarioController.text.trim();
-    final senha = senhaController.text;
-
-    if (nome.isEmpty || senha.isEmpty) {
-      mostrarMensagem('Preencha o nome e a senha.');
-      return;
-    }
-
-    final existe = usuarios.any(
-      (u) => (u['nome'] as String).toLowerCase() == nome.toLowerCase(),
-    );
-
-    if (existe) {
-      mostrarMensagem('Já existe um usuário com esse nome.');
-      return;
-    }
-
-    if (papelSelecionado != 'admin' && setorSelecionado == null) {
-      mostrarMensagem('Selecione um setor para o usuário.');
-      return;
-    }
-
-    final idUsuario = usuarios.isEmpty
-        ? 1
-        : usuarios.map((u) => u['id'] as int).reduce((a, b) => a > b ? a : b) +
-              1;
-
-    setState(() {
-      usuarios.add({
-        'id': idUsuario,
-        'nome': nome,
-        'senha': senha,
-        'papel': papelSelecionado,
-        'setor': papelSelecionado == 'admin' ? null : setorSelecionado,
-      });
-    });
-
-    nomeUsuarioController.clear();
-    senhaController.clear();
-
-    mostrarMensagem('Usuário criado com sucesso!');
-  }
-
-  void mostrarMensagem(String mensagem) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(mensagem)));
   }
 
   @override
@@ -273,6 +216,24 @@ class _AdminScreenState extends State<AdminScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => HistoricoScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text(
+                "Logout",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 3, 3, 3),
+                  fontSize: 18,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen(
+                    nomeSetor: widget.nomeSetor,
+                  )),
                 );
               },
             ),
@@ -546,9 +507,6 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   void dispose() {
-    nomeSetorController.dispose();
-    nomeUsuarioController.dispose();
-    senhaController.dispose();
     super.dispose();
   }
 }
