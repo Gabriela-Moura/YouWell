@@ -7,11 +7,13 @@ import 'package:youwell/Gerente/setor_screen_gerente.dart';
 class GerenteScreen extends StatefulWidget {
   final String nomeGerente;
   final int idUsuario;
+  final String? fotoPerfil;
 
   const GerenteScreen({
     super.key,
     required this.nomeGerente,
     required this.idUsuario,
+    this.fotoPerfil,
   });
 
   @override
@@ -120,7 +122,16 @@ class _GerenteScreenState extends State<GerenteScreen> {
                   style: const TextStyle(color: Colors.white, fontSize: 20),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(child: Icon(Icons.person)),
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage: widget.fotoPerfil != null &&
+                          widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(Icons.person, color: verde)
+                      : null,
+                ),
               ],
             ),
           ),
@@ -192,6 +203,7 @@ class _GerenteScreenState extends State<GerenteScreen> {
                                 nomeUsuario: widget.nomeGerente,
                                 idSetor: setor['id_setor'],
                                 idUsuario: widget.idUsuario,
+                                fotoPerfil: widget.fotoPerfil,
                               ),
                             ),
                           );

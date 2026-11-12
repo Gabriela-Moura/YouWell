@@ -15,6 +15,7 @@ class RuidoScreen extends StatefulWidget {
   final String nomeUsuario;
   final int idSetor;
   final int idUsuario;
+  final String? fotoPerfil;
 
   const RuidoScreen({
     super.key,
@@ -22,6 +23,7 @@ class RuidoScreen extends StatefulWidget {
     required this.nomeUsuario,
     required this.idSetor,
     required this.idUsuario,
+    this.fotoPerfil,
   });
 
   @override
@@ -208,6 +210,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                     builder: (context) => GerenteScreen(
                       nomeGerente: nomeUsuario,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -230,6 +233,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -250,6 +254,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -270,6 +275,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -290,6 +296,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -363,7 +370,16 @@ class _RuidoScreenState extends State<RuidoScreen> {
                   style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(child: Icon(Icons.person)),
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage: widget.fotoPerfil != null &&
+                          widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(Icons.person, color: Color.fromARGB(255, 10, 85, 64))
+                      : null,
+                ),
               ],
             ),
           ),

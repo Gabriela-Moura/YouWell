@@ -20,6 +20,7 @@ class TemperaturaScreen extends StatefulWidget {
   final String nomeUsuario;
   final int idSetor;
   final int idUsuario;
+  final String? fotoPerfil;
 
   const TemperaturaScreen({
     super.key,
@@ -27,6 +28,7 @@ class TemperaturaScreen extends StatefulWidget {
     required this.nomeUsuario,
     required this.idSetor,
     required this.idUsuario,
+    this.fotoPerfil,
   });
 
   @override
@@ -239,6 +241,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                     builder: (context) => GerenteScreen(
                       nomeGerente: nomeUsuario,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -261,6 +264,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -281,6 +285,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -301,6 +306,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -321,6 +327,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -397,7 +404,16 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
 
                 SizedBox(width: 10),
 
-                CircleAvatar(child: Icon(Icons.person)),
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage: widget.fotoPerfil != null &&
+                          widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(Icons.person, color: Color.fromARGB(255, 10, 85, 64))
+                      : null,
+                ),
               ],
             ),
           ),

@@ -117,8 +117,11 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                GerenteScreen(nomeGerente: nome, idUsuario: idUsuario),
+            builder: (_) => GerenteScreen(
+              nomeGerente: nome,
+              idUsuario: idUsuario,
+              fotoPerfil: fotoPerfil,
+            ),
           ),
         );
       } else if (papel == 'admin') {
