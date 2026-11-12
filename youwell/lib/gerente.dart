@@ -31,7 +31,7 @@ class _GerenteScreenState extends State<GerenteScreen> {
   void initState() {
     super.initState();
     debugPrint('ENTROU NO INITSTATE DO GERENTESCREEN');
-  debugPrint('ID RECEBIDO PELO GERENTESCREEN: ${widget.idUsuario}');
+    debugPrint('ID RECEBIDO PELO GERENTESCREEN: ${widget.idUsuario}');
     buscarSetores();
   }
 
@@ -79,7 +79,7 @@ class _GerenteScreenState extends State<GerenteScreen> {
       }).toList();
 
       debugPrint('QUANTIDADE DE SETORES RECEBIDOS: ${setoresRecebidos.length}');
-debugPrint('SETORES CONVERTIDOS: $setoresRecebidos');
+      debugPrint('SETORES CONVERTIDOS: $setoresRecebidos');
 
       if (!mounted) return;
 

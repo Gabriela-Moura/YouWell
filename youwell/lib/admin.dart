@@ -5,12 +5,9 @@ import 'package:http/http.dart' as http;
 
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
-import 'package:youwell/main.dart';
+import 'package:youwell/login_screen.dart';
 import 'package:youwell/Administrador/criar_setor.dart';
 import 'package:youwell/Administrador/novo_usuario.dart';
-import 'package:youwell/Administrador/qualidade_ar.dart';
-import 'package:youwell/Administrador/ruido.dart';
-import 'package:youwell/Administrador/temperatura_screen.dart';
 import 'package:youwell/Administrador/setor_screen.dart';
 
 class AdminScreen extends StatefulWidget {
