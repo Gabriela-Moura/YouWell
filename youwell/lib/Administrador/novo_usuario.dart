@@ -46,7 +46,7 @@ class _NovoUsuarioState extends State<NovoUsuario> {
   bool confirmarVisivel = false;
 
   // REQUISITOS DA SENHA (iguais aos do servidor)
-  bool get _temTamanho => senhaController.text.length >= 8;
+  bool get _temTamanho => senhaController.text.length > 7;
   bool get _temMaiuscula => _regexMaiuscula.hasMatch(senhaController.text);
   bool get _temEspecial => _regexEspecial.hasMatch(senhaController.text);
   bool get _senhaValida => _temTamanho && _temMaiuscula && _temEspecial;

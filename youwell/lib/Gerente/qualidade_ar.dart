@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:youwell/widgets/sino_alertas.dart';
 import 'package:youwell/Gerente/temperatura_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:youwell/Gerente/setor_screen_gerente.dart';
@@ -6,7 +7,6 @@ import 'package:youwell/Gerente/ruido.dart';
 import 'package:youwell/alertas.dart';
 import 'package:youwell/historico.dart';
 import 'package:youwell/gerente.dart';
-import 'package:youwell/login_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -15,7 +15,6 @@ class ArScreen extends StatefulWidget {
   final String nomeUsuario;
   final int idSetor;
   final int idUsuario;
-  final String? fotoPerfil;
 
   const ArScreen({
     super.key,
@@ -23,7 +22,6 @@ class ArScreen extends StatefulWidget {
     required this.nomeUsuario,
     required this.idSetor,
     required this.idUsuario,
-    this.fotoPerfil,
   });
 
   @override
@@ -166,7 +164,6 @@ class _ArScreenState extends State<ArScreen> {
                     builder: (context) => GerenteScreen(
                       nomeGerente: nomeUsuario,
                       idUsuario: idUsuario,
-                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -189,7 +186,6 @@ class _ArScreenState extends State<ArScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
-                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -210,7 +206,6 @@ class _ArScreenState extends State<ArScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
-                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -231,7 +226,6 @@ class _ArScreenState extends State<ArScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
-                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -252,7 +246,6 @@ class _ArScreenState extends State<ArScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
-                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -287,26 +280,6 @@ class _ArScreenState extends State<ArScreen> {
                 );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text(
-                "Logout",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 3, 3, 3),
-                  fontSize: 18,
-                ),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LoginScreen(
-                      nomeSetor: nomeSetor,
-                    ),
-                  ),
-                );
-              },
-            ),
           ],
         ),
       ),
@@ -317,6 +290,7 @@ class _ArScreenState extends State<ArScreen> {
         title: Text(nomeSetor, style: TextStyle(color: Colors.white)),
 
         actions: [
+          const SinoAlertas(),
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: Row(
@@ -326,16 +300,7 @@ class _ArScreenState extends State<ArScreen> {
                   style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
-                CircleAvatar(
-                  backgroundColor: Colors.white,
-                  backgroundImage: widget.fotoPerfil != null &&
-                          widget.fotoPerfil!.isNotEmpty
-                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
-                      : null,
-                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
-                      ? const Icon(Icons.person, color: Color.fromARGB(255, 10, 85, 64))
-                      : null,
-                ),
+                const CircleAvatar(child: Icon(Icons.person)),
               ],
             ),
           ),

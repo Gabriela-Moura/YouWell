@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:youwell/widgets/sino_alertas.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:youwell/Gerente/setor_screen_gerente.dart';
@@ -80,15 +81,11 @@ class _GerenteScreenState extends State<GerenteScreen> {
         };
       }).toList();
 
-      debugPrint('QUANTIDADE DE SETORES RECEBIDOS: ${setoresRecebidos.length}');
-      debugPrint('SETORES CONVERTIDOS: $setoresRecebidos');
-
       if (!mounted) return;
 
       setState(() {
         setores = setoresRecebidos;
         carregando = false;
-        debugPrint('SETORES SALVOS NA TELA: ${setores.length}');
       });
     } catch (e) {
       debugPrint('ERRO AO BUSCAR SETORES DO GERENTE: $e');
@@ -113,6 +110,7 @@ class _GerenteScreenState extends State<GerenteScreen> {
         backgroundColor: verde,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
+          const SinoAlertas(),
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: Row(
@@ -124,12 +122,15 @@ class _GerenteScreenState extends State<GerenteScreen> {
                 const SizedBox(width: 10),
                 CircleAvatar(
                   backgroundColor: Colors.white,
-                  backgroundImage: widget.fotoPerfil != null &&
-                          widget.fotoPerfil!.isNotEmpty
+                  backgroundImage:
+                      widget.fotoPerfil != null && widget.fotoPerfil!.isNotEmpty
                       ? MemoryImage(base64Decode(widget.fotoPerfil!))
                       : null,
                   child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
-                      ? const Icon(Icons.person, color: verde)
+                      ? const Icon(
+                          Icons.person,
+                          color: Color.fromARGB(255, 10, 85, 64),
+                        )
                       : null,
                 ),
               ],
@@ -203,7 +204,6 @@ class _GerenteScreenState extends State<GerenteScreen> {
                                 nomeUsuario: widget.nomeGerente,
                                 idSetor: setor['id_setor'],
                                 idUsuario: widget.idUsuario,
-                                fotoPerfil: widget.fotoPerfil,
                               ),
                             ),
                           );

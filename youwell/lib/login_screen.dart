@@ -94,14 +94,8 @@ class _LoginScreenState extends State<LoginScreen> {
           ? null
           : int.tryParse(usuarioRecebido.toString());
 
-      // ID de um setor, caso seja retornado pelo login
-      final dynamic setorRecebido = dados['setor'];
       debugPrint('Dados recebidos no login: $dados');
       debugPrint('Papel do usuário: $papel');
-      debugPrint('Setor recebido: $setorRecebido');
-      final int? idSetor = setorRecebido == null
-          ? null
-          : int.tryParse(setorRecebido.toString());
 
       if (papel == 'gerente') {
         if (idUsuario == null) {
@@ -125,6 +119,11 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       } else if (papel == 'admin') {
+        if (idUsuario == null) {
+          mostrarMensagem('Não foi possível identificar o usuário.');
+          return;
+        }
+
         MonitorAlertas.iniciarAdmin(idUsuario: idUsuario);
 
         Navigator.pushReplacement(

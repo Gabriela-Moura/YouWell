@@ -8,6 +8,8 @@ import 'package:youwell/login_screen.dart';
 import 'package:youwell/Administrador/criar_setor.dart';
 import 'package:youwell/Administrador/novo_usuario.dart';
 import 'package:youwell/Administrador/setor_screen.dart';
+import 'package:youwell/services/monitor_alertas.dart';
+import 'package:youwell/widgets/sino_alertas.dart';
 
 class AdminScreen extends StatefulWidget {
   final String nomeAdmin;
@@ -225,6 +227,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 ),
               ),
               onTap: () {
+                MonitorAlertas.parar();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -247,6 +250,7 @@ class _AdminScreenState extends State<AdminScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          const SinoAlertas(),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Row(

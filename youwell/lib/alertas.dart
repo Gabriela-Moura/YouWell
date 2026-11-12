@@ -2,12 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:youwell/services/monitor_alertas.dart';
 
 class AlertaScreen extends StatefulWidget {
   final int? idSetor;
   final String nomeSetor;
 
-  const AlertaScreen({super.key, this.idSetor, required this.nomeSetor});
+  // Quando informado (e sem idSetor), mostra os alertas de TODOS os setores
+  // deste gerente. Sem idSetor e sem idUsuario (admin), mostra todos os setores.
+  final int? idUsuario;
+
+  const AlertaScreen({
+    super.key,
+    this.idSetor,
+    this.idUsuario,
+    required this.nomeSetor,
+  });
 
   @override
   State<AlertaScreen> createState() => _AlertaScreenState();
@@ -71,7 +81,13 @@ class _AlertaScreenState extends State<AlertaScreen> {
   // BUSCAR TODOS OS SETORES (USADO QUANDO NÃO HÁ UM SETOR ESPECÍFICO, EX.: ADMIN).
   Future<List<Map<String, dynamic>>> _buscarTodosSetores() async {
     final resposta = await http
-        .post(Uri.parse(urlSetores), headers: {'Accept': 'application/json'})
+        .post(
+          Uri.parse(urlSetores),
+          headers: {'Accept': 'application/json'},
+          body: widget.idUsuario != null
+              ? {'id_usuario': widget.idUsuario.toString()}
+              : null,
+        )
         .timeout(const Duration(seconds: 20));
 
     debugPrint('STATUS SETORES: ${resposta.statusCode}');
@@ -223,6 +239,11 @@ class _AlertaScreenState extends State<AlertaScreen> {
         carregando = false;
         erro = null;
       });
+
+      // Quem abriu a tela já viu os alertas: o sininho do gerente zera.
+      MonitorAlertas.marcarComoLidos(
+        idSetor: (idSetor != null && idSetor > 0) ? idSetor : null,
+      );
     } catch (e) {
       debugPrint('ERRO AO BUSCAR ALERTAS: $e');
 

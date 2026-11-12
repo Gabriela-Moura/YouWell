@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:youwell/widgets/sino_alertas.dart';
 import 'package:youwell/admin.dart';
 import 'package:youwell/gerente.dart';
 import 'package:youwell/main.dart';
-import 'package:youwell/login_screen.dart';
 import 'package:youwell/Gerente/temperatura_screen.dart';
 import 'package:youwell/screens/home_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -20,7 +20,6 @@ class SetorScreen extends StatefulWidget {
   final String nomeUsuario;
   final int idSetor;
   final int idUsuario;
-  final String? fotoPerfil;
 
   const SetorScreen({
     super.key,
@@ -28,7 +27,6 @@ class SetorScreen extends StatefulWidget {
     required this.nomeUsuario,
     required this.idSetor,
     required this.idUsuario,
-    this.fotoPerfil,
   });
 
   @override
@@ -287,7 +285,6 @@ class _SetorScreenState extends State<SetorScreen> {
                     builder: (context) => GerenteScreen(
                       nomeGerente: widget.nomeUsuario,
                       idUsuario: widget.idUsuario,
-                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -310,7 +307,6 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeUsuario: widget.nomeUsuario,
                       idSetor: widget.idSetor,
                       idUsuario: widget.idUsuario,
-                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -333,7 +329,6 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeUsuario: widget.nomeUsuario,
                       idSetor: widget.idSetor,
                       idUsuario: widget.idUsuario,
-                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -357,7 +352,6 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeUsuario: widget.nomeUsuario,
                       idSetor: widget.idSetor,
                       idUsuario: widget.idUsuario,
-                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -381,7 +375,6 @@ class _SetorScreenState extends State<SetorScreen> {
                       nomeUsuario: widget.nomeUsuario,
                       idSetor: widget.idSetor,
                       idUsuario: widget.idUsuario,
-                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -424,26 +417,6 @@ class _SetorScreenState extends State<SetorScreen> {
                 );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text(
-                "Logout",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 3, 3, 3),
-                  fontSize: 18,
-                ),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LoginScreen(
-                      nomeSetor: widget.nomeSetor,
-                    ),
-                  ),
-                );
-              },
-            ),
           ],
         ),
       ),
@@ -454,6 +427,7 @@ class _SetorScreenState extends State<SetorScreen> {
 
         title: Text(widget.nomeSetor, style: TextStyle(color: Colors.white)),
         actions: [
+          const SinoAlertas(),
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: Row(
@@ -463,16 +437,7 @@ class _SetorScreenState extends State<SetorScreen> {
                   style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
-                CircleAvatar(
-                  backgroundColor: Colors.white,
-                  backgroundImage: widget.fotoPerfil != null &&
-                          widget.fotoPerfil!.isNotEmpty
-                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
-                      : null,
-                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
-                      ? const Icon(Icons.person, color: Color.fromARGB(255, 10, 85, 64))
-                      : null,
-                ),
+                const CircleAvatar(child: Icon(Icons.person)),
               ],
             ),
           ),
