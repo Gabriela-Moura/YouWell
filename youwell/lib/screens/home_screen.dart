@@ -4,7 +4,6 @@ import '../sobre_nos.dart';
 import '../admin.dart';
 import '../gerente.dart';
 import '../login_screen.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class HomeScreen extends StatelessWidget {
   final String nomeSetor;

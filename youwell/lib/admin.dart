@@ -12,7 +12,6 @@ import 'package:youwell/Administrador/qualidade_ar.dart';
 import 'package:youwell/Administrador/ruido.dart';
 import 'package:youwell/Administrador/temperatura_screen.dart';
 import 'package:youwell/Administrador/setor_screen.dart';
-import 'package:youwell/simulacaoBD/dados_sensores.dart';
 
 class AdminScreen extends StatefulWidget {
   final String nomeAdmin;
