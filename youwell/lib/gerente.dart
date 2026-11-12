@@ -4,6 +4,7 @@ import 'package:youwell/widgets/sino_alertas.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:youwell/Gerente/setor_screen_gerente.dart';
+import 'package:youwell/services/monitor_alertas.dart';
 
 class GerenteScreen extends StatefulWidget {
   final String nomeGerente;
@@ -35,6 +36,7 @@ class _GerenteScreenState extends State<GerenteScreen> {
     super.initState();
     debugPrint('ENTROU NO INITSTATE DO GERENTESCREEN');
     debugPrint('ID RECEBIDO PELO GERENTESCREEN: ${widget.idUsuario}');
+    MonitorAlertas.iniciarGerente(idUsuario: widget.idUsuario);
     buscarSetores();
   }
 

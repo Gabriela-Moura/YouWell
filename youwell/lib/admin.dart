@@ -15,6 +15,7 @@ class AdminScreen extends StatefulWidget {
   final String nomeAdmin;
   final String nomeSetor;
   final int? idSetor;
+  final int? idUsuario;
   final String? fotoPerfil;
 
   const AdminScreen({
@@ -22,6 +23,7 @@ class AdminScreen extends StatefulWidget {
     required this.nomeAdmin,
     required this.nomeSetor,
     required this.idSetor,
+    this.idUsuario,
     required this.fotoPerfil,
   });
 
@@ -44,6 +46,10 @@ class _AdminScreenState extends State<AdminScreen> {
   void initState() {
     super.initState();
     buscarSetores();
+    final idUsuario = widget.idUsuario;
+    if (idUsuario != null) {
+      MonitorAlertas.iniciarAdmin(idUsuario: idUsuario);
+    }
   }
 
   // BUSCAR TODOS OS SETORES NO BANCO DE DADOS

@@ -30,6 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
 
+    MonitorAlertas.parar();
     testarAPI();
   }
 
@@ -103,9 +104,6 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
 
-        // Monitora os alertas de TODOS os setores do gerente
-        MonitorAlertas.iniciarGerente(idUsuario: idUsuario);
-
         debugPrint('ID DO GERENTE: $idUsuario');
 
         Navigator.pushReplacement(
@@ -124,8 +122,6 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
 
-        MonitorAlertas.iniciarAdmin(idUsuario: idUsuario);
-
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -133,6 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
               nomeAdmin: nome,
               nomeSetor: 'null',
               idSetor: null,
+              idUsuario: idUsuario,
               fotoPerfil: fotoPerfil,
             ),
           ),
