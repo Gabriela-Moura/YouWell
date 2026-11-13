@@ -5,6 +5,7 @@ import 'package:youwell/widgets/sino_alertas.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:youwell/Gerente/setor_screen_gerente.dart';
+import 'package:youwell/historico.dart';
 import 'package:youwell/services/monitor_alertas.dart';
 
 class GerenteScreen extends StatefulWidget {
@@ -217,6 +218,7 @@ class _GerenteScreenState extends State<GerenteScreen> {
                                 nomeUsuario: widget.nomeGerente,
                                 idSetor: setor['id_setor'],
                                 idUsuario: widget.idUsuario,
+                                fotoPerfil: widget.fotoPerfil,
                               ),
                             ),
                           );
@@ -241,6 +243,35 @@ class _GerenteScreenState extends State<GerenteScreen> {
                         ),
                       );
                     }),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HistoricoScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        height: 120,
+                        margin: const EdgeInsets.only(bottom: 15),
+                        padding: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                          color: verde,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Histórico Geral (PDF)',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
         ),

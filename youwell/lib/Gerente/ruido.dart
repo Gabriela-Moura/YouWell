@@ -18,6 +18,7 @@ class RuidoScreen extends StatefulWidget {
   final String nomeUsuario;
   final int idSetor;
   final int idUsuario;
+  final String? fotoPerfil;
 
   const RuidoScreen({
     super.key,
@@ -25,6 +26,7 @@ class RuidoScreen extends StatefulWidget {
     required this.nomeUsuario,
     required this.idSetor,
     required this.idUsuario,
+    this.fotoPerfil,
   });
 
   @override
@@ -118,9 +120,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
             Uri.parse(
               'https://devsbee.com.br/You-Well/controllers/buscar_historico_medicoes.php',
             ),
-            body: widget.idSetor == null
-                ? <String, String>{}
-                : {'id_setor': widget.idSetor.toString()},
+            body: {'id_setor': widget.idSetor.toString()},
           )
           .timeout(const Duration(seconds: 20));
 
@@ -221,6 +221,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                     builder: (context) => GerenteScreen(
                       nomeGerente: nomeUsuario,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -243,6 +244,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -263,6 +265,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -283,6 +286,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -303,6 +307,7 @@ class _RuidoScreenState extends State<RuidoScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -325,18 +330,6 @@ class _RuidoScreenState extends State<RuidoScreen> {
               },
             ),
 
-            ListTile(
-              leading: const Icon(Icons.picture_as_pdf),
-
-              title: const Text("Histórico Geral (PDF)"),
-
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HistoricoScreen()),
-                );
-              },
-            ),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text(
@@ -376,7 +369,19 @@ class _RuidoScreenState extends State<RuidoScreen> {
                   style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
-                const CircleAvatar(child: Icon(Icons.person)),
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage:
+                      widget.fotoPerfil != null && widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(
+                          Icons.person,
+                          color: Color.fromARGB(255, 10, 85, 64),
+                        )
+                      : null,
+                ),
               ],
             ),
           ),

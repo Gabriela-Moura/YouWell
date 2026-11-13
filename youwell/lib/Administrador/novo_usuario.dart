@@ -334,16 +334,6 @@ class _NovoUsuarioState extends State<NovoUsuario> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.picture_as_pdf),
-              title: const Text('Histórico Geral (PDF)'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HistoricoScreen()),
-                );
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.logout),
               title: const Text(
                 'Logout',

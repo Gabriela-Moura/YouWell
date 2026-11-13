@@ -380,24 +380,6 @@ class _SetorScreenState extends State<SetorScreen> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.picture_as_pdf),
-
-              title: const Text(
-                "Histórico Geral (PDF)",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 3, 3, 3),
-                  fontSize: 18,
-                ),
-              ),
-
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HistoricoScreen()),
-                );
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.logout),
               title: const Text(
                 "Logout",

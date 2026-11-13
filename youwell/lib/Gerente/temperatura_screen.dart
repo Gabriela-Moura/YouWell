@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:youwell/widgets/sino_alertas.dart';
-import 'package:youwell/admin.dart';
-import 'package:youwell/main.dart';
-import 'package:youwell/screens/home_screen.dart';
 import 'package:youwell/Gerente/qualidade_ar.dart';
 import 'package:youwell/Gerente/ruido.dart';
 import 'package:youwell/alertas.dart';
@@ -13,7 +10,6 @@ import 'package:youwell/Gerente/setor_screen_gerente.dart';
 import 'package:youwell/gerente.dart';
 import 'package:youwell/login_screen.dart';
 import 'package:youwell/services/monitor_alertas.dart';
-import 'package:youwell/services/api_service.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -23,6 +19,7 @@ class TemperaturaScreen extends StatefulWidget {
   final String nomeUsuario;
   final int idSetor;
   final int idUsuario;
+  final String? fotoPerfil;
 
   const TemperaturaScreen({
     super.key,
@@ -30,6 +27,7 @@ class TemperaturaScreen extends StatefulWidget {
     required this.nomeUsuario,
     required this.idSetor,
     required this.idUsuario,
+    this.fotoPerfil,
   });
 
   @override
@@ -252,6 +250,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                     builder: (context) => GerenteScreen(
                       nomeGerente: nomeUsuario,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -274,6 +273,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -294,6 +294,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -314,6 +315,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -334,6 +336,7 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
                       nomeUsuario: nomeUsuario,
                       idSetor: idSetor,
                       idUsuario: idUsuario,
+                      fotoPerfil: widget.fotoPerfil,
                     ),
                   ),
                 );
@@ -356,18 +359,6 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
               },
             ),
 
-            ListTile(
-              leading: const Icon(Icons.picture_as_pdf),
-
-              title: const Text("Histórico Geral (PDF)"),
-
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HistoricoScreen()),
-                );
-              },
-            ),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text(
@@ -410,7 +401,19 @@ class _TemperaturaScreenState extends State<TemperaturaScreen> {
 
                 SizedBox(width: 10),
 
-                CircleAvatar(child: Icon(Icons.person)),
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage:
+                      widget.fotoPerfil != null && widget.fotoPerfil!.isNotEmpty
+                      ? MemoryImage(base64Decode(widget.fotoPerfil!))
+                      : null,
+                  child: widget.fotoPerfil == null || widget.fotoPerfil!.isEmpty
+                      ? const Icon(
+                          Icons.person,
+                          color: Color.fromARGB(255, 10, 85, 64),
+                        )
+                      : null,
+                ),
               ],
             ),
           ),
