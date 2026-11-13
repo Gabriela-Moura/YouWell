@@ -33,12 +33,16 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
+  static const String _baseUrlControllers =
+      'https://devsbee.com.br/You-Well/controllers/';
+
   // Lista de setores recebidos do banco de dados real
   List<Map<String, dynamic>> listaSetores = [];
 
   bool carregandoSetores = true;
   String? erroSetores;
   Timer? _timerAtualizacao;
+  int? _setorEmAlteracao;
 
   // Endereço da API
   final String urlBuscarSetores =
@@ -84,6 +88,9 @@ class _AdminScreenState extends State<AdminScreen> {
               return {
                 'id_setor': int.parse(setor['id_setor'].toString()),
                 'nome': setor['nome'].toString(),
+                'id_gerente': int.tryParse(
+                  setor['id_gerente']?.toString() ?? '',
+                ),
               };
             }).toList();
 
@@ -106,6 +113,291 @@ class _AdminScreenState extends State<AdminScreen> {
         erroSetores = e.toString();
       });
     }
+  }
+
+  Future<List<Map<String, dynamic>>> _buscarGerentes() async {
+    final resposta = await http
+        .get(Uri.parse('${_baseUrlControllers}listar_gerentes.php'))
+        .timeout(const Duration(seconds: 15));
+
+    final dados = jsonDecode(utf8.decode(resposta.bodyBytes));
+    if (resposta.statusCode != 200 ||
+        dados is! Map ||
+        dados['success'] != true ||
+        dados['gerentes'] is! List) {
+      final mensagem = dados is Map
+          ? dados['mensagem']?.toString() ??
+                dados['message']?.toString() ??
+                'Não foi possível carregar os gerentes.'
+          : 'Resposta inválida do servidor.';
+      throw Exception(mensagem);
+    }
+
+    return (dados['gerentes'] as List)
+        .whereType<Map>()
+        .map((gerente) => Map<String, dynamic>.from(gerente))
+        .toList();
+  }
+
+  Future<void> _editarSetor(Map<String, dynamic> setor) async {
+    late final List<Map<String, dynamic>> gerentes;
+    try {
+      gerentes = await _buscarGerentes();
+    } catch (e) {
+      if (mounted) {
+        _mostrarMensagem('Não foi possível carregar os gerentes: $e');
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    if (gerentes.isEmpty) {
+      _mostrarMensagem('Não há gerentes cadastrados para atribuir ao setor.');
+      return;
+    }
+
+    final nomeController = TextEditingController(text: setor['nome'] as String);
+    final senhaController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    var gerenteSelecionado = setor['id_gerente'] as int?;
+    if (!gerentes.any(
+      (gerente) =>
+          int.tryParse(gerente['id_usuario'].toString()) == gerenteSelecionado,
+    )) {
+      gerenteSelecionado = null;
+    }
+
+    final valores = await _showDialogAndWaitForDismiss<Map<String, String>>(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Editar setor'),
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: nomeController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome do setor',
+                    ),
+                    validator: (valor) => valor == null || valor.trim().isEmpty
+                        ? 'Informe o nome do setor.'
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<int>(
+                    initialValue: gerenteSelecionado,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Gerente responsável',
+                    ),
+                    items: gerentes.map((gerente) {
+                      return DropdownMenuItem<int>(
+                        value: int.parse(gerente['id_usuario'].toString()),
+                        child: Text(gerente['nome'].toString()),
+                      );
+                    }).toList(),
+                    onChanged: (valor) {
+                      setDialogState(() => gerenteSelecionado = valor);
+                    },
+                    validator: (valor) => valor == null
+                        ? 'Selecione um gerente responsável.'
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: senhaController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Senha do administrador',
+                    ),
+                    validator: (valor) => valor == null || valor.isEmpty
+                        ? 'Informe sua senha para confirmar.'
+                        : null,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final formulario = formKey.currentState;
+
+                if (formulario == null || !formulario.validate()) {
+                  return;
+                }
+
+                final resultado = <String, String>{
+                  'nome': nomeController.text.trim(),
+                  'id_gerente': gerenteSelecionado.toString(),
+                  'admin_nome': widget.nomeAdmin,
+                  'admin_senha': senhaController.text,
+                };
+
+                Navigator.of(dialogContext).pop(resultado);
+              },
+              child: const Text('Continuar'),
+            ),
+          ],
+        ),
+      ),
+    );
+    nomeController.dispose();
+    senhaController.dispose();
+
+    if (valores == null) return;
+
+    await _enviarAcaoSetor(
+      endpoint: 'atualizar_setor.php',
+      setorId: setor['id_setor'] as int,
+      sucesso: 'Setor atualizado com sucesso.',
+      campos: {...valores, 'id_setor': setor['id_setor'].toString()},
+    );
+  }
+
+  Future<void> _excluirSetor(Map<String, dynamic> setor) async {
+    final setorId = setor['id_setor'] as int;
+    final senhaController = TextEditingController();
+    final senhaAdmin = await _showDialogAndWaitForDismiss<String>(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Confirmar exclusão'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Deseja excluir "${setor['nome']}"? O servidor bloqueará '
+                'a exclusão se houver registros relacionados.',
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: senhaController,
+                obscureText: true,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Senha do administrador',
+                ),
+                onChanged: (_) => setDialogState(() {}),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: senhaController.text.isEmpty
+                  ? null
+                  : () => Navigator.of(dialogContext).pop(senhaController.text),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Excluir'),
+            ),
+          ],
+        ),
+      ),
+    );
+    senhaController.dispose();
+
+    if (senhaAdmin == null) return;
+
+    await _enviarAcaoSetor(
+      endpoint: 'excluir_setor.php',
+      setorId: setorId,
+      sucesso: 'Setor excluído com sucesso.',
+      campos: {
+        'id_setor': setorId.toString(),
+        'admin_nome': widget.nomeAdmin,
+        'admin_senha': senhaAdmin,
+      },
+    );
+  }
+
+  Future<T?> _showDialogAndWaitForDismiss<T>({
+    required WidgetBuilder builder,
+  }) async {
+    final navigator = Navigator.of(context, rootNavigator: true);
+    final route = DialogRoute<T>(
+      context: context,
+      builder: builder,
+      themes: InheritedTheme.capture(from: context, to: navigator.context),
+    );
+    final result = await navigator.push<T>(route);
+    await route.completed;
+    return result;
+  }
+
+  Future<void> _enviarAcaoSetor({
+    required String endpoint,
+    required int setorId,
+    required String sucesso,
+    required Map<String, String> campos,
+  }) async {
+    if (_setorEmAlteracao != null) return;
+    setState(() => _setorEmAlteracao = setorId);
+
+    try {
+      final resposta = await http
+          .post(
+            Uri.parse('$_baseUrlControllers$endpoint'),
+            headers: {'Accept': 'application/json'},
+            body: campos,
+          )
+          .timeout(const Duration(seconds: 20));
+      dynamic resultado;
+      try {
+        resultado = jsonDecode(utf8.decode(resposta.bodyBytes));
+      } on FormatException {
+        final corpo = resposta.body.trim();
+        debugPrint(
+          'Resposta inválida de $endpoint (HTTP ${resposta.statusCode}): '
+          '${corpo.length > 300 ? '${corpo.substring(0, 300)}...' : corpo}',
+        );
+        final mensagem = resposta.statusCode == 404
+            ? 'Endpoint $endpoint não encontrado (HTTP 404). '
+                  'Confira o caminho /controllers no cPanel.'
+            : 'Resposta inválida do servidor (HTTP ${resposta.statusCode}).';
+        throw Exception(mensagem);
+      }
+
+      if (resultado is! Map ||
+          resposta.statusCode < 200 ||
+          resposta.statusCode >= 300 ||
+          resultado['success'] != true) {
+        final mensagem = resultado is Map
+            ? resultado['mensagem']?.toString() ??
+                  'Não foi possível concluir a operação.'
+            : 'Resposta inválida do servidor.';
+        throw Exception(mensagem);
+      }
+
+      _mostrarMensagem(sucesso);
+      await buscarSetores(mostrarCarregamento: false);
+    } on FormatException {
+      _mostrarMensagem('O servidor retornou uma resposta inválida.');
+    } catch (e) {
+      debugPrint('Erro ao alterar setor: $e');
+      _mostrarMensagem(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _setorEmAlteracao = null);
+    }
+  }
+
+  void _mostrarMensagem(String mensagem) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(mensagem)));
   }
 
   @override
@@ -379,6 +671,10 @@ class _AdminScreenState extends State<AdminScreen> {
             // LISTA DE SETORES DO BANCO REAL
             else
               ...listaSetores.map((setor) {
+                final setorId = setor['id_setor'] as int;
+                final emAlteracao = _setorEmAlteracao == setorId;
+                final ocupado = _setorEmAlteracao != null;
+
                 return Card(
                   elevation: 1,
                   margin: const EdgeInsets.only(bottom: 10),
@@ -400,7 +696,35 @@ class _AdminScreenState extends State<AdminScreen> {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text('Setor ${setor['id_setor']}'),
-                    trailing: const Icon(Icons.chevron_right, color: verde),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: 'Editar setor',
+                          onPressed: ocupado ? null : () => _editarSetor(setor),
+                          icon: emAlteracao
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.edit_outlined, color: verde),
+                        ),
+                        IconButton(
+                          tooltip: 'Excluir setor',
+                          onPressed: ocupado
+                              ? null
+                              : () => _excluirSetor(setor),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right, color: verde),
+                      ],
+                    ),
 
                     onTap: () {
                       Navigator.push(
