@@ -1,6 +1,0 @@
-DER
-Sistema deve emitir alertas
-Versão workbench
-windows versão 11
-PHP versão 8
-fazer uma tabela
