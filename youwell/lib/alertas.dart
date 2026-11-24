@@ -40,6 +40,7 @@ class _AlertaScreenState extends State<AlertaScreen> {
       'https://devsbee.com.br/You-Well/controllers/buscar_setor.php';
 
   // Limites máximos configurados para o projeto.
+  // (A faixa de "atenção" é definida em MonitorAlertas.fracaoAtencao.)
   static const Map<String, double> limites = {
     'temperatura': 25.0,
     'ruido': 65.0,
@@ -135,7 +136,7 @@ class _AlertaScreenState extends State<AlertaScreen> {
     return setores;
   }
 
-  // BUSCAR AS MEDIÇÕES DE UM SETOR E DEVOLVER OS ALERTAS ACIMA DO LIMITE.
+  // BUSCAR AS MEDIÇÕES DE UM SETOR E DEVOLVER OS ALERTAS (ATENÇÃO E CRÍTICOS).
   Future<List<Map<String, dynamic>>> _buscarAlertasDoSetor(
     int idSetor,
     String nomeSetor,
@@ -266,7 +267,8 @@ class _AlertaScreenState extends State<AlertaScreen> {
     }
   }
 
-  // ANALISAR MEDIÇÕES E FILTRAR SOMENTE VALORES ACIMA DO LIMITE.
+  // ANALISAR MEDIÇÕES E FILTRAR VALORES CRÍTICOS (ACIMA DO LIMITE)
+  // E DE ATENÇÃO (PRÓXIMOS DO LIMITE).
   void _analisarMedicoes(
     dynamic medicoes,
     String indicador,
@@ -281,8 +283,9 @@ class _AlertaScreenState extends State<AlertaScreen> {
 
       if (valor == null) continue;
 
-      // IGNORAR VALORES DENTRO DO LIMITE.
-      if (valor <= limite) continue;
+      // IGNORAR VALORES LONGE DO LIMITE (nem atenção, nem crítico).
+      final gravidade = MonitorAlertas.gravidadeDe(indicador, valor);
+      if (gravidade == null) continue;
 
       final dataHora = DateTime.tryParse(item['data_hora']?.toString() ?? '');
 
@@ -315,8 +318,8 @@ class _AlertaScreenState extends State<AlertaScreen> {
         'unidade': unidade,
         'limite': limite,
         'dataHora': dataHora,
-        'gravidade': 'critico',
-        'mensagem': 'Valor acima do limite máximo configurado.',
+        'gravidade': gravidade,
+        'mensagem': MonitorAlertas.mensagemDe(gravidade),
       });
     }
   }
@@ -334,6 +337,11 @@ class _AlertaScreenState extends State<AlertaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final totalCriticos = alertas
+        .where((a) => a['gravidade'] == 'critico')
+        .length;
+    final totalAtencao = alertas.length - totalCriticos;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -445,6 +453,14 @@ class _AlertaScreenState extends State<AlertaScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              Text(
+                                '$totalCriticos crítico(s) · '
+                                '$totalAtencao em atenção',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -463,7 +479,17 @@ class _AlertaScreenState extends State<AlertaScreen> {
 
                   // CARDS DOS ALERTAS.
                   ...alertas.map((alerta) {
-                    const cor = Colors.red;
+                    final gravidade = alerta['gravidade'];
+                    final critico = gravidade == 'critico';
+                    final noLimite = gravidade == 'limite';
+                    final MaterialColor cor = critico
+                        ? Colors.red
+                        : (noLimite ? Colors.deepOrange : Colors.orange);
+                    final corTexto = cor.shade700;
+                    final corFundo = cor.shade50;
+                    final rotulo = critico
+                        ? 'CRÍTICO'
+                        : (noLimite ? 'NO LIMITE' : 'ATENÇÃO');
                     final dataHora = alerta['dataHora'] as DateTime;
 
                     return Card(
@@ -481,7 +507,13 @@ class _AlertaScreenState extends State<AlertaScreen> {
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.error, color: cor, size: 28),
+                                Icon(
+                                  critico
+                                      ? Icons.error
+                                      : Icons.warning_amber_rounded,
+                                  color: cor,
+                                  size: 28,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
@@ -499,13 +531,13 @@ class _AlertaScreenState extends State<AlertaScreen> {
                                     vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.red.shade50,
+                                    color: corFundo,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
-                                    'CRÍTICO',
+                                    rotulo,
                                     style: TextStyle(
-                                      color: Colors.red.shade700,
+                                      color: corTexto,
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -523,7 +555,7 @@ class _AlertaScreenState extends State<AlertaScreen> {
                               style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.red.shade700,
+                                color: corTexto,
                               ),
                             ),
 

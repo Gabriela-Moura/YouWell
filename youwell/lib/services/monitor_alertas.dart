@@ -22,6 +22,31 @@ class MonitorAlertas {
     'qualidade_ar': 70.0,
   };
 
+  /// Fração do limite a partir da qual o valor já é considerado "atenção".
+  /// 0.90 = 90% do limite (ex.: ruído a partir de 58,5 dB).
+  static const double fracaoAtencao = 0.90;
+
+  /// Retorna null (normal), 'atencao' (próximo do limite), 'limite' (exatamente
+  /// no limite) ou 'critico' (acima do limite).
+  static String? gravidadeDe(String indicador, double valor) {
+    final limite = limites[indicador]!;
+    if ((valor - limite).abs() < 1e-9) return 'limite';
+    if (valor > limite) return 'critico';
+    if (valor >= limite * fracaoAtencao) return 'atencao';
+    return null;
+  }
+
+  static String mensagemDe(String gravidade) {
+    switch (gravidade) {
+      case 'critico':
+        return 'Valor acima do limite máximo configurado.';
+      case 'limite':
+        return 'Valor no limite máximo configurado.';
+      default:
+        return 'Valor próximo do limite máximo configurado.';
+    }
+  }
+
   /// Quantidade de alertas que o usuário atual ainda não abriu.
   static final ValueNotifier<int> naoLidos = ValueNotifier<int>(0);
 
@@ -43,7 +68,7 @@ class MonitorAlertas {
   // Salvos no aparelho.
   static final Set<String> _lidos = {};
 
-  // Alertas acima do limite que existem agora nos setores monitorados.
+  // Alertas (críticos ou de atenção) que existem agora nos setores monitorados.
   static final Map<String, Map<String, dynamic>> _atuais = {};
 
   // Mantém a chave antiga, então quem já usou a versão anterior não perde o histórico.
@@ -276,10 +301,13 @@ class MonitorAlertas {
         );
         if (valor == null ||
             dataHora == null ||
-            valor <= limites[indicador]! ||
             dataHora.isBefore(limiteData)) {
           continue;
         }
+
+        // Ignora valores normais; mantém atenção (perto do limite) e críticos.
+        final gravidade = gravidadeDe(indicador, valor);
+        if (gravidade == null) continue;
 
         registros.add({
           'data':
@@ -292,8 +320,8 @@ class MonitorAlertas {
           'setor': nomeSetor,
           'indicador': indicador,
           'valor': valor,
-          'gravidade': 'critico',
-          'mensagem': 'Valor acima do limite máximo configurado.',
+          'gravidade': gravidade,
+          'mensagem': mensagemDe(gravidade),
         });
       }
     }
@@ -301,7 +329,7 @@ class MonitorAlertas {
     return registros;
   }
 
-  // Devolve TODOS os alertas acima do limite de um setor.
+  // Devolve TODOS os alertas (atenção e críticos) de um setor.
   // Devolve null se a consulta falhou (para não apagar o que já se sabia).
   static Future<List<Map<String, dynamic>>?> _consultarSetor(
     Map<String, dynamic> setor,
@@ -337,7 +365,10 @@ class MonitorAlertas {
           final dataHora = item['data_hora']?.toString();
 
           if (valor == null || dataHora == null) continue;
-          if (valor <= limites[indicador]!) continue;
+
+          // Ignora valores normais; mantém atenção (perto do limite) e críticos.
+          final gravidade = gravidadeDe(indicador, valor);
+          if (gravidade == null) continue;
 
           final identificador =
               item['id_leitura']?.toString() ?? '$indicador|$valor|$dataHora';
@@ -350,6 +381,7 @@ class MonitorAlertas {
             'indicador': indicador,
             'valor': valor,
             'data_hora': dataHora,
+            'gravidade': gravidade,
           });
         }
       }
@@ -466,33 +498,6 @@ class MonitorAlertas {
     final sessao = _sessao;
     final chavesDoLote = lote.map((a) => a['chave'] as String).toList();
 
-    // Contagens para o texto da notificação.
-    final total = lote.length;
-    final porSetor = <String, int>{};
-    final porIndicador = <String, int>{};
-
-    for (final alerta in lote) {
-      porSetor.update(
-        alerta['nome_setor'] as String,
-        (v) => v + 1,
-        ifAbsent: () => 1,
-      );
-      porIndicador.update(
-        alerta['indicador'] as String,
-        (v) => v + 1,
-        ifAbsent: () => 1,
-      );
-    }
-
-    final setoresOrdenados = porSetor.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-
-    const nomesIndicadores = {
-      'temperatura': 'Temperatura',
-      'ruido': 'Ruído',
-      'qualidade_ar': 'Qualidade do ar',
-    };
-
     const verde = Color(0xFF0A5540);
 
     _dialogAberto = true;
@@ -511,7 +516,10 @@ class MonitorAlertas {
             color: Colors.red,
             size: 50,
           ),
-          title: Text('Você possui novos alertas', textAlign: TextAlign.center),
+          title: const Text(
+            'Você possui novos alertas',
+            textAlign: TextAlign.center,
+          ),
           actions: [
             TextButton(
               onPressed: () {

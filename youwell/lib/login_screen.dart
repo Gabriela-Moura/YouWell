@@ -299,18 +299,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: TextStyle(fontSize: 16),
                             ),
                     ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: carregando
-                          ? null
-                          : () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => MyApp()),
-                              );
-                            },
-                      child: const Text('Voltar'),
-                    ),
                   ],
                 ),
               ),
