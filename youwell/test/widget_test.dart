@@ -11,20 +11,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:youwell/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('home screen shows one login action', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('YouWell'), findsOneWidget);
+    expect(find.text('Saúde e bem-estar corporativo'), findsOneWidget);
+    expect(find.text('Login'), findsOneWidget);
+    expect(find.byType(ElevatedButton), findsOneWidget);
   });
 }
