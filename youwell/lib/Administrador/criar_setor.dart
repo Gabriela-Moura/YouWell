@@ -182,13 +182,26 @@ class _CriarSetorState extends State<CriarSetor> {
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(color: verde),
-              child: Text(
-                'Olá, ${widget.nomeAdmin}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                children: [
+                  Image.asset(
+                    'assets/images/logo_branco.png',
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Olá, ${widget.nomeAdmin}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 

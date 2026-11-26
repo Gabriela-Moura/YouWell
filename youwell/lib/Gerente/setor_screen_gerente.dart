@@ -274,14 +274,26 @@ class _SetorScreenState extends State<SetorScreen> {
                 color: Color.fromARGB(255, 10, 85, 64),
               ),
 
-              child: Text(
-                'Olá, ${widget.nomeUsuario}',
-
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                children: [
+                  Image.asset(
+                    'assets/images/logo_branco.png',
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Olá, ${widget.nomeUsuario}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             ListTile(
